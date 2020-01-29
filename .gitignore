@@ -1,2 +1,5 @@
 build/
 async_build/
+frameworks/halloc/repository
+frameworks/scatteralloc/repository
+frameworks/ouroboros/repository
