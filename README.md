@@ -5,6 +5,7 @@ Evaluating different memory managers for dynamic GPU memory
 
 | Framework | Status |
 |:---:|:---:|
+| CUDA Device Allocator | Done |
 | Ouroboros | WIP |
 | Halloc | WIP |
 | ScatterAlloc | WIP |
