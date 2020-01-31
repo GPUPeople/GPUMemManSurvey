@@ -2,7 +2,8 @@
 
 #include "Instance.cuh"
 
-__global__ void d_testFunctions(MemoryManagerCUDA memory_manager)
+template <typename MemoryManager>
+__global__ void d_testFunctions(MemoryManager memory_manager)
 {
 	int tid = threadIdx.x + blockIdx.x * blockDim.x;
 	if(tid > 0)
@@ -24,9 +25,9 @@ __global__ void d_testFunctions(MemoryManagerCUDA memory_manager)
 
 int main(int argc, char* argv[])
 {
-	std::cout << "Simple CUDA Testcase\n";
+	std::cout << "Simple Halloc Testcase\n";
 
-	MemoryManagerCUDA memory_manager;
+	MemoryManagerHalloc memory_manager;
 
 	memory_manager.init();
 

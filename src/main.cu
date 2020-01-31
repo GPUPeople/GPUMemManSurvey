@@ -33,6 +33,8 @@ int main(int argc, char* argv[])
 	MemoryManagerCUDA memory_manager;
 #endif
 
+	memory_manager.init();
+
 	d_testFunctions <<<1,1>>>(memory_manager);
 
 	cudaDeviceSynchronize();

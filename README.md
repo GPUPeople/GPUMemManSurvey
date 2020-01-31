@@ -10,3 +10,5 @@ Evaluating different memory managers for dynamic GPU memory
 | Halloc | WIP |
 | ScatterAlloc | WIP |
 | XMalloc | X |
+| FDGMalloc | X |
+| Bulk-Sempaphore | X |
