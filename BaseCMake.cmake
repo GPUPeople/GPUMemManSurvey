@@ -1,9 +1,9 @@
 # Force Compiler to version 8 (higher not yet supportet as of July 2019)
-if(WIN32)
-else()
-set(CMAKE_C_COMPILER /usr/bin/gcc-8)
-set(CMAKE_CXX_COMPILER /usr/bin/g++-8)
-endif()
+# if(WIN32)
+# else()
+# set(CMAKE_C_COMPILER /usr/bin/gcc-8)
+# set(CMAKE_CXX_COMPILER /usr/bin/g++-8)
+# endif()
 
 ##########################################################################
 # Choose for which CC to build and if to enable Debug

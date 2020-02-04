@@ -1,7 +1,7 @@
 #pragma once
 
 #include "TestInstance.cuh"
-#include "halloc.cuh"
+#include "repository/src/halloc.cuh"
 
 struct MemoryManagerHalloc : public MemoryManagerBase
 {
@@ -16,12 +16,12 @@ struct MemoryManagerHalloc : public MemoryManagerBase
 		ha_init(halloc_opts_t(size));
 	}
 
-	virtual __device__ __forceinline__ void* malloc(size_t size)
+	virtual __device__ __forceinline__ void* malloc(size_t size) override
 	{
 		return hamalloc(size);
 	}
 
-	virtual __device__ __forceinline__ void free(void* ptr)
+	virtual __device__ __forceinline__ void free(void* ptr) override
 	{
 		hafree(ptr);
 	};

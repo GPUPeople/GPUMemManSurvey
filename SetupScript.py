@@ -9,6 +9,7 @@ def main():
 
 	if not os.path.isdir("frameworks/halloc/repository"):
 		Repo.clone_from("https://github.com/canonizer/halloc.git", "frameworks/halloc/repository")
+		print("Halloc Repository cloning done!")
 	else:
 		print("Halloc Repository already cloned")
 
@@ -21,6 +22,22 @@ def main():
 	
 	print("------------------------")
 	print("Halloc is ready to use!")
+	print("------------------------")
+
+	print("------------------------")
+	print("Setup ScatterAlloc")
+	print("------------------------")
+
+	if not os.path.isdir("frameworks/scatteralloc/repository"):
+		Repo.clone_from("https://github.com/ax3l/scatteralloc.git", "frameworks/scatteralloc/repository")
+		print("ScatterAlloc Repository cloning done!")
+	else:
+		print("ScatterAlloc Repository already cloned")
+
+	print("Overwrite existing files with corrected files!")
+
+	print("------------------------")
+	print("ScatterAlloc is ready to use!")
 	print("------------------------")
 
 

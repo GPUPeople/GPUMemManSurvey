@@ -1,8 +1,6 @@
 #pragma once
 
-#include <cuda_runtime_api.h>
-#include <device_launch_parameters.h>
-#include <cuda_runtime.h>
+#include "Utility.cuh"
 
 struct MemoryManagerBase
 {

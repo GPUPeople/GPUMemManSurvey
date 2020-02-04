@@ -11,7 +11,7 @@ Execute the automated script!
 |:---:|:---:|
 | CUDA Device Allocator | Done |
 | Ouroboros | WIP |
-| Halloc | WIP |
+| Halloc | Done |
 | ScatterAlloc | WIP |
 | XMalloc | X |
 | FDGMalloc | X |
