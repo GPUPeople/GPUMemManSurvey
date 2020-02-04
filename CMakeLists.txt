@@ -11,6 +11,10 @@ if(TEST_HALLOC)
 	add_subdirectory(frameworks/halloc)
 endif ()
 
+if(TEST_SCATTERALLOC)
+	include_directories(frameworks/scatteralloc/repository/src/include/mallocMC)
+endif ()
+
 ##########################################################################
 ##########################################################################
 ##########################################################################
@@ -35,6 +39,15 @@ if(TEST_HALLOC)
 		src/main.cu
 	)
 	target_compile_definitions(h_main PUBLIC TEST_HALLOC)
+endif ()
+
+##########################################################################
+# ScatterAlloc
+if(TEST_HALLOC)
+	add_executable(s_main
+		src/main.cu
+	)
+	target_compile_definitions(s_main PUBLIC TEST_SCATTERALLOC)
 endif ()
 
 ##########################################################################

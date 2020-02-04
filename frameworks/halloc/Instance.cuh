@@ -24,5 +24,5 @@ struct MemoryManagerHalloc : public MemoryManagerBase
 	virtual __device__ __forceinline__ void free(void* ptr) override
 	{
 		hafree(ptr);
-	};
+	}
 };

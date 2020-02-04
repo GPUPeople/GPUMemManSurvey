@@ -7,6 +7,8 @@
 #include "cuda/Instance.cuh"
 #elif TEST_HALLOC
 #include "halloc/Instance.cuh"
+#elif TEST_SCATTERALLOC
+#include "scatteralloc/Instance.cuh"
 #endif
 
 template <typename MemoryManagerType>
@@ -35,6 +37,9 @@ int main(int argc, char* argv[])
 #elif TEST_HALLOC
 	std::cout << "--- Halloc ---\n";
 	MemoryManagerHalloc memory_manager;
+#elif TEST_SCATTERALLOC
+	std::cout << "--- ScatterAlloc ---\n";
+	MemoryManagerScatterAlloc memory_manager;
 #endif
 
 	memory_manager.init();
