@@ -46,7 +46,7 @@ int main(int argc, char* argv[])
 
 	d_testFunctions <<<1,1>>>(memory_manager);
 
-	HANDLE_ERROR(cudaDeviceSynchronize());
+	CHECK_ERROR(cudaDeviceSynchronize());
 
 	printf("Testcase done!\n");
 

@@ -4,6 +4,8 @@
 #include <device_launch_parameters.h>
 #include <cuda_runtime.h>
 
+namespace Utils{
+
 static inline void HandleError(cudaError_t err,
 	const char* string,
 	const char *file,
@@ -25,5 +27,7 @@ static inline void HandleError(const char *file,
 	}
 }
 
-#define HANDLE_ERROR( err ) (HandleError( err, "", __FILE__, __LINE__ ))
-#define HANDLE_ERROR_S( err , string) (HandleError( err, string, __FILE__, __LINE__ ))
+}
+
+#define CHECK_ERROR( err ) (Utils::HandleError( err, "", __FILE__, __LINE__ ))
+#define CHECK_ERROR_S( err , string) (Utils::HandleError( err, string, __FILE__, __LINE__ ))

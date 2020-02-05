@@ -9,10 +9,10 @@ Execute the automated script!
 
 | Framework | Status |
 |:---:|:---:|
-| CUDA Device Allocator | Done |
-| Halloc | Done |
-| ScatterAlloc | Done |
-| Ouroboros | WIP |
-| XMalloc | X |
-| FDGMalloc | X |
-| Bulk-Sempaphore | X |
+| CUDA Device Allocator | Done 	|
+| Halloc 				| Done 	|
+| ScatterAlloc 			| Done 	|
+| Ouroboros 			|  WIP	|
+| XMalloc 				| 	X 	|
+| FDGMalloc 			| 	X 	|
+| Bulk-Sempaphore 		| 	X 	|

@@ -2,7 +2,12 @@ from git import Repo
 import os
 from shutil import copy as copyFile
 
+halloc_repo = "https://github.com/canonizer/halloc.git"
+scatteralloc_repo = "https://github.com/ax3l/scatteralloc.git"
+ouroboros_repo = "xxx"
+
 def main():
+	###########################################################################################################################################################################
 	print("------------------------")
 	print("Setup Halloc")
 	print("------------------------")
@@ -19,11 +24,12 @@ def main():
 		filename = fixed_files_path + os.fsdecode(file)
 		print("Copy file " + filename)
 		copyFile(filename, "frameworks/halloc/repository/src/")
-	
+
 	print("------------------------")
 	print("Halloc is ready to use!")
 	print("------------------------")
 
+	###########################################################################################################################################################################
 	print("------------------------")
 	print("Setup ScatterAlloc")
 	print("------------------------")
@@ -38,6 +44,17 @@ def main():
 
 	print("------------------------")
 	print("ScatterAlloc is ready to use!")
+	print("------------------------")
+
+	###########################################################################################################################################################################
+	print("------------------------")
+	print("Setup Ouroboros")
+	print("------------------------")
+
+	print("Currently just copy it over!")
+
+	print("------------------------")
+	print("Ouroboros is ready to use!")
 	print("------------------------")
 
 
