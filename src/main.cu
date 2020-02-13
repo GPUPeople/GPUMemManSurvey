@@ -9,6 +9,8 @@
 #include "halloc/Instance.cuh"
 #elif TEST_SCATTERALLOC
 #include "scatteralloc/Instance.cuh"
+#elif TEST_OUROBOROS
+#include "ouroboros/Instance.cuh"
 #endif
 
 template <typename MemoryManagerType>
@@ -40,6 +42,9 @@ int main(int argc, char* argv[])
 #elif TEST_SCATTERALLOC
 	std::cout << "--- ScatterAlloc ---\n";
 	MemoryManagerScatterAlloc memory_manager;
+#elif TEST_OUROBOROS
+	std::cout << "--- Ouroboros ---\n";
+	MemoryManagerOuroboros memory_manager;
 #endif
 
 	memory_manager.init();

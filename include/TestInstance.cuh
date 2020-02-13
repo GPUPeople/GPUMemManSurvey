@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Utility.cuh"
-
 struct MemoryManagerBase
 {
 	explicit MemoryManagerBase(size_t instantiation_size = 2048ULL*1024ULL*1024ULL) : size{instantiation_size}{}
