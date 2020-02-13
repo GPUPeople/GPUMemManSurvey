@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "Utility.cuh"
+#include "UtilityFunctions.cuh"
 
 // ########################
 #ifdef TEST_CUDA

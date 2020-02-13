@@ -8,27 +8,29 @@
 
 struct MemoryManagerOuroboros : public MemoryManagerBase
 {
-	explicit MemoryManagerOuroboros(size_t instantiation_size = 2048ULL*1024ULL*1024ULL) : MemoryManagerBase(instantiation_size), memory_manager{new OuroPQ()} {}
+	using OuroborosType = OuroPQ;
+
+	explicit MemoryManagerOuroboros(size_t instantiation_size = 2048ULL*1024ULL*1024ULL) : MemoryManagerBase(instantiation_size), memory_manager{new OuroborosType()} {}
 	~MemoryManagerOuroboros(){if(!IAMACOPY) {delete memory_manager;}}
-	MemoryManagerOuroboros(const MemoryManagerOuroboros& src) : memory_manager{src.memory_manager}, IAMACOPY{true} {}
+	MemoryManagerOuroboros(const MemoryManagerOuroboros& src) : memory_manager{src.memory_manager}, d_memory_manager{src.d_memory_manager}, IAMACOPY{true} {}
 
 	virtual void init() override
 	{
 		memory_manager->initialize();
-		d_memory_manager = reinterpret_cast<OuroPQ*>(memory_manager->memory.d_memory);
+		d_memory_manager = memory_manager->getDeviceMemoryManager();
 	}
 
 	virtual __device__ __forceinline__ void* malloc(size_t size) override
 	{
-		MemoryIndex new_index;
-		return d_memory_manager->template allocPage<int>(size / sizeof(int), new_index);
+		return d_memory_manager->malloc(size);
 	}
 
 	virtual __device__ __forceinline__ void free(void* ptr) override
 	{
+		d_memory_manager->free(ptr);
 	}
 
-	OuroPQ* memory_manager;
-	OuroPQ* d_memory_manager{nullptr};
+	OuroborosType* memory_manager{nullptr};
+	OuroborosType* d_memory_manager{nullptr};
 	bool IAMACOPY{false}; // TODO: That is an ugly hack so we don't get a double free when making a copy for the device
 };

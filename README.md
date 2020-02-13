@@ -12,7 +12,7 @@ Execute the automated script!
 | CUDA Device Allocator | Done 	|
 | Halloc 				| Done 	|
 | ScatterAlloc 			| Done 	|
-| Ouroboros 			|  WIP	|
+| Ouroboros 			|  Done	|
 | XMalloc 				| 	X 	|
 | FDGMalloc 			| 	X 	|
 | Bulk-Sempaphore 		| 	X 	|
