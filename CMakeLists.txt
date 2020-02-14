@@ -24,58 +24,89 @@ endif ()
 include_directories(${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
 include_directories(include)
 include_directories(frameworks)
-if(TEST_SCATTERALLOC)
-	include_directories(frameworks/scatteralloc/repository/src/include/mallocMC)
-endif ()
-if(TEST_OUROBOROS)
-	include_directories(frameworks/ouroboros/repository/include)
-endif ()
 
 ##########################################################################
 ##########################################################################
-##########################################################################
-# Add Executables
-
 ##########################################################################
 # CUDA
+##########################################################################
+##########################################################################
+##########################################################################
 if(TEST_CUDA)
+
 	add_executable(c_main
 		src/main.cu
 	)
 	target_compile_definitions(c_main PUBLIC TEST_CUDA)
+	add_executable(c_allocation
+		src/perf_allocation.cu
+	)
+	target_compile_definitions(c_allocation PUBLIC TEST_CUDA)
+
 endif()
 
 ##########################################################################
+##########################################################################
+##########################################################################
 # Halloc
+##########################################################################
+##########################################################################
+##########################################################################
 if(TEST_HALLOC)
+
 	add_executable(h_main
 		src/main.cu
 	)
 	target_compile_definitions(h_main PUBLIC TEST_HALLOC)
+	add_executable(h_allocation
+		src/perf_allocation.cu
+	)
+	target_compile_definitions(h_allocation PUBLIC TEST_HALLOC)
+
+	# Link libraries
+	target_link_libraries(h_main memorymanagerhalloc)
+	target_link_libraries(h_allocation memorymanagerhalloc)
+
 endif ()
 
 ##########################################################################
+##########################################################################
+##########################################################################
 # ScatterAlloc
+##########################################################################
+##########################################################################
+##########################################################################
 if(TEST_SCATTERALLOC)
+	include_directories(frameworks/scatteralloc/repository/src/include/mallocMC)
+
 	add_executable(s_main
 		src/main.cu
 	)
 	target_compile_definitions(s_main PUBLIC TEST_SCATTERALLOC)
+	add_executable(s_allocation
+		src/perf_allocation.cu
+	)
+	target_compile_definitions(s_allocation PUBLIC TEST_SCATTERALLOC)
+
 endif ()
 
 ##########################################################################
+##########################################################################
+##########################################################################
 # Ouroboros
+##########################################################################
+##########################################################################
+##########################################################################
 if(TEST_OUROBOROS)
+	include_directories(frameworks/ouroboros/repository/include)
+
 	add_executable(o_main
 		src/main.cu
 	)
 	target_compile_definitions(o_main PUBLIC TEST_OUROBOROS)
-endif ()
+	add_executable(o_allocation
+		src/perf_allocation.cu
+	)
+	target_compile_definitions(o_allocation PUBLIC TEST_OUROBOROS)
 
-##########################################################################
-##########################################################################
-##########################################################################
-# Linking
-if(TEST_HALLOC)
-	target_link_libraries(h_main memorymanagerhalloc)
 endif ()
