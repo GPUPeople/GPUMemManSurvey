@@ -20,7 +20,7 @@ __device__ bool Warp::isWorkerThread(uint8_t* workerId, uint32_t* count) {
 	const uint8_t id = FDG__THREADIDINWARP;
 
 	// perform voting
-	uint32_t vote = __ballot(1);
+	uint32_t vote = __ballot_sync(0xFFFFFFFF, 1);
 	uint32_t wId;
 
 	// find worker thread

@@ -59,8 +59,19 @@ def main():
 
 	testcases.sort()
 
-	column_names = list()
-	column_names.append("Bytes")
+	# Timeout (in seconds)
+	time_out_val = 10;
+
+	# Run executables
+	for executable in testcases:
+		smallest_allocation_size = 4
+		while smallest_allocation_size <= largest_allocation_size:
+			run_config = str(num_allocations) + " " + str(smallest_allocation_size) + " 0 " + str(free_memory)
+			executecommand = "{0} {1}".format(executable, run_config)
+			print(executecommand)
+			Command(executecommand).run(timeout=time_out_val)
+			smallest_allocation_size += 4
+
 	approach_result_alloc = list(list())
 	approach_result_alloc.append(np.arange(smallest_allocation_size, largest_allocation_size, 4).tolist())
 	approach_result_alloc[0].insert(0, "Bytes")
@@ -89,17 +100,18 @@ def main():
 			continue
 		os.remove(filename)
 
+	# Get Timestring
 	now = datetime.now()
 	time_string = now.strftime("%b-%d-%Y_%H-%M-%S")
 
 	# Generate output file
-	alloc_name = str("../results/allocation/alloc_") + str(num_allocations) + str(".csv")
+	alloc_name = str("../results/allocation/") + time_string + str("_alloc_") + str(num_allocations) + str(".csv")
 	with(open(alloc_name, "w")) as f:
 		writer = csv.writer(f, delimiter=',')
 		for row in approach_result_alloc:
 			writer.writerow(row)
 	
-	free_name = str("../results/free/free_") + str(num_allocations) + str(".csv")
+	free_name = str("../results/free/") + time_string + str("_free_") + str(num_allocations) + str(".csv")
 	with(open(free_name, "w")) as f:
 		writer = csv.writer(f, delimiter=',')
 		for row in approach_result_free:
@@ -112,13 +124,13 @@ def main():
 		df[str(approach_result_alloc[i][0])] = approach_result_alloc[i][1:]
 	
 	for i in range(1, len(approach_result_alloc)):
-		plt.plot(str(approach_result_alloc[0][0]), str(approach_result_alloc[i][0]), data=df, marker='', color=colours[str(approach_result_alloc[i][0])], linewidth=2, label=str(approach_result_alloc[i][0]))
+		plt.plot(str(approach_result_alloc[0][0]), str(approach_result_alloc[i][0]), data=df, marker='', color=colours[str(approach_result_alloc[i][0])], linewidth=1, label=str(approach_result_alloc[i][0]))
 	plt.yscale("log")
 	plt.ylabel('ms')
 	plt.xlabel('Bytes')
 	plt.title("Allocation performance for " + str(num_allocations) + " allocations")
 	plt.legend()
-	plt.savefig(time_string + "_alloc.pdf", dpi=600)
+	plt.savefig(str("../results/allocation/") + time_string + "_alloc.pdf", dpi=600)
 
 	# Clear Figure
 	plt.clf()
@@ -129,48 +141,15 @@ def main():
 		df[str(approach_result_free[i][0])] = approach_result_free[i][1:]
 	
 	for i in range(1, len(approach_result_free)):
-		plt.plot(str(approach_result_free[0][0]), str(approach_result_free[i][0]), data=df, marker='', color=colours[str(approach_result_free[i][0])], linewidth=2, label=str(approach_result_free[i][0]))
+		plt.plot(str(approach_result_free[0][0]), str(approach_result_free[i][0]), data=df, marker='', color=colours[str(approach_result_free[i][0])], linewidth=1, label=str(approach_result_free[i][0]))
 	plt.yscale("log")
 	plt.ylabel('ms')
 	plt.xlabel('Bytes')
 	plt.title("Free performance for " + str(num_allocations) + " allocations")
 	plt.legend()
-	plt.savefig(str("../results/free/")time_string + "_free.pdf", dpi=600)
+	plt.savefig(str("../results/free/") + time_string + "_free.pdf", dpi=600)
 
 	print("Done")
-
-
-
-
-
-
-
-
-
-
-
-	exit()
-
-	# Timeout (in seconds)
-	time_out_val = 10;
-
-	# Run executables
-	for executable in testcases:
-		smallest_allocation_size = 4
-		while smallest_allocation_size <= largest_allocation_size:
-			run_config = str(num_allocations) + " " + str(smallest_allocation_size) + " 0 " + str(free_memory)
-			executecommand = "{0} {1}".format(executable, run_config)
-			print(executecommand)
-			Command(executecommand).run(timeout=time_out_val)
-			smallest_allocation_size += 4
-	
-	# Copy resulting files into separate folder with time stamp
-
-	
-
-
-		shutil.move(filename, "../results/allocation")
-
 
 if __name__ == "__main__":
 	main()
