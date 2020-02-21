@@ -42,6 +42,10 @@ if(TEST_CUDA)
 		src/perf_allocation.cu
 	)
 	target_compile_definitions(c_allocation PUBLIC TEST_CUDA)
+	add_executable(c_fragmentation
+		src/frag_memory_overhead.cu
+	)
+	target_compile_definitions(c_fragmentation PUBLIC TEST_CUDA)
 
 endif()
 
@@ -62,10 +66,15 @@ if(TEST_HALLOC)
 		src/perf_allocation.cu
 	)
 	target_compile_definitions(h_allocation PUBLIC TEST_HALLOC)
+	add_executable(h_fragmentation
+		src/frag_memory_overhead.cu
+	)
+	target_compile_definitions(h_fragmentation PUBLIC TEST_HALLOC)
 
 	# Link libraries
 	target_link_libraries(h_main memorymanagerhalloc)
 	target_link_libraries(h_allocation memorymanagerhalloc)
+	target_link_libraries(h_fragmentation memorymanagerhalloc)
 
 endif ()
 
@@ -83,10 +92,16 @@ if(TEST_SCATTERALLOC)
 		src/main.cu
 	)
 	target_compile_definitions(s_main PUBLIC TEST_SCATTERALLOC)
+
 	add_executable(s_allocation
 		src/perf_allocation.cu
 	)
 	target_compile_definitions(s_allocation PUBLIC TEST_SCATTERALLOC)
+
+	add_executable(s_fragmentation
+		src/frag_memory_overhead.cu
+	)
+	target_compile_definitions(s_fragmentation PUBLIC TEST_SCATTERALLOC)
 
 endif ()
 
@@ -104,9 +119,15 @@ if(TEST_OUROBOROS)
 		src/main.cu
 	)
 	target_compile_definitions(o_main PUBLIC TEST_OUROBOROS)
+
 	add_executable(o_allocation
 		src/perf_allocation.cu
 	)
 	target_compile_definitions(o_allocation PUBLIC TEST_OUROBOROS)
+
+	add_executable(o_fragmentation
+		src/frag_memory_overhead.cu
+	)
+	target_compile_definitions(o_fragmentation PUBLIC TEST_OUROBOROS)
 
 endif ()

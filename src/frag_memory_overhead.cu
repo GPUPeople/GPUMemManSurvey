@@ -1,5 +1,8 @@
 #include <iostream>
 #include <fstream>
+#include <vector>
+#include <utility>
+#include <algorithm> 
 
 #include "UtilityFunctions.cuh"
 
@@ -14,10 +17,20 @@
 #include "ouroboros/Instance.cuh"
 #endif
 
-template <typename MemoryManagerType>
+template <typename MemoryManagerType, bool warp_based>
 __global__ void d_testAllocation(MemoryManagerType mm, int** verification_ptr, int num_allocations, int allocation_size)
 {
-	int tid = threadIdx.x + blockIdx.x * blockDim.x;
+	int tid{0};
+	if(warp_based)
+	{
+		tid = (threadIdx.x + blockIdx.x * blockDim.x) / 32;
+		if(threadIdx.x % 32 != 0)
+			return;
+	}
+	else
+	{
+		tid = threadIdx.x + blockIdx.x * blockDim.x;
+	}
 	if(tid >= num_allocations)
 		return;
 
@@ -40,6 +53,7 @@ int main(int argc, char* argv[])
 	unsigned int num_allocations{10000};
 	unsigned int allocation_size_byte{16};
 	int num_iterations {25};
+	bool warp_based{false};
 	bool print_output{true};
 	bool free_memory{true};
 	if(argc >= 2)
@@ -53,13 +67,18 @@ int main(int argc, char* argv[])
 				num_iterations = atoi(argv[3]);
 				if(argc >= 5)
 				{
-					print_output = static_cast<bool>(atoi(argv[4]));
+					warp_based = static_cast<bool>(atoi(argv[4]));
 					if(argc >= 6)
-						free_memory = static_cast<bool>(atoi(argv[5]));
+					{
+						print_output = static_cast<bool>(atoi(argv[5]));
+						if(argc >= 7)
+							free_memory = static_cast<bool>(atoi(argv[6]));
+					}
 				}
 			}
 		}
 	}
+
 	allocation_size_byte = alignment(allocation_size_byte, sizeof(int));
 	if(print_output)
 		std::cout << "Number of Allocations: " << num_allocations << " | Allocation Size: " << allocation_size_byte << std::endl;
@@ -68,7 +87,7 @@ int main(int argc, char* argv[])
 	cudaSetDevice(device);
 	cudaDeviceProp prop;
 	cudaGetDeviceProperties(&prop, device);
-
+	
 	#ifdef TEST_CUDA
 	if(print_output)
 		std::cout << "--- CUDA ---\n";
@@ -96,47 +115,51 @@ int main(int argc, char* argv[])
 	int** d_memory{nullptr};
 	CHECK_ERROR(cudaMalloc(&d_memory, sizeof(int*) * num_allocations));
 
-	std::ofstream results_alloc, results_free;
-	results_alloc.open((std::string("../results/alloc_") + prop.name  + "_" + mem_name + "_" + std::to_string(num_allocations) + ".csv").c_str(), std::ios_base::app);
-	results_free.open((std::string("../results/free_") + prop.name + "_" + mem_name + "_" + std::to_string(num_allocations) + ".csv").c_str(), std::ios_base::app);
-	results_alloc << "\n" << allocation_size_byte << ",";
-	results_free << "\n" << allocation_size_byte << ",";
+	std::ofstream results_frag;
+	results_frag.open((std::string("../results/frag_") + prop.name  + "_" + mem_name + "_" + std::to_string(num_allocations) + ".csv").c_str(), std::ios_base::app);
+	results_frag << "\n" << allocation_size_byte << ",";
 
 	int blockSize {256};
 	int gridSize {divup<int>(num_allocations, blockSize)};
-	float timing_allocation{0.0f};
-	float timing_free{0.0f};
-	cudaEvent_t start, end;
+	if (warp_based)
+		gridSize *= 32;
+
 	for(auto i = 0; i < num_iterations; ++i)
 	{
-		Utils::start_clock(start, end);
-		d_testAllocation <<<gridSize, blockSize>>>(memory_manager, d_memory, num_allocations, allocation_size_byte);
-		timing_allocation += Utils::end_clock(start, end);
-
+		if(warp_based)
+			d_testAllocation <decltype(memory_manager), true> <<<gridSize, blockSize>>>(memory_manager, d_memory, num_allocations, allocation_size_byte);
+		else
+			d_testAllocation <decltype(memory_manager), false> <<<gridSize, blockSize>>>(memory_manager, d_memory, num_allocations, allocation_size_byte);
 		CHECK_ERROR(cudaDeviceSynchronize());
+
+		// Look at address range
+		static int* static_min_ptr{reinterpret_cast<int*>(0xFFFFFFFFFFFFFFFFULL)};
+		static int* static_max_ptr{nullptr};
+		std::vector<int*> verification_pointers(num_allocations);
+		CHECK_ERROR(cudaMemcpy(verification_pointers.data(), d_memory, sizeof(int*) * verification_pointers.size(), cudaMemcpyDeviceToHost));
+		auto min_ptr = *min_element(verification_pointers.begin(), verification_pointers.end());
+		auto max_ptr = *max_element(verification_pointers.begin(), verification_pointers.end());
+		static_min_ptr = std::min(static_min_ptr, min_ptr);
+		static_max_ptr = std::max(static_max_ptr, max_ptr);
+		printf("%llu | %llu | %llu MB | %llu | %llu | %llu B\n", 
+		reinterpret_cast<unsigned long long>(min_ptr), 
+		reinterpret_cast<unsigned long long>(max_ptr), 
+		(reinterpret_cast<unsigned long long>(max_ptr) - reinterpret_cast<unsigned long long>(min_ptr)) / (1024*1024),
+		reinterpret_cast<unsigned long long>(static_min_ptr), 
+		reinterpret_cast<unsigned long long>(static_max_ptr), 
+		(reinterpret_cast<unsigned long long>(static_max_ptr) - reinterpret_cast<unsigned long long>(static_min_ptr)));
+		results_frag << (reinterpret_cast<unsigned long long>(max_ptr) - reinterpret_cast<unsigned long long>(min_ptr)) 
+			<< "," 
+			<<(reinterpret_cast<unsigned long long>(static_max_ptr) - reinterpret_cast<unsigned long long>(static_min_ptr));
+		if(num_iterations != 1)
+			results_frag << ",";
 
 		if(free_memory)
 		{
-			Utils::start_clock(start, end);
 			d_testFree <<<gridSize, blockSize>>>(memory_manager, d_memory, num_allocations);
-			timing_free += Utils::end_clock(start, end);
-	
 			CHECK_ERROR(cudaDeviceSynchronize());
 		}
 	}
-	timing_allocation /= num_iterations;
-	timing_free /= num_iterations;
-
-	if(print_output)
-	{
-		std::cout << "Timing Allocation: " << timing_allocation << "ms" << std::endl;
-		std::cout << "Timing       Free: " << timing_free << "ms" << std::endl;
-
-		std::cout << "Testcase DONE!\n";
-	}
 	
-	results_alloc << timing_allocation;
-	results_free << timing_free;
-
 	return 0;
 }

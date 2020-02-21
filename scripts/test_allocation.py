@@ -25,6 +25,7 @@ def main():
 	num_allocations = 10000
 	smallest_allocation_size = 4
 	largest_allocation_size = 1024
+	num_iterations = 25
 	free_memory = 1
 	build_path = "../build/"
 
@@ -66,7 +67,7 @@ def main():
 	for executable in testcases:
 		smallest_allocation_size = 4
 		while smallest_allocation_size <= largest_allocation_size:
-			run_config = str(num_allocations) + " " + str(smallest_allocation_size) + " 0 " + str(free_memory)
+			run_config = str(num_allocations) + " " + str(smallest_allocation_size) + " " + str(num_iterations) + " 0 " + str(free_memory)
 			executecommand = "{0} {1}".format(executable, run_config)
 			print(executecommand)
 			Command(executecommand).run(timeout=time_out_val)
