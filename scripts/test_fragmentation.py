@@ -10,7 +10,7 @@ import csv
 import matplotlib.pyplot as plt
 plt.style.use('seaborn-whitegrid')
 
-colours = {'Halloc' : 'Orange' , 'Ouroboros' : 'Red' , 'CUDA' : 'green' , 'ScatterAlloc' : 'blue'}
+colours = {'Actual Size' : 'Black', 'Halloc' : 'Orange' , 'Ouroboros' : 'Red' , 'CUDA' : 'green' , 'ScatterAlloc' : 'blue'}
 
 import argparse
 
@@ -38,10 +38,10 @@ def main():
 	parser.add_argument('-num', type=int, help='How many allocations to perform')
 	parser.add_argument('-range', type=str, help='Sepcify Allocation Range, e.g. 4-1024')
 	parser.add_argument('-iter', type=int, help='How many iterations?')
-	parser.add_argument('-genplot', action='store_true', default=False)
-	parser.add_argument('-genres', action='store_true', default=False)
-	parser.add_argument('-cleantemp', action='store_true', default=False)
-	parser.add_argument('-warp', action='store_true', default=False)
+	parser.add_argument('-genplot', action='store_true', default=False, help='Generate results file and plot')
+	parser.add_argument('-genres', action='store_true', default=False, help='Run testcases and generate results')
+	parser.add_argument('-cleantemp', action='store_true', default=False, help='Clean up temporary files')
+	parser.add_argument('-warp', action='store_true', default=False, help='Start testcases warp-based')
 
 	args = parser.parse_args()
 
@@ -86,7 +86,7 @@ def main():
 	testcases.sort()
 
 	# Timeout (in seconds)
-	time_out_val = 10;
+	time_out_val = 5;
 
 	####################################################################################################
 	####################################################################################################
@@ -94,7 +94,6 @@ def main():
 	####################################################################################################
 	####################################################################################################
 	if generate_results:
-		# Run executables
 		for executable in testcases:
 			smallest_allocation_size = 4
 			while smallest_allocation_size <= largest_allocation_size:
@@ -116,6 +115,8 @@ def main():
 		approach_result_frag = list(list())
 		approach_result_frag.append(np.arange(smallest_allocation_size, largest_allocation_size, 4).tolist())
 		approach_result_frag[0].insert(0, "Bytes")
+		approach_result_frag.append(np.arange(smallest_allocation_size * num_allocations, largest_allocation_size * num_allocations, 4 * num_allocations).tolist())
+		approach_result_frag[1].insert(0, "Actual Size")
 
 		# Go over files, read data and generate new 
 		for file in os.listdir("../results"):
@@ -142,7 +143,7 @@ def main():
 		df = pandas.DataFrame({str(approach_result_frag[0][0]) : approach_result_frag[0][1:]})
 		for i in range(1, len(approach_result_frag)):
 			df[str(approach_result_frag[i][0])] = approach_result_frag[i][1:]
-		
+
 		for i in range(1, len(approach_result_frag)):
 			plt.plot(str(approach_result_frag[0][0]), str(approach_result_frag[i][0]), data=df, marker='', color=colours[str(approach_result_frag[i][0])], linewidth=1, label=str(approach_result_frag[i][0]))
 		plt.yscale("log")
@@ -150,9 +151,13 @@ def main():
 		plt.xlabel('Bytes')
 		plt.title("Allocation Byte Range for " + str(num_allocations) + " allocations")
 		plt.legend()
-		plt.savefig(str("../results/fragmentation/") + time_string + "_alloc.pdf", dpi=600)
+		plt.savefig(str("../results/fragmentation/") + time_string + "_frag.pdf", dpi=600)
 
+	####################################################################################################
+	####################################################################################################
 	# Clean temporary files
+	####################################################################################################
+	####################################################################################################
 	if clean_temporary_files:
 		for file in os.listdir("../results"):
 			filename = str("../results/") + os.fsdecode(file)

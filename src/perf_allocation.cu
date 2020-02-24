@@ -14,20 +14,40 @@
 #include "ouroboros/Instance.cuh"
 #endif
 
-template <typename MemoryManagerType>
+template <typename MemoryManagerType, bool warp_based>
 __global__ void d_testAllocation(MemoryManagerType mm, int** verification_ptr, int num_allocations, int allocation_size)
 {
-	int tid = threadIdx.x + blockIdx.x * blockDim.x;
+	int tid{0};
+	if(warp_based)
+	{
+		tid = (threadIdx.x + blockIdx.x * blockDim.x) / 32;
+		if(threadIdx.x % 32 != 0)
+			return;
+	}
+	else
+	{
+		tid = threadIdx.x + blockIdx.x * blockDim.x;
+	}
 	if(tid >= num_allocations)
 		return;
 
 	verification_ptr[tid] = reinterpret_cast<int*>(mm.malloc(allocation_size));
 }
 
-template <typename MemoryManagerType>
+template <typename MemoryManagerType, bool warp_based>
 __global__ void d_testFree(MemoryManagerType mm, int** verification_ptr, int num_allocations)
 {
-	int tid = threadIdx.x + blockIdx.x * blockDim.x;
+	int tid{0};
+	if(warp_based)
+	{
+		tid = (threadIdx.x + blockIdx.x * blockDim.x) / 32;
+		if(threadIdx.x % 32 != 0)
+			return;
+	}
+	else
+	{
+		tid = threadIdx.x + blockIdx.x * blockDim.x;
+	}
 	if(tid >= num_allocations)
 		return;
 
@@ -40,6 +60,7 @@ int main(int argc, char* argv[])
 	unsigned int num_allocations{10000};
 	unsigned int allocation_size_byte{16};
 	int num_iterations {25};
+	bool warp_based{false};
 	bool print_output{true};
 	bool free_memory{true};
 	if(argc >= 2)
@@ -53,9 +74,13 @@ int main(int argc, char* argv[])
 				num_iterations = atoi(argv[3]);
 				if(argc >= 5)
 				{
-					print_output = static_cast<bool>(atoi(argv[4]));
+					warp_based = static_cast<bool>(atoi(argv[4]));
 					if(argc >= 6)
-						free_memory = static_cast<bool>(atoi(argv[5]));
+					{
+						print_output = static_cast<bool>(atoi(argv[5]));
+						if(argc >= 7)
+							free_memory = static_cast<bool>(atoi(argv[6]));
+					}
 				}
 			}
 		}
@@ -110,7 +135,10 @@ int main(int argc, char* argv[])
 	for(auto i = 0; i < num_iterations; ++i)
 	{
 		Utils::start_clock(start, end);
-		d_testAllocation <<<gridSize, blockSize>>>(memory_manager, d_memory, num_allocations, allocation_size_byte);
+		if(warp_based)
+			d_testAllocation <decltype(memory_manager), true> <<<gridSize, blockSize>>>(memory_manager, d_memory, num_allocations, allocation_size_byte);
+		else
+			d_testAllocation <decltype(memory_manager), false> <<<gridSize, blockSize>>>(memory_manager, d_memory, num_allocations, allocation_size_byte);
 		timing_allocation += Utils::end_clock(start, end);
 
 		CHECK_ERROR(cudaDeviceSynchronize());
@@ -118,7 +146,10 @@ int main(int argc, char* argv[])
 		if(free_memory)
 		{
 			Utils::start_clock(start, end);
-			d_testFree <<<gridSize, blockSize>>>(memory_manager, d_memory, num_allocations);
+			if(warp_based)
+				d_testFree <decltype(memory_manager), true> <<<gridSize, blockSize>>>(memory_manager, d_memory, num_allocations);
+			else
+				d_testFree <decltype(memory_manager), false> <<<gridSize, blockSize>>>(memory_manager, d_memory, num_allocations);
 			timing_free += Utils::end_clock(start, end);
 	
 			CHECK_ERROR(cudaDeviceSynchronize());

@@ -37,10 +37,20 @@ __global__ void d_testAllocation(MemoryManagerType mm, int** verification_ptr, i
 	verification_ptr[tid] = reinterpret_cast<int*>(mm.malloc(allocation_size));
 }
 
-template <typename MemoryManagerType>
+template <typename MemoryManagerType, bool warp_based>
 __global__ void d_testFree(MemoryManagerType mm, int** verification_ptr, int num_allocations)
 {
-	int tid = threadIdx.x + blockIdx.x * blockDim.x;
+	int tid{0};
+	if(warp_based)
+	{
+		tid = (threadIdx.x + blockIdx.x * blockDim.x) / 32;
+		if(threadIdx.x % 32 != 0)
+			return;
+	}
+	else
+	{
+		tid = threadIdx.x + blockIdx.x * blockDim.x;
+	}
 	if(tid >= num_allocations)
 		return;
 
@@ -121,13 +131,11 @@ int main(int argc, char* argv[])
 
 	int blockSize {256};
 	int gridSize {divup<int>(num_allocations, blockSize)};
-	if (warp_based)
-		gridSize *= 32;
 
 	for(auto i = 0; i < num_iterations; ++i)
 	{
 		if(warp_based)
-			d_testAllocation <decltype(memory_manager), true> <<<gridSize, blockSize>>>(memory_manager, d_memory, num_allocations, allocation_size_byte);
+			d_testAllocation <decltype(memory_manager), true> <<<gridSize * 32, blockSize>>>(memory_manager, d_memory, num_allocations, allocation_size_byte);
 		else
 			d_testAllocation <decltype(memory_manager), false> <<<gridSize, blockSize>>>(memory_manager, d_memory, num_allocations, allocation_size_byte);
 		CHECK_ERROR(cudaDeviceSynchronize());
@@ -156,7 +164,10 @@ int main(int argc, char* argv[])
 
 		if(free_memory)
 		{
-			d_testFree <<<gridSize, blockSize>>>(memory_manager, d_memory, num_allocations);
+			if(warp_based)
+				d_testFree <decltype(memory_manager), true> <<<gridSize * 32, blockSize>>>(memory_manager, d_memory, num_allocations);
+			else
+				d_testFree <decltype(memory_manager), false> <<<gridSize, blockSize>>>(memory_manager, d_memory, num_allocations);
 			CHECK_ERROR(cudaDeviceSynchronize());
 		}
 	}
