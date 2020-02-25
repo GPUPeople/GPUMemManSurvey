@@ -10,6 +10,8 @@
  *	\date		06-12-2012 
  */
 
+ #include "../header/SuperBlock.cuh"
+
 //-----------------------------------------------------------------------------
 template<size_t SIZE>
 __device__ void SuperBlock<SIZE>::init(void) {

@@ -1,7 +1,7 @@
 #include <iostream>
 
 #include "Instance.cuh"
-#include "FDGMalloc_impl.cuh"
+#include "UtilityFunctions.cuh"
 
 template <typename MemoryManager>
 __global__ void d_testFunctions(MemoryManager memory_manager)
@@ -34,7 +34,7 @@ int main(int argc, char* argv[])
 
 	d_testFunctions <<<1,1>>>(memory_manager);
 
-	cudaDeviceSynchronize();
+	CHECK_ERROR(cudaDeviceSynchronize());
 
 	printf("Testcase done!\n");
 

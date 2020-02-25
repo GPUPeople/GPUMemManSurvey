@@ -10,6 +10,9 @@
  *	\version	1.0
  *	\date		06-12-2012 
  */
+
+ #define COALESCE_WARP
+
 class __align__(128) Warp {
 private:
 	/*! stores the peak memory consumption for this Warp. */

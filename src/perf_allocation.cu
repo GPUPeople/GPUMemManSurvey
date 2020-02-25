@@ -12,6 +12,8 @@
 #include "scatteralloc/Instance.cuh"
 #elif TEST_OUROBOROS
 #include "ouroboros/Instance.cuh"
+#elif TEST_FDG
+#include "fdg/Instance.cuh"
 #endif
 
 template <typename MemoryManagerType, bool warp_based>
@@ -114,6 +116,11 @@ int main(int argc, char* argv[])
 		std::cout << "--- Ouroboros ---\n";
 	MemoryManagerOuroboros memory_manager;
 	std::string mem_name("Ouroboros");
+	#elif TEST_FDG
+	if(print_output)
+		std::cout << "--- FDGMalloc ---\n";
+	MemoryManagerFDG memory_manager;
+	std::string mem_name("FDGMalloc");
 	#endif
 
 	memory_manager.init();

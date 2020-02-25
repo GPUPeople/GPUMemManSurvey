@@ -10,6 +10,8 @@
  *	\date		06-12-2012 
  */
 
+ #include "../header/List.cuh"
+
 //-----------------------------------------------------------------------------
 template<uint32_t SIZE>
 __device__ void List<SIZE>::init(void) {

@@ -8,6 +8,7 @@ option(TEST_CUDA "Test CUDA" True)
 option(TEST_HALLOC "Test Halloc" True)
 option(TEST_SCATTERALLOC "Test ScatterAlloc" True)
 option(TEST_OUROBOROS "Test Ouroboros" True)
+option(TEST_FDG "Test FDGMalloc" True)
 
 ##########################################################################
 ##########################################################################
@@ -131,3 +132,29 @@ if(TEST_OUROBOROS)
 	target_compile_definitions(o_fragmentation PUBLIC TEST_OUROBOROS)
 
 endif ()
+
+##########################################################################
+##########################################################################
+##########################################################################
+# FDGMalloc
+##########################################################################
+##########################################################################
+##########################################################################
+if(TEST_FDG)
+
+	add_executable(f_main
+	src/main.cu
+	)
+	target_compile_definitions(f_main PUBLIC TEST_FDG)
+
+	add_executable(f_allocation
+	src/perf_allocation.cu
+	)
+	target_compile_definitions(f_allocation PUBLIC TEST_FDG)
+
+	add_executable(f_fragmentation
+	src/frag_memory_overhead.cu
+	)
+	target_compile_definitions(f_fragmentation PUBLIC TEST_FDG)
+
+endif()

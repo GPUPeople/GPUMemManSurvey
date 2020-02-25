@@ -11,6 +11,8 @@
 #include "scatteralloc/Instance.cuh"
 #elif TEST_OUROBOROS
 #include "ouroboros/Instance.cuh"
+#elif TEST_FDG
+#include "fdg/Instance.cuh"
 #endif
 
 template <typename MemoryManagerType>
@@ -45,6 +47,9 @@ int main(int argc, char* argv[])
 #elif TEST_OUROBOROS
 	std::cout << "--- Ouroboros ---\n";
 	MemoryManagerOuroboros memory_manager;
+#elif TEST_FDG
+	std::cout << "--- FDGMalloc ---\n";
+	MemoryManagerFDG memory_manager;
 #endif
 
 	memory_manager.init();

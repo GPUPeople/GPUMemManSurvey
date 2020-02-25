@@ -12,9 +12,9 @@
  */
 
 namespace FDG {
-	#include "src/SuperBlock.cu"
-	#include "src/List.cu"
-	#include "src/Warp.cu"
+	#include "src/SuperBlock_impl.cuh"
+	#include "src/List_impl.cuh"
+	#include "src/Warp_impl.cuh"
 }
 
 #endif

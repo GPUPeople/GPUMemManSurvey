@@ -10,9 +10,11 @@
  *	\date		06-12-2012 
  */
 
+ #include "../header/Warp.cuh"
+
 //#if __CUDA_ARCH__ < 300
-#define FDG__USE_SHARED
-__shared__ void* sharedPtr[FDG__WARPSIZE];
+// #define FDG__USE_SHARED
+//__shared__ void* sharedPtr[FDG__WARPSIZE];
 //#endif
 
 //-----------------------------------------------------------------------------
@@ -212,22 +214,22 @@ __device__ bool Warp::appendToList(void* ptr, bool performVoting) {
 __device__ void* Warp::exchangePointer(void* ptr, const uint8_t workerId, const uint8_t id) {
 	// we can only use shfl if CC is 3.0 or higher and if we are on a 32 bit system.
 	// shfl only supports 4 Byte values
-	#ifndef FDG__USE_SHARED
+	// #ifndef FDG__USE_SHARED
 		#if defined(_M_X64) || defined(__amd64__)
 			uint64_t ptr64 = (uint64_t)ptr;
-			ptr64 = ((uint64_t)__shfl((int32_t)(ptr64 >> 32),	(uint32_t)workerId, FDG__WARPSIZE)) << 32;
-			ptr64 |= (uint64_t)__shfl((int32_t)ptr,				(uint32_t)workerId, FDG__WARPSIZE);
+			ptr64 = ((uint64_t)__shfl_sync(0xFFFFFFFF, (int32_t)(ptr64 >> 32),	(uint32_t)workerId, FDG__WARPSIZE)) << 32;
+			ptr64 |= (uint64_t)__shfl_sync(0xFFFFFFFF, (int32_t)ptr,				(uint32_t)workerId, FDG__WARPSIZE);
 
 			ptr = (void*)ptr64;
 		#else
-			ptr = (void*)__shfl((int32_t)ptr, (uint32_t)workerId, FDG__WARPSIZE);
+			ptr = (void*)__shfl_sync(0xFFFFFFFF, (int32_t)ptr, (uint32_t)workerId, FDG__WARPSIZE);
 		#endif
-	#else
-		if(workerId == id)
-			sharedPtr[FDG__PSEUDOWARPIDINBLOCK] = ptr;
+	// #else
+	// 	if(workerId == id)
+	// 		sharedPtr[FDG__PSEUDOWARPIDINBLOCK] = ptr;
 
-		ptr = sharedPtr[FDG__PSEUDOWARPIDINBLOCK];
-	#endif
+	// 	ptr = sharedPtr[FDG__PSEUDOWARPIDINBLOCK];
+	// #endif
 
 	return ptr;
 }
