@@ -215,16 +215,16 @@ __device__ void* Warp::exchangePointer(void* ptr, const uint8_t workerId, const 
 	// we can only use shfl if CC is 3.0 or higher and if we are on a 32 bit system.
 	// shfl only supports 4 Byte values
 	// #ifndef FDG__USE_SHARED
-		#if defined(_M_X64) || defined(__amd64__)
+		// #if defined(_M_X64) || defined(__amd64__)
 			uint64_t ptr64 = (uint64_t)ptr;
 			ptr64 = ((uint64_t)__shfl_sync(0xFFFFFFFF, (int32_t)(ptr64 >> 32),	(uint32_t)workerId, FDG__WARPSIZE)) << 32;
-			ptr64 |= (uint64_t)__shfl_sync(0xFFFFFFFF, (int32_t)ptr,				(uint32_t)workerId, FDG__WARPSIZE);
+			ptr64 |= (uint64_t)__shfl_sync(0xFFFFFFFF, reinterpret_cast<int32_t>(ptr), (uint32_t)workerId, FDG__WARPSIZE);
 
 			ptr = (void*)ptr64;
-		#else
-			ptr = (void*)__shfl_sync(0xFFFFFFFF, (int32_t)ptr, (uint32_t)workerId, FDG__WARPSIZE);
-		#endif
-	// #else
+	// 	#else
+	// 		ptr = (void*)__shfl_sync(0xFFFFFFFF, (int32_t)ptr, (uint32_t)workerId, FDG__WARPSIZE);
+	// 	#endif
+	// // #else
 	// 	if(workerId == id)
 	// 		sharedPtr[FDG__PSEUDOWARPIDINBLOCK] = ptr;
 

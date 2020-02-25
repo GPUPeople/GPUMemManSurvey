@@ -32,9 +32,34 @@
     Warp wide utility functions.
 */
 
+#define _M_X64
+
 #pragma once
 #include "warp_common.cuh"
 
+namespace GPUTools
+{
+	__device__ inline uint laneid()
+	{
+	uint mylaneid;
+	asm("mov.u32 %0, %laneid;" : "=r" (mylaneid));
+	return mylaneid;
+	}
+
+	__device__ inline uint warpid()
+	{
+	uint mywarpid;
+	asm("mov.u32 %0, %warpid;" : "=r" (mywarpid));
+	return mywarpid;
+	}
+
+	__device__ inline uint smid()
+  {
+    uint mysmid;
+    asm("mov.u32 %0, %smid;" : "=r" (mysmid));
+    return mysmid;
+  }
+}
 
 //------------------------------------------------------------------------
 

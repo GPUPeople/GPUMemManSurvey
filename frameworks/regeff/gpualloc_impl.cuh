@@ -41,15 +41,12 @@
  *  CFMalloc         - mallocCircularFusedMalloc, freeCircularFusedMalloc
  *  CMMalloc         - mallocCircularMultiMalloc, freeCircularMultiMalloc
  *  CFMMalloc        - mallocCircularFusedMultiMalloc, freeCircularFusedMultiMalloc
- *  ScatterAlloc     - mallocScatterAlloc, freeScatterAlloc
- *  FDGMalloc        - mallocFDGMalloc, freeFDGMalloc
- *  Halloc           - mallocHalloc, freeHalloc
  *  Version: 1.0
  */
 
 #include <cstdint>
-#include "gpualloc.h"
-#include "warp_common.cu"
+#include "gpualloc.cuh"
+#include "warp_common_impl.cuh"
 #if 0
 typedef unsigned long long int uint64_t;
 typedef signed long int int32_t;
@@ -87,14 +84,14 @@ __shared__ uint warpAtomicCounter[32];
 
 __device__ uint getWorker()
 {
-	return __ffs(__ballot(1)) - 1;
+	return __ffs(__ballot_sync(0xFFFFFFFF, 1)) - 1;
 }
 
 //------------------------------------------------------------------------
 
 __device__ uint getWorker(uint& mask)
 {
-	mask = __ballot(1);
+	mask = __ballot_sync(0xFFFFFFFF, 1);
 	return __ffs(mask) - 1;
 }
 
@@ -109,7 +106,7 @@ __device__ uint coalesce(uint value, uint& total, uint& workerIdx)
 	int prefix = shfl_prefix_sum(value);
 	// The total memory is inclusive prefix sum of the last thread
 	total = prefix + value;
-	total = __shfl((int)total, 31);
+	total = __shfl_sync(0xFFFFFFFF, (int)total, 31);
 	return prefix;
 #elif COALESCE_ATOMIC
 	uint warpIdx = GPUTools::warpid();
@@ -142,14 +139,14 @@ __device__ uint coalesce(uint value, uint& total, uint& workerIdx)
 		// Active thread
 		if(activeMask & (1 << i))
 		{
-			uint n = __shfl((int)value, i);
+			uint n = __shfl_sync(0xFFFFFFFF, (int)value, i);
 			if(i < laneIdx)
 				prefix += n;
 		}
 	}
 
 	total = prefix + value;
-	total = __shfl((int)total, maxThread);
+	total = __shfl_sync(0xFFFFFFFF, (int)total, maxThread);
 
 	return prefix;
 #endif
@@ -159,7 +156,7 @@ __device__ uint coalesce(uint value, uint& total, uint& workerIdx)
 
 __device__ uint exchange(uint value, uint workerIdx)
 {
-	value = __shfl((int32_t)value, (uint32_t)workerIdx);
+	value = __shfl_sync(0xFFFFFFFF, (int32_t)value, (uint32_t)workerIdx);
 	return value;
 }
 
@@ -169,12 +166,12 @@ __device__ void* exchangePtr(void* ptr, uint workerIdx)
 {
 #if defined(_M_X64) || defined(__amd64__)
 	uint64_t ptr64 = (uint64_t)ptr;
-	ptr64 = ((uint64_t)__shfl((int32_t)(ptr64 >> 32),	(uint32_t)workerIdx)) << 32;
-	ptr64 |= ((uint64_t)__shfl((int32_t)ptr,				(uint32_t)workerIdx) & 0x00000000FFFFFFFF);
+	ptr64 = ((uint64_t)__shfl_sync(0xFFFFFFFF, (int32_t)(ptr64 >> 32),	(uint32_t)workerIdx)) << 32;
+	ptr64 |= ((uint64_t)__shfl_sync(0xFFFFFFFF, (int32_t)ptr,				(uint32_t)workerIdx) & 0x00000000FFFFFFFF);
 
 	ptr = (void*)ptr64;
 #else
-	ptr = (void*)__shfl((int32_t)ptr, (uint32_t)workerIdx);
+	ptr = (void*)__shfl_sync(0xFFFFFFFF, (int32_t)ptr, (uint32_t)workerIdx);
 #endif
 
 	return ptr;
@@ -1267,60 +1264,6 @@ __device__ __forceinline__ void freeCircularFusedMultiMalloc(void* ptr)
 	freeCircularMultiMallocFusedInternal(ptr, dummy);
 #endif
 }
-
-#if 0
-//------------------------------------------------------------------------
-// ScatterAlloc
-//------------------------------------------------------------------------
-
-__device__ __forceinline__ void* mallocScatterAlloc(uint allocSize)
-{
-	return theHeap.alloc(allocSize);
-}
-
-//------------------------------------------------------------------------
-
-__device__ __forceinline__ void freeScatterAlloc(void* ptr)
-{
-	theHeap.dealloc(ptr);
-}
-#endif
-
-#if 0
-//------------------------------------------------------------------------
-// FDGMalloc
-//------------------------------------------------------------------------
-
-__device__ __forceinline__ void* mallocFDGMalloc(FDG::Warp* warp, uint allocSize)
-{
-	return warp->alloc(allocSize);
-}
-
-//------------------------------------------------------------------------
-
-__device__ __forceinline__ void freeFDGMalloc(FDG::Warp* warp)
-{
-	warp->end();
-}
-#endif
-
-#if 0
-//------------------------------------------------------------------------
-// Halloc
-//------------------------------------------------------------------------
-
-__device__ __forceinline__ void* mallocHalloc(uint allocSize)
-{
-	return hamalloc(allocSize);
-}
-
-//------------------------------------------------------------------------
-
-__device__ __forceinline__ void freeHalloc(void* ptr)
-{
-	hafree(ptr);
-}
-#endif
 
 //------------------------------------------------------------------------
 // CircularMalloc - Allocator using a circular linked list of chunks

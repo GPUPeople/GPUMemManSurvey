@@ -95,44 +95,8 @@ struct AllocInfo
 #define WARP_SIZE 32
 //#define COALESCE_WARP
 
-//------------------------------------------------------------------------
-// Halloc
-//------------------------------------------------------------------------
-#if 0
-#include "halloc/src/halloc.cu"
-#endif
 
 #ifdef __CUDACC__
-#if 0
-//------------------------------------------------------------------------
-// ScatterAlloc - Downloadable from: http://www.icg.tugraz.at/project/mvp
-//------------------------------------------------------------------------
-
-//set the template arguments using HEAPARGS
-// pagesize ... byter per page
-// accessblocks ... number of superblocks
-// regionsize ... number of regions for meta data structur
-// wastefactor ... how much memory can be wasted per alloc (multiplicative factor)
-// use_coalescing ... combine memory requests of within each warp
-// resetfreedpages ... allow pages to be reused with a different size
-#define HEAPARGS SCATTER_ALLOC_PAGESIZE, SCATTER_ALLOC_ACCESSBLOCKS, SCATTER_ALLOC_REGIONSIZE, SCATTER_ALLOC_WASTEFACTOR, SCATTER_ALLOC_COALESCING, SCATTER_ALLOC_RESETPAGES
-//include the scatter alloc heap
-#include "ScatterAlloc/heap_impl.cuh"
-#include "ScatterAlloc/utils.h"
-
-template __global__ void GPUTools::initHeap<HEAPARGS>(DeviceHeap<HEAPARGS>* heap, void* heapmem, uint memsize);
-#endif
-#include "ScatterAlloc/utils.h"
-#if 0
-//------------------------------------------------------------------------
-// FDGMalloc - Downloadable from: http://www.gris.informatik.tu-darmstadt.de/projects/fdgmalloc/
-//------------------------------------------------------------------------
-#include "fdg/FDGMalloc.cuh"
-#include "fdg/FDGMalloc.cu"
-
-//------------------------------------------------------------------------
-#endif
-
 // Heap data
 __device__ char* g_heapBase; // The base pointer to the heap
 __device__ uint g_heapOffset; // Current location in the heap
@@ -166,21 +130,6 @@ __device__ __forceinline__ void freeCircularMultiMalloc(void* ptr);
 
 __device__ __forceinline__ void* mallocCircularFusedMultiMalloc(uint allocSize);
 __device__ __forceinline__ void freeCircularFusedMultiMalloc(void* ptr);
-
-#if 0
-__device__ __forceinline__ void* mallocScatterAlloc(uint allocSize);
-__device__ __forceinline__ void freeScatterAlloc(void* ptr);
-#endif
-
-#if 0
-__device__ __forceinline__ void* mallocFDGMalloc(FDG::Warp* warp, uint allocSize);
-__device__ __forceinline__ void freeFDGMalloc(FDG::Warp* warp);
-#endif
-
-#if 0
-__device__ __forceinline__ void* mallocHalloc(uint allocSize);
-__device__ __forceinline__ void freeHalloc(void* ptr);
-#endif
 
 extern "C" __global__ void CircularMallocPrepare1(uint numChunks);
 extern "C" __global__ void CircularMallocPrepare3(uint numChunks, uint rootChunk);
