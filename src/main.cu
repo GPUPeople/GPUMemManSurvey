@@ -16,25 +16,80 @@
 #endif
 
 template <typename MemoryManagerType>
-__global__ void d_testFunctions(MemoryManagerType memory_manager)
+__global__ void d_testAllocation(MemoryManagerType mm, int** verification_ptr, int num_allocations, int allocation_size)
 {
 	int tid = threadIdx.x + blockIdx.x * blockDim.x;
-	if(tid > 0)
+	if(tid >= num_allocations)
 		return;
 
-	auto test_array = reinterpret_cast<int*>(memory_manager.malloc(sizeof(int) * 16));
+	verification_ptr[tid] = reinterpret_cast<int*>(mm.malloc(allocation_size));
+}
 
-	for(int i = 0; i < 16; ++i)
+__global__ void d_testWriteToMemory(int** verification_ptr, int num_allocations, int allocation_size)
+{
+	int tid = threadIdx.x + blockIdx.x * blockDim.x;
+	if(tid >= num_allocations)
+		return;
+	
+	auto ptr = verification_ptr[tid];
+
+	for(auto i = 0; i < (allocation_size / sizeof(int)); ++i)
 	{
-		test_array[i] = i;
+		ptr[i] = tid;
 	}
+}
 
-	memory_manager.free(test_array);
-	return;
+__global__ void d_testReadFromMemory(int** verification_ptr, int num_allocations, int allocation_size)
+{
+	int tid = threadIdx.x + blockIdx.x * blockDim.x;
+	if(tid >= num_allocations)
+		return;
+	
+	if(threadIdx.x == 0 && blockIdx.x == 0)
+		printf("Test Read!\n");
+	
+	auto ptr = verification_ptr[tid];
+
+	for(auto i = 0; i < (allocation_size / sizeof(int)); ++i)
+	{
+		if(ptr[i] != tid)
+		{
+			printf("%d - %d | We got a wrong value here! %d vs %d\n", threadIdx.x, blockIdx.x, ptr[i], tid);
+		}
+	}
+}
+
+template <typename MemoryManagerType>
+__global__ void d_testFree(MemoryManagerType mm, int** verification_ptr, int num_allocations)
+{
+	int tid = threadIdx.x + blockIdx.x * blockDim.x;
+	if(tid >= num_allocations)
+		return;
+
+	mm.free(verification_ptr[tid]);
 }
 
 int main(int argc, char* argv[])
 {
+	std::cout << "Usage: num_allocations allocation_size_in_bytes\n";
+	int num_allocations{10000};
+	int allocation_size_byte{16};
+	int num_iterations {10};
+	if(argc >= 2)
+	{
+		num_allocations = atoi(argv[1]);
+		if(argc >= 3)
+		{
+			allocation_size_byte = atoi(argv[2]);
+			if(argc >= 4)
+			{
+				num_iterations = atoi(argv[3]);
+			}
+		}
+	}
+	allocation_size_byte = Utils::alignment(allocation_size_byte, sizeof(int));
+	std::cout << "Number of Allocations: " << num_allocations << " | Allocation Size: " << allocation_size_byte << " | Iterations: " << num_iterations << std::endl;
+
 #ifdef TEST_CUDA
 	std::cout << "--- CUDA ---\n";
 	MemoryManagerCUDA memory_manager;
@@ -54,9 +109,41 @@ int main(int argc, char* argv[])
 
 	memory_manager.init();
 
-	d_testFunctions <<<1,1>>>(memory_manager);
+	int** d_memory{nullptr};
+	CHECK_ERROR(cudaMalloc(&d_memory, sizeof(int*) * num_allocations));
 
-	CHECK_ERROR(cudaDeviceSynchronize());
+	int blockSize {256};
+	int gridSize {Utils::divup(num_allocations, blockSize)};
+	float timing_allocation{0.0f};
+	float timing_free{0.0f};
+	cudaEvent_t start, end;
+	for(auto i = 0; i < num_iterations; ++i)
+	{
+		Utils::start_clock(start, end);
+		d_testAllocation <decltype(memory_manager)> <<<gridSize, blockSize>>>(memory_manager, d_memory, num_allocations, allocation_size_byte);
+		timing_allocation += Utils::end_clock(start, end);
+
+		CHECK_ERROR(cudaDeviceSynchronize());
+
+		d_testWriteToMemory<<<gridSize, blockSize>>>(d_memory, num_allocations, allocation_size_byte);
+
+		CHECK_ERROR(cudaDeviceSynchronize());
+
+		d_testReadFromMemory<<<gridSize, blockSize>>>(d_memory, num_allocations, allocation_size_byte);
+
+		CHECK_ERROR(cudaDeviceSynchronize());
+
+		Utils::start_clock(start, end);
+		d_testFree <decltype(memory_manager)> <<<gridSize, blockSize>>>(memory_manager, d_memory, num_allocations);
+		timing_free += Utils::end_clock(start, end);
+
+		CHECK_ERROR(cudaDeviceSynchronize());
+	}
+	timing_allocation /= num_iterations;
+	timing_free /= num_iterations;
+
+	std::cout << "Timing Allocation: " << timing_allocation << "ms" << std::endl;
+	std::cout << "Timing       Free: " << timing_free << "ms" << std::endl;
 
 	printf("Testcase done!\n");
 

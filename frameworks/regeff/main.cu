@@ -28,7 +28,7 @@ int main(int argc, char* argv[])
 {
 	std::cout << "Simple RegEff Testcase\n";
 
-	MemoryManagerRegEff memory_manager;
+	MemoryManagerRegEff<> memory_manager;
 
 	memory_manager.init();
 

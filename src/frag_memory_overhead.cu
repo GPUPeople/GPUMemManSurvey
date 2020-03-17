@@ -91,7 +91,7 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	allocation_size_byte = alignment(allocation_size_byte, sizeof(int));
+	allocation_size_byte = Utils::alignment(allocation_size_byte, sizeof(int));
 	if(print_output)
 		std::cout << "Number of Allocations: " << num_allocations << " | Allocation Size: " << allocation_size_byte << std::endl;
 
@@ -137,7 +137,7 @@ int main(int argc, char* argv[])
 	results_frag << "\n" << allocation_size_byte << ",";
 
 	int blockSize {256};
-	int gridSize {divup<int>(num_allocations, blockSize)};
+	int gridSize {Utils::divup<int>(num_allocations, blockSize)};
 
 	for(auto i = 0; i < num_iterations; ++i)
 	{

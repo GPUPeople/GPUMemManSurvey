@@ -87,7 +87,7 @@ int main(int argc, char* argv[])
 			}
 		}
 	}
-	allocation_size_byte = alignment(allocation_size_byte, sizeof(int));
+	allocation_size_byte = Utils::alignment(allocation_size_byte, sizeof(int));
 	if(print_output)
 		std::cout << "Number of Allocations: " << num_allocations << " | Allocation Size: " << allocation_size_byte << std::endl;
 
@@ -135,7 +135,7 @@ int main(int argc, char* argv[])
 	results_free << "\n" << allocation_size_byte << ",";
 
 	int blockSize {256};
-	int gridSize {divup<int>(num_allocations, blockSize)};
+	int gridSize {Utils::divup<int>(num_allocations, blockSize)};
 	float timing_allocation{0.0f};
 	float timing_free{0.0f};
 	cudaEvent_t start, end;

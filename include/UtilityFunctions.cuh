@@ -31,52 +31,54 @@ static inline void HandleError(const char *file,
 #define CHECK_ERROR( err ) (Utils::HandleError( err, "", __FILE__, __LINE__ ))
 #define CHECK_ERROR_S( err , string) (Utils::HandleError( err, string, __FILE__, __LINE__ ))
 
-namespace Utils{
-// ##############################################################################################################################################
-//
-void inline start_clock(cudaEvent_t &start, cudaEvent_t &end)
+namespace Utils
 {
-	CHECK_ERROR(cudaEventCreate(&start));
-	CHECK_ERROR(cudaEventCreate(&end));
-	CHECK_ERROR(cudaEventRecord(start, 0));
-}
+	// ##############################################################################################################################################
+	//
+	void inline start_clock(cudaEvent_t &start, cudaEvent_t &end)
+	{
+		CHECK_ERROR(cudaEventCreate(&start));
+		CHECK_ERROR(cudaEventCreate(&end));
+		CHECK_ERROR(cudaEventRecord(start, 0));
+	}
 
-// ##############################################################################################################################################
-//
-float inline end_clock(cudaEvent_t &start, cudaEvent_t &end)
-{
-	float time;
-	CHECK_ERROR(cudaEventRecord(end, 0));
-	CHECK_ERROR(cudaEventSynchronize(end));
-	CHECK_ERROR(cudaEventElapsedTime(&time, start, end));
-	CHECK_ERROR(cudaEventDestroy(start));
-	CHECK_ERROR(cudaEventDestroy(end));
+	// ##############################################################################################################################################
+	//
+	float inline end_clock(cudaEvent_t &start, cudaEvent_t &end)
+	{
+		float time;
+		CHECK_ERROR(cudaEventRecord(end, 0));
+		CHECK_ERROR(cudaEventSynchronize(end));
+		CHECK_ERROR(cudaEventElapsedTime(&time, start, end));
+		CHECK_ERROR(cudaEventDestroy(start));
+		CHECK_ERROR(cudaEventDestroy(end));
 
-	// Returns ms
-	return time;
-}
-}
+		// Returns ms
+		return time;
+	}
 
-// ##############################################################################################################################################
-//
-template<typename T>
-__host__ __device__ __forceinline__ T divup(T a, T b)
-{
-	return (a + b - 1) / b;
-}
 
-// ##############################################################################################################################################
-//
-template<typename T, typename O>
-constexpr __host__ __device__ __forceinline__ T divup(T a, O b)
-{
-	return (a + b - 1) / b;
-}
+	// ##############################################################################################################################################
+	//
+	template<typename T>
+	__host__ __device__ __forceinline__ T divup(T a, T b)
+	{
+		return (a + b - 1) / b;
+	}
 
-// ##############################################################################################################################################
-//
-template<typename T>
-constexpr __host__ __device__ __forceinline__ T alignment(const T size, size_t alignment)
-{
-	return divup<T, size_t>(size, alignment) * alignment;
+	// ##############################################################################################################################################
+	//
+	template<typename T, typename O>
+	constexpr __host__ __device__ __forceinline__ T divup(T a, O b)
+	{
+		return (a + b - 1) / b;
+	}
+
+	// ##############################################################################################################################################
+	//
+	template<typename T>
+	constexpr __host__ __device__ __forceinline__ T alignment(const T size, size_t alignment)
+	{
+		return divup<T, size_t>(size, alignment) * alignment;
+	}
 }
