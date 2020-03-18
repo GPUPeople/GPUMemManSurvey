@@ -14,7 +14,7 @@ enum class RegEffVariants
 	CFMMalloc		// - mallocCircularFusedMultiMalloc, freeCircularFusedMultiMalloc
 };
 
-template <RegEffVariants variant=RegEffVariants::CMalloc>
+template <RegEffVariants variant=RegEffVariants::CudaMalloc>
 struct MemoryManagerRegEff : public MemoryManagerBase
 {
 	explicit MemoryManagerRegEff(size_t instantiation_size = 2048ULL*1024ULL*1024ULL) : MemoryManagerBase(instantiation_size) {}

@@ -257,10 +257,16 @@ __device__ __forceinline__ void* mallocAtomicMalloc(uint allocSize)
 	uint totalMem = 0;
 	uint offset = coalesce(allocMem, totalMem, workerIdx);
 
+	printf("%d - %d | Offset: %u\n", threadIdx.x, blockIdx.x, offset);
+
 	uint baseOffset;
 	if(laneIdx == workerIdx)
 		baseOffset = mallocAtomicMallocInternal(totalMem);
 	baseOffset = exchange(baseOffset, workerIdx);
+
+	printf("%d - %d | BaseOffset: %u\n", threadIdx.x, blockIdx.x, baseOffset);
+
+	printf("g_heapbase: %p\n", g_heapBase);
 
 	return g_heapBase + baseOffset + offset;
 #else

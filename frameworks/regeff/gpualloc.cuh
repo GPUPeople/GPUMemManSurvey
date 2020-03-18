@@ -93,7 +93,7 @@ struct AllocInfo
 // Configurations.
 #define ALIGN 16
 #define WARP_SIZE 32
-//#define COALESCE_WARP
+#define COALESCE_WARP
 
 
 #ifdef __CUDACC__

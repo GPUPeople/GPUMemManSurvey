@@ -12,6 +12,8 @@ __global__ void d_testFunctions(MemoryManager memory_manager)
 
 	int* test_array = reinterpret_cast<int*>(memory_manager.malloc(sizeof(int) * 16));
 
+	printf("%d - %d | Pointer received: %p\n", threadIdx.x, blockIdx.x, test_array);
+
 	for(int i = 0; i < 16; ++i)
 	{
 		test_array[i] = i;
@@ -27,16 +29,92 @@ __global__ void d_testFunctions(MemoryManager memory_manager)
 int main(int argc, char* argv[])
 {
 	std::cout << "Simple RegEff Testcase\n";
+	
+	{
+		MemoryManagerRegEff<RegEffVariants::CudaMalloc> memory_manager;
 
-	MemoryManagerRegEff<> memory_manager;
+		memory_manager.init();
 
-	memory_manager.init();
+		d_testFunctions <<<1,1>>>(memory_manager);
 
-	d_testFunctions <<<1,1>>>(memory_manager);
+		CHECK_ERROR(cudaDeviceSynchronize());
 
-	CHECK_ERROR(cudaDeviceSynchronize());
+		printf("Testcase CudaMalloc done!\n");
+	}
 
-	printf("Testcase done!\n");
+	{
+		MemoryManagerRegEff<RegEffVariants::AtomicMalloc> memory_manager;
+
+		memory_manager.init();
+
+		d_testFunctions <<<1,1>>>(memory_manager);
+
+		CHECK_ERROR(cudaDeviceSynchronize());
+
+		printf("Testcase AtomicMalloc done!\n");
+	}
+
+	{
+		MemoryManagerRegEff<RegEffVariants::AWMalloc> memory_manager;
+
+		memory_manager.init();
+
+		d_testFunctions <<<1,1>>>(memory_manager);
+
+		CHECK_ERROR(cudaDeviceSynchronize());
+
+		printf("Testcase AWMalloc done!\n");
+	}
+
+	{
+		MemoryManagerRegEff<RegEffVariants::CMalloc> memory_manager;
+
+		memory_manager.init();
+
+		d_testFunctions <<<1,1>>>(memory_manager);
+
+		CHECK_ERROR(cudaDeviceSynchronize());
+
+		printf("Testcase CMalloc done!\n");
+	}
+
+	{
+		MemoryManagerRegEff<RegEffVariants::CFMalloc> memory_manager;
+
+		memory_manager.init();
+
+		d_testFunctions <<<1,1>>>(memory_manager);
+
+		CHECK_ERROR(cudaDeviceSynchronize());
+
+		printf("Testcase CFMalloc done!\n");
+	}
+
+	{
+		MemoryManagerRegEff<RegEffVariants::CMMalloc> memory_manager;
+
+		memory_manager.init();
+
+		d_testFunctions <<<1,1>>>(memory_manager);
+
+		CHECK_ERROR(cudaDeviceSynchronize());
+
+		printf("Testcase CMMalloc done!\n");
+	}
+
+	{
+		MemoryManagerRegEff<RegEffVariants::CFMMalloc> memory_manager;
+
+		memory_manager.init();
+
+		d_testFunctions <<<1,1>>>(memory_manager);
+
+		CHECK_ERROR(cudaDeviceSynchronize());
+
+		printf("Testcase CFMMalloc done!\n");
+	}
+
 
 	return 0;
 }
+

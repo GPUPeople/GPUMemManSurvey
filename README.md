@@ -10,7 +10,7 @@ Then execute the automated script!
 | Framework | Status |
 |:---:|:---:|
 | CUDA Device Allocator | Done 	|
-| Halloc 				| Done 	|
+| Halloc 				| Bug 	|
 | ScatterAlloc 			| Done 	|
 | Ouroboros 			| Done	|
 | FDGMalloc 			|  WIP 	|

@@ -10,12 +10,10 @@
  *	\date		06-12-2012 
  */
 
- #include "../header/Warp.cuh"
-
-//#if __CUDA_ARCH__ < 300
-// #define FDG__USE_SHARED
-//__shared__ void* sharedPtr[FDG__WARPSIZE];
-//#endif
+#if __CUDA_ARCH__ < 300
+#define FDG__USE_SHARED
+__shared__ void* volatile sharedPtr[FDG__WARPSIZE];
+#endif
 
 //-----------------------------------------------------------------------------
 __device__ bool Warp::isWorkerThread(uint8_t* workerId, uint32_t* count) {
@@ -47,7 +45,6 @@ __device__ Warp* Warp::start(uint32_t count) {
 	// init variables
 	Warp* warp = 0;
 
-#ifdef COALESCE_WARP
 	// determine worker thread
 	const uint8_t id = FDG__THREADIDINWARP;
 	uint8_t workerId;
@@ -64,12 +61,6 @@ __device__ Warp* Warp::start(uint32_t count) {
 	
 	// exchange WarpHeader to other threads
 	warp = (Warp*)exchangePointer(warp, workerId, id);
-#else
-	warp = (Warp*)FDG__MALLOC(sizeof(Warp));
-	// init if allocation was successful
-	if(warp != 0)	
-		warp->init(1);
-#endif
 
 	return warp;
 }
@@ -187,10 +178,7 @@ __device__ bool Warp::appendToList(void* ptr, bool performVoting) {
 	// check if we can add this ptr to the list.
 	if(m_list == 0 || !m_list->append(ptr)) {
 		// check if this is the worker thread
-#ifdef COALESCE_WARP
-		if(!performVoting || isWorkerThread()) 
-#endif
-		{
+		if(!performVoting || isWorkerThread()) {
 			// allocate new list
 			List_t* newList = allocateList();
 
@@ -214,29 +202,28 @@ __device__ bool Warp::appendToList(void* ptr, bool performVoting) {
 __device__ void* Warp::exchangePointer(void* ptr, const uint8_t workerId, const uint8_t id) {
 	// we can only use shfl if CC is 3.0 or higher and if we are on a 32 bit system.
 	// shfl only supports 4 Byte values
-	// #ifndef FDG__USE_SHARED
-		// #if defined(_M_X64) || defined(__amd64__)
+	#ifndef FDG__USE_SHARED
+		#if defined(_M_X64) || defined(__amd64__)
 			uint64_t ptr64 = (uint64_t)ptr;
-			ptr64 = ((uint64_t)__shfl_sync(0xFFFFFFFF, (int32_t)(ptr64 >> 32),	(uint32_t)workerId, FDG__WARPSIZE)) << 32;
-			ptr64 |= (uint64_t)__shfl_sync(0xFFFFFFFF, reinterpret_cast<int32_t>(ptr), (uint32_t)workerId, FDG__WARPSIZE);
+			ptr64 = ((uint64_t)__shfl_sync(0xFFFFFFFF,(int32_t)(ptr64 >> 32),	(uint32_t)workerId, FDG__WARPSIZE)) << 32;
+			ptr64 |= (uint64_t)__shfl_sync(0xFFFFFFFF,(int32_t)ptr,				(uint32_t)workerId, FDG__WARPSIZE);
 
 			ptr = (void*)ptr64;
-	// 	#else
-	// 		ptr = (void*)__shfl_sync(0xFFFFFFFF, (int32_t)ptr, (uint32_t)workerId, FDG__WARPSIZE);
-	// 	#endif
-	// // #else
-	// 	if(workerId == id)
-	// 		sharedPtr[FDG__PSEUDOWARPIDINBLOCK] = ptr;
+		#else
+			ptr = (void*)__shfl_sync(0xFFFFFFFF, (int32_t)ptr, (uint32_t)workerId, FDG__WARPSIZE);
+		#endif
+	#else
+		if(workerId == id)
+			sharedPtr[FDG__PSEUDOWARPIDINBLOCK] = ptr;
 
-	// 	ptr = sharedPtr[FDG__PSEUDOWARPIDINBLOCK];
-	// #endif
+		ptr = sharedPtr[FDG__PSEUDOWARPIDINBLOCK];
+	#endif
 
 	return ptr;
 }
 
 //-----------------------------------------------------------------------------
 __device__ void* Warp::alloc(const uint32_t size) {
-#ifdef COALESCE_WARP
 	// init vars
 	const uint8_t id	= FDG__THREADIDINWARP;
 	uint8_t workerId	= 0;
@@ -310,53 +297,6 @@ __device__ void* Warp::alloc(const uint32_t size) {
 			}
 		} while(ptr == 0);
 	}
-#else
-	void* ptr			= 0;
-	uint32_t total	= size;
-	// enforce alignment
-	if(total % FDG__MIN_ALLOC_SIZE != 0) {
-		total += FDG__MIN_ALLOC_SIZE - (total % FDG__MIN_ALLOC_SIZE);
-	}
-	m_request[0] = total;
-
-	// is the total request bigger than a superblock?
-	if(total >= FDG__SUPERBLOCK_SIZE) {
-		uint8_t* data = 0;
-
-		// let worker get a new data chunk
-		data = (uint8_t*)allocateSuperBlock(total);
-
-		// get pointer if request was successful
-		if(data != 0)
-			ptr = (void*)&data;
-	} else {
-		// check if the first superBlock has been allocated
-		if(m_superBlock == 0) {
-			m_superBlock = (SuperBlock_t*)allocateSuperBlock(sizeof(SuperBlock_t));
-
-			if(m_superBlock != 0)
-				m_superBlock->init();
-		}
-
-		// repeat until we have sufficed all requests.
-		do {
-			// check if the allocation was successful
-			if(m_superBlock == 0)
-				return 0;
-
-			// allocate memory inside super block
-			ptr = m_superBlock->alloc(total, 0, 0, 0);
-
-			// check if allocation was successful
-			if(ptr == 0) {
-				m_superBlock = (SuperBlock_t*)allocateSuperBlock(sizeof(SuperBlock_t));
-
-				if(m_superBlock != 0)
-					m_superBlock->init();
-			}
-		} while(ptr == 0);
-	}
-#endif
 	
 	return ptr;
 }
