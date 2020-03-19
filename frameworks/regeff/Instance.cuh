@@ -64,7 +64,7 @@ struct MemoryManagerRegEff : public MemoryManagerBase
 
 	virtual __device__ __forceinline__ void free(void* ptr) override
 	{
-		if(variant == RegEffVariants::CudaMalloc || variant == RegEffVariants::AtomicMalloc || variant == RegEffVariants::AWMalloc)
+		if(variant == RegEffVariants::CudaMalloc)
 		{
 			freeCudaMalloc(ptr);
 		}
@@ -86,7 +86,8 @@ struct MemoryManagerRegEff : public MemoryManagerBase
 		}
 		else
 		{
-			printf("Variant not implemented!\n");
+			// variant == RegEffVariants::AtomicMalloc || variant == RegEffVariants::AWMalloc
+			// Those variants have no deallocations
 		}
 	}
 
