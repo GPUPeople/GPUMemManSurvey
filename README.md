@@ -13,7 +13,7 @@ Then execute the automated script!
 | Halloc 				| Bug 	|
 | ScatterAlloc 			| Done 	|
 | Ouroboros 			| Done	|
-| FDGMalloc 			|  WIP 	|
-| Register Efficient	|  WIP 	|
+| FDGMalloc 			|  Bug 	|
+| Register Efficient	|  Done	|
 | XMalloc 				| 	X 	|
 | Bulk-Sempaphore 		| 	X 	|

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "TestInstance.cuh"
+#include "UtilityFunctions.cuh"
 #include "gpualloc_impl.cuh"
 
 enum class RegEffVariants
@@ -18,34 +19,118 @@ template <RegEffVariants variant=RegEffVariants::CudaMalloc>
 struct MemoryManagerRegEff : public MemoryManagerBase
 {
 	explicit MemoryManagerRegEff(size_t instantiation_size = 2048ULL*1024ULL*1024ULL) : MemoryManagerBase(instantiation_size) {}
-	~MemoryManagerRegEff(){}
+	~MemoryManagerRegEff()
+	{
+		if(variant != RegEffVariants::CudaMalloc)
+		{
+			char* m_mallocData{nullptr};
+			cudaMemcpyFromSymbol(&m_mallocData, g_heapBase, sizeof(char*));
+			cudaFree(m_mallocData);
+		}
+	}
 
 	virtual void init() override
 	{
-		// Allocate the memory for the heap
 		if(variant == RegEffVariants::CudaMalloc)
 		{
 			cudaDeviceSetLimit(cudaLimitMallocHeapSize, size);
-		}
-		else
-		{
-			
-			
+			return;
 		}
 
+		// ######################################################################
 		// Prepare the memory for the heap
-		if (variant == RegEffVariants::AtomicMalloc || variant == RegEffVariants::AWMalloc)
-		{
-			void* m_mallocData{nullptr};
-			cudaMalloc(&m_mallocData, size);
-			cudaMemcpyToSymbol(g_heapBase, reinterpret_cast<char**>(&m_mallocData), sizeof(char*));
-			unsigned int _g_heapOffset{0};
-			cudaMemcpyToSymbol(g_heapOffset, &_g_heapOffset, sizeof(unsigned int));
-		}
-		else if (variant == RegEffVariants::CMalloc || variant == RegEffVariants::CFMalloc ||
+
+		// Set the heapBase
+		char* m_mallocData{nullptr};
+		cudaMalloc(&m_mallocData, size);
+		cudaMemcpyToSymbol(g_heapBase, &m_mallocData, sizeof(char*));
+
+		// Init the heapOffset
+		unsigned int _g_heapOffset{0};
+		cudaMemcpyToSymbol(g_heapOffset, &_g_heapOffset, sizeof(unsigned int));
+
+		if (variant == RegEffVariants::CMalloc || variant == RegEffVariants::CFMalloc ||
 			variant == RegEffVariants::CMMalloc || variant == RegEffVariants::CFMMalloc)
 		{
+			// Init the heapMultiOffset
+			int device{0};
+			cudaGetDevice(&device);
+			int m_numSM{0};
+			cudaDeviceGetAttribute(&m_numSM, cudaDevAttrMultiProcessorCount, device);
+			cudaMemcpyToSymbol(g_numSM, &m_numSM, sizeof(unsigned int));
 
+			unsigned int** m_multiOffset{nullptr};
+			cudaMalloc(&m_multiOffset, m_numSM * sizeof(unsigned int*));
+			cudaMemcpyToSymbol(g_heapMultiOffset, &m_multiOffset, sizeof(unsigned int*));
+
+			// Init the header size
+			unsigned int heapSize = size;
+
+			unsigned int headerSize{0};
+			if(variant == RegEffVariants::CMalloc || variant == RegEffVariants::CMMalloc)
+				headerSize = CIRCULAR_MALLOC_HEADER_SIZE;
+			else
+				headerSize = sizeof(unsigned int);
+			
+			unsigned int heapLock{0};
+			cudaMemcpyToSymbol(g_heapLock, &heapLock, sizeof(unsigned int));
+
+			// Set the chunk size
+			unsigned int numChunks{0};
+			unsigned int chunkSize{Utils::alignment<unsigned int>(static_cast<unsigned int>((headerSize + payload) * chunkRatio), ALIGN)};
+
+			// Create hierarchical chunks
+			unsigned int minChunkSize = chunkSize;
+			float treeMem = static_cast<float>(minChunkSize);
+			float heapTotalMem = static_cast<float>(heapSize-2*headerSize);
+			float heapMem{0.f};
+			int repeats{1};
+			if(variant == RegEffVariants::CMalloc || variant == RegEffVariants::CFMalloc)
+			{
+				heapMem = heapTotalMem;
+				repeats = 1;
+			}
+			else
+			{
+				heapMem = heapTotalMem/static_cast<float>(m_numSM);
+				repeats = m_numSM;
+			}
+
+			unsigned int i {1};
+			for(; treeMem < heapMem; i++)
+			{
+				treeMem = static_cast<float>(i + 1) * static_cast<float>(1 << i) * static_cast<float>(minChunkSize);
+			}
+			chunkSize = (1 << (i - 2)) * minChunkSize;
+
+			// Launch the prepare3 kernel
+			if(variant == RegEffVariants::CMalloc || variant == RegEffVariants::CFMalloc)
+				numChunks = (1 << (i-1)); 						// Number of nodes of the tree + 1 for the rest
+			else
+				numChunks = ((1 << (i-1)) - 1) * m_numSM + 1; 	// Number of nodes of the tree times numSM + 1 for the rest
+			
+			int blockSize = 256;
+			int gridSize = numChunks;
+			if(variant == RegEffVariants::CMalloc)
+			{
+				CircularMallocPrepare3 <<<gridSize, blockSize>>> (numChunks, chunkSize);
+				cudaDeviceSynchronize();
+			}
+			else if(variant == RegEffVariants::CFMalloc)
+			{
+				CircularFusedMallocPrepare3 <<<gridSize, blockSize>>> (numChunks, chunkSize);
+				cudaDeviceSynchronize();
+			}
+			else if(variant == RegEffVariants::CMMalloc)
+			{
+				CircularMultiMallocPrepare3 <<<gridSize, blockSize>>> (numChunks, chunkSize);
+				cudaDeviceSynchronize();
+			}
+			else if(variant == RegEffVariants::CFMMalloc)
+			{
+				CircularFusedMultiMallocPrepare3 <<<gridSize, blockSize>>> (numChunks, chunkSize);
+				cudaDeviceSynchronize();
+			}
 		}
 	}
 
@@ -147,5 +232,8 @@ struct MemoryManagerRegEff : public MemoryManagerBase
 		}
 	}
 
-	
+	// Found in AppEnvironment.cpp.269
+	static constexpr unsigned int payload{4};
+	static constexpr double maxFrag{2.0};
+	static constexpr double chunkRatio{1.0};
 };
