@@ -22,7 +22,31 @@ struct MemoryManagerRegEff : public MemoryManagerBase
 
 	virtual void init() override
 	{
-		cudaDeviceSetLimit(cudaLimitMallocHeapSize, size);
+		// Allocate the memory for the heap
+		if(variant == RegEffVariants::CudaMalloc)
+		{
+			cudaDeviceSetLimit(cudaLimitMallocHeapSize, size);
+		}
+		else
+		{
+			
+			
+		}
+
+		// Prepare the memory for the heap
+		if (variant == RegEffVariants::AtomicMalloc || variant == RegEffVariants::AWMalloc)
+		{
+			void* m_mallocData{nullptr};
+			cudaMalloc(&m_mallocData, size);
+			cudaMemcpyToSymbol(g_heapBase, reinterpret_cast<char**>(&m_mallocData), sizeof(char*));
+			unsigned int _g_heapOffset{0};
+			cudaMemcpyToSymbol(g_heapOffset, &_g_heapOffset, sizeof(unsigned int));
+		}
+		else if (variant == RegEffVariants::CMalloc || variant == RegEffVariants::CFMalloc ||
+			variant == RegEffVariants::CMMalloc || variant == RegEffVariants::CFMMalloc)
+		{
+
+		}
 	}
 
 	virtual __device__ __forceinline__ void* malloc(size_t size) override
@@ -122,4 +146,6 @@ struct MemoryManagerRegEff : public MemoryManagerBase
 			return std::string("RegEff - CFMMalloc");
 		}
 	}
+
+	
 };

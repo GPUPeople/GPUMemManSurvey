@@ -12,8 +12,6 @@ __global__ void d_testFunctions(MemoryManager memory_manager)
 
 	int* test_array = reinterpret_cast<int*>(memory_manager.malloc(sizeof(int) * 16));
 
-	printf("%d - %d | Pointer received: %p\n", threadIdx.x, blockIdx.x, test_array);
-
 	for(int i = 0; i < 16; ++i)
 	{
 		test_array[i] = i;
@@ -40,6 +38,7 @@ int main(int argc, char* argv[])
 		CHECK_ERROR(cudaDeviceSynchronize());
 
 		printf("Testcase CudaMalloc done!\n");
+		printf("###############################################\n");
 	}
 
 	{
@@ -52,6 +51,7 @@ int main(int argc, char* argv[])
 		CHECK_ERROR(cudaDeviceSynchronize());
 
 		printf("Testcase AtomicMalloc done!\n");
+		printf("###############################################\n");
 	}
 
 	{
@@ -64,6 +64,7 @@ int main(int argc, char* argv[])
 		CHECK_ERROR(cudaDeviceSynchronize());
 
 		printf("Testcase AWMalloc done!\n");
+		printf("###############################################\n");
 	}
 
 	{
@@ -76,6 +77,7 @@ int main(int argc, char* argv[])
 		CHECK_ERROR(cudaDeviceSynchronize());
 
 		printf("Testcase CMalloc done!\n");
+		printf("###############################################\n");
 	}
 
 	{
@@ -88,6 +90,7 @@ int main(int argc, char* argv[])
 		CHECK_ERROR(cudaDeviceSynchronize());
 
 		printf("Testcase CFMalloc done!\n");
+		printf("###############################################\n");
 	}
 
 	{
@@ -100,6 +103,7 @@ int main(int argc, char* argv[])
 		CHECK_ERROR(cudaDeviceSynchronize());
 
 		printf("Testcase CMMalloc done!\n");
+		printf("###############################################\n");
 	}
 
 	{
@@ -112,6 +116,7 @@ int main(int argc, char* argv[])
 		CHECK_ERROR(cudaDeviceSynchronize());
 
 		printf("Testcase CFMMalloc done!\n");
+		printf("###############################################\n");
 	}
 
 
