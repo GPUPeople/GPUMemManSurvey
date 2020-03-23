@@ -11,8 +11,7 @@ include_directories(${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
 include_directories(${BASE_LOCATION}/include)
 include_directories(${HALLOC_LOCATION})
 
-# Library
-add_library(memorymanagerhalloc STATIC
+add_executable(memorymanagerhalloc_example
 	${HALLOC_LOCATION}/globals.cuh
 	${HALLOC_LOCATION}/grid.cuh
 	${HALLOC_LOCATION}/grid.h
@@ -25,15 +24,8 @@ add_library(memorymanagerhalloc STATIC
 	${HALLOC_LOCATION}/slab.cuh
 	${HALLOC_LOCATION}/slab.h
 	${HALLOC_LOCATION}/statistics.cuh
-	${HALLOC_LOCATION}/utils.cu
+	${HALLOC_LOCATION}/utils.cuh
 	${HALLOC_LOCATION}/utils.h
 	Instance.cuh
-)
-# Optional
-target_compile_definitions(memorymanagerhalloc PUBLIC LINEAR_MEMORY_LAYOUT)
-
-add_executable(memorymanagerhalloc_example
 	main.cu
 )
-
-target_link_libraries(memorymanagerhalloc_example memorymanagerhalloc)

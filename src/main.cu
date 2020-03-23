@@ -13,6 +13,8 @@
 #include "ouroboros/Instance.cuh"
 #elif TEST_FDG
 #include "fdg/Instance.cuh"
+#elif TEST_REGEFF
+#include "regeff/Instance.cuh"
 #endif
 
 template <typename MemoryManagerType>
@@ -100,11 +102,55 @@ int main(int argc, char* argv[])
 	std::cout << "--- ScatterAlloc ---\n";
 	MemoryManagerScatterAlloc memory_manager;
 #elif TEST_OUROBOROS
-	std::cout << "--- Ouroboros ---\n";
-	MemoryManagerOuroboros memory_manager;
+	std::cout << "--- Ouroboros ---";
+	#ifdef TEST_PAGES
+	#ifdef TEST_VIRTUALIZED_ARRAY
+	std::cout << " Page --- Virtualized Array ---\n";
+	MemoryManagerOuroboros<OuroVAPQ> memory_manager;
+	#elif TEST_VIRTUALIZED_LIST
+	std::cout << " Page --- Virtualized List ---\n";
+	MemoryManagerOuroboros<OuroVLPQ> memory_manager;
+	#else
+	std::cout << " Page --- Standard ---\n";
+	MemoryManagerOuroboros<OuroPQ> memory_manager;
+	#endif
+	#endif
+	#ifdef TEST_CHUNKS
+	#ifdef TEST_VIRTUALIZED_ARRAY
+	std::cout << " Chunk --- Virtualized Array ---\n";
+	MemoryManagerOuroboros<OuroVACQ> memory_manager;
+	#elif TEST_VIRTUALIZED_LIST
+	std::cout << " Chunk --- Virtualized List ---\n";
+	MemoryManagerOuroboros<OuroVLCQ> memory_manager;
+	#else
+	std::cout << " Chunk --- Standard ---\n";
+	MemoryManagerOuroboros<OuroCQ> memory_manager;
+	#endif
+	#endif
 #elif TEST_FDG
 	std::cout << "--- FDGMalloc ---\n";
 	MemoryManagerFDG memory_manager;
+#elif TEST_REGEFF
+	std::cout << "--- RegEff ---";
+	#ifdef TEST_ATOMIC
+	std::cout << " Atomic\n";
+	MemoryManagerRegEff<RegEffVariants::AtomicMalloc> memory_manager;
+	#elif TEST_ATOMIC_WRAP
+	std::cout << " Atomic Wrap\n";
+	MemoryManagerRegEff<RegEffVariants::AWMalloc> memory_manager;
+	#elif TEST_CIRCULAR
+	std::cout << " Circular\n";
+	MemoryManagerRegEff<RegEffVariants::CMalloc> memory_manager;
+	#elif TEST_CIRCULAR_FUSED
+	std::cout << " Circular Fused\n";
+	MemoryManagerRegEff<RegEffVariants::CFMalloc> memory_manager;
+	#elif TEST_CIRCULAR_MULTI
+	std::cout << " Circular Multi\n";
+	MemoryManagerRegEff<RegEffVariants::CMMalloc> memory_manager;
+	#elif TEST_CIRCULAR_FUSED_MULTI
+	std::cout << " Circular Fused Multi\n";
+	MemoryManagerRegEff<RegEffVariants::CFMMalloc> memory_manager;
+	#endif
 #endif
 
 	memory_manager.init();

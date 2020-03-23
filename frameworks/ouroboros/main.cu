@@ -27,7 +27,7 @@ int main(int argc, char* argv[])
 {
 	std::cout << "Simple Ouroboros Testcase\n";
 
-	MemoryManagerOuroboros memory_manager;
+	MemoryManagerOuroboros<> memory_manager;
 
 	memory_manager.init();
 

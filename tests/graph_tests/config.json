@@ -1,0 +1,6 @@
+{
+    "device": 0,
+    "graphs": [
+        { "filename": "data/email.mtx" }
+      ]
+}
