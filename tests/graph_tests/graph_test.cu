@@ -10,7 +10,7 @@
 #include "CSR.h"
 #include "dCSR.h"
 #include "COO.h"
-#include "device/dynamicGraph.cuh"
+#include "device/dynamicGraph_impl.cuh"
 #include "Definitions.h"
 
 // Json Reader
@@ -123,68 +123,69 @@ int main(int argc, char* argv[])
         // #######################################################
         // #######################################################
         // #######################################################
+        size_t allocationSize{4ULL * 1024ULL * 1024ULL * 1024ULL};
         #ifdef TEST_CUDA
         std::cout << "--- CUDA ---\n";
-        DynGraph<VertexData, EdgeData, MemoryManagerCUDA> dynamic_graph;
+        DynGraph<VertexData, EdgeData, MemoryManagerCUDA> dynamic_graph(allocationSize);
         #elif TEST_HALLOC
         std::cout << "--- Halloc ---\n";
-        DynGraph<VertexData, EdgeData, MemoryManagerHalloc> dynamic_graph;
+        DynGraph<VertexData, EdgeData, MemoryManagerHalloc> dynamic_graph(allocationSize);
         #elif TEST_SCATTERALLOC
         std::cout << "--- ScatterAlloc ---\n";
-        DynGraph<VertexData, EdgeData, MemoryManagerScatterAlloc> dynamic_graph;
+        DynGraph<VertexData, EdgeData, MemoryManagerScatterAlloc> dynamic_graph(allocationSize);
         #elif TEST_OUROBOROS
         std::cout << "--- Ouroboros ---";
         #ifdef TEST_PAGES
         #ifdef TEST_VIRTUALIZED_ARRAY
         std::cout << " Page --- Virtualized Array ---\n";
-        DynGraph<VertexData, EdgeData, MemoryManagerOuroboros<OuroVAPQ>> dynamic_graph;
+        DynGraph<VertexData, EdgeData, MemoryManagerOuroboros<OuroVAPQ>> dynamic_graph(allocationSize);
         #elif TEST_VIRTUALIZED_LIST
         std::cout << " Page --- Virtualized List ---\n";
-        DynGraph<VertexData, EdgeData, MemoryManagerOuroboros<OuroVLPQ>> dynamic_graph;
+        DynGraph<VertexData, EdgeData, MemoryManagerOuroboros<OuroVLPQ>> dynamic_graph(allocationSize);
         #else
         std::cout << " Page --- Standard ---\n";
-        DynGraph<VertexData, EdgeData, MemoryManagerOuroboros<OuroPQ>> dynamic_graph;
+        DynGraph<VertexData, EdgeData, MemoryManagerOuroboros<OuroPQ>> dynamic_graph(allocationSize);
         #endif
         #endif
         #ifdef TEST_CHUNKS
         #ifdef TEST_VIRTUALIZED_ARRAY
         std::cout << " Chunk --- Virtualized Array ---\n";
-        DynGraph<VertexData, EdgeData, MemoryManagerOuroboros<OuroVACQ>> dynamic_graph;
+        DynGraph<VertexData, EdgeData, MemoryManagerOuroboros<OuroVACQ>> dynamic_graph(allocationSize);
         #elif TEST_VIRTUALIZED_LIST
         std::cout << " Chunk --- Virtualized List ---\n";
-        DynGraph<VertexData, EdgeData, MemoryManagerOuroboros<OuroVLCQ>> dynamic_graph;
+        DynGraph<VertexData, EdgeData, MemoryManagerOuroboros<OuroVLCQ>> dynamic_graph(allocationSize);
         #else
         std::cout << " Chunk --- Standard ---\n";
-        DynGraph<VertexData, EdgeData, MemoryManagerOuroboros<OuroCQ>> dynamic_graph;
+        DynGraph<VertexData, EdgeData, MemoryManagerOuroboros<OuroCQ>> dynamic_graph(allocationSize);
         #endif
         #endif
         #elif TEST_FDG
         std::cout << "--- FDGMalloc ---\n";
-        DynGraph<VertexData, EdgeData, MemoryManagerFDG> dynamic_graph;
+        DynGraph<VertexData, EdgeData, MemoryManagerFDG> dynamic_graph(allocationSize);
         #elif TEST_REGEFF
         std::cout << "--- RegEff ---";
         #ifdef TEST_ATOMIC
         std::cout << " Atomic\n";
-        DynGraph<VertexData, EdgeData, MemoryManagerRegEff<RegEffVariants::AtomicMalloc>> dynamic_graph;
+        DynGraph<VertexData, EdgeData, MemoryManagerRegEff<RegEffVariants::AtomicMalloc>> dynamic_graph(allocationSize);
         #elif TEST_ATOMIC_WRAP
         std::cout << " Atomic Wrap\n";
-        DynGraph<VertexData, EdgeData, MemoryManagerRegEff<RegEffVariants::AWMalloc>> dynamic_graph;
+        DynGraph<VertexData, EdgeData, MemoryManagerRegEff<RegEffVariants::AWMalloc>> dynamic_graph(allocationSize);
         #elif TEST_CIRCULAR
         std::cout << " Circular\n";
-        DynGraph<VertexData, EdgeData, MemoryManagerRegEff<RegEffVariants::CMalloc>> dynamic_graph;
+        DynGraph<VertexData, EdgeData, MemoryManagerRegEff<RegEffVariants::CMalloc>> dynamic_graph(allocationSize);
         #elif TEST_CIRCULAR_FUSED
         std::cout << " Circular Fused\n";
-        DynGraph<VertexData, EdgeData, MemoryManagerRegEff<RegEffVariants::CFMalloc>> dynamic_graph;
+        DynGraph<VertexData, EdgeData, MemoryManagerRegEff<RegEffVariants::CFMalloc>> dynamic_graph(allocationSize);
         #elif TEST_CIRCULAR_MULTI
         std::cout << " Circular Multi\n";
-        DynGraph<VertexData, EdgeData, MemoryManagerRegEff<RegEffVariants::CMMalloc>> dynamic_graph;
+        DynGraph<VertexData, EdgeData, MemoryManagerRegEff<RegEffVariants::CMMalloc>> dynamic_graph(allocationSize);
         #elif TEST_CIRCULAR_FUSED_MULTI
         std::cout << " Circular Fused Multi\n";
-        DynGraph<VertexData, EdgeData, MemoryManagerRegEff<RegEffVariants::CFMMalloc>> dynamic_graph;
+        DynGraph<VertexData, EdgeData, MemoryManagerRegEff<RegEffVariants::CFMMalloc>> dynamic_graph(allocationSize);
         #endif        
         #endif
 
-
+        dynamic_graph.init(csr_mat);
     }
     
     return 0;
