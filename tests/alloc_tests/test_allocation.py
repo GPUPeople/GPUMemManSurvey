@@ -27,7 +27,7 @@ def main():
 	largest_allocation_size = 1024
 	num_iterations = 25
 	free_memory = 1
-	build_path = "../build/"
+	build_path = "build/"
 
 	parser = argparse.ArgumentParser(description='Test allocation performance for various frameworks')
 	parser.add_argument('-t', type=str, help='Specify which frameworks to test, separated by +, e.g. o+s+h+c')
@@ -43,15 +43,28 @@ def main():
 
 	# Parse approaches
 	if(args.t):
-		selected_approaches = args.t.split('+')
 		if any("h" in s for s in args.t):
-			testcases.append(build_path + str("h_allocation"))
+			testcases.append(build_path + str("h_alloc_test"))
 		if any("s" in s for s in args.t):
-			testcases.append(build_path + str("s_allocation"))
+			testcases.append(build_path + str("s_alloc_test"))
 		if any("o" in s for s in args.t):
-			testcases.append(build_path + str("o_allocation"))
+			testcases.append(build_path + str("o_alloc_test_p"))
+			testcases.append(build_path + str("o_alloc_test_c"))
+			testcases.append(build_path + str("o_alloc_test_vap"))
+			testcases.append(build_path + str("o_alloc_test_vac"))
+			testcases.append(build_path + str("o_alloc_test_vlp"))
+			testcases.append(build_path + str("o_alloc_test_vlc"))
 		if any("c" in s for s in args.t):
-			testcases.append(build_path + str("c_allocation"))
+			testcases.append(build_path + str("c_alloc_test"))
+		if any("f" in s for s in args.t):
+			testcases.append(build_path + str("f_alloc_test"))
+		if any("r" in s for s in args.t):
+			testcases.append(build_path + str("r_alloc_test_a"))
+			testcases.append(build_path + str("r_alloc_test_aw"))
+			testcases.append(build_path + str("r_alloc_test_c"))
+			testcases.append(build_path + str("r_alloc_test_cf"))
+			testcases.append(build_path + str("r_alloc_test_cm"))
+			testcases.append(build_path + str("r_alloc_test_cfm"))
 	
 	# Parse num allocation
 	if(args.num):
@@ -93,7 +106,7 @@ def main():
 		for executable in testcases:
 			smallest_allocation_size = 4
 			while smallest_allocation_size <= largest_allocation_size:
-				run_config = str(num_allocations) + " " + str(smallest_allocation_size) + " " + str(num_iterations) + " " + str(warp_based) + " 0 " + str(free_memory)
+				run_config = str(num_allocations) + " " + str(smallest_allocation_size) + " " + str(num_iterations) + " " + str(test_warp_based) + " 0 " + str(free_memory)
 				executecommand = "{0} {1}".format(executable, run_config)
 				print(executecommand)
 				Command(executecommand).run(timeout=time_out_val)
@@ -113,8 +126,8 @@ def main():
 		approach_result_free[0].insert(0, "Bytes")
 
 		# Go over files, read data and generate new 
-		for file in os.listdir("../results"):
-			filename = str("../results/") + os.fsdecode(file)
+		for file in os.listdir("results/tmp"):
+			filename = str("results/tmp/") + os.fsdecode(file)
 			if(os.path.isdir(filename)):
 				continue
 			with open(filename, newline='') as csv_file:
@@ -131,13 +144,13 @@ def main():
 		time_string = now.strftime("%b-%d-%Y_%H-%M-%S")
 
 		# Generate output file
-		alloc_name = str("../results/allocation/") + time_string + str("_alloc_") + str(num_allocations) + str(".csv")
+		alloc_name = str("results/") + time_string + str("_alloc_") + str(num_allocations) + str(".csv")
 		with(open(alloc_name, "w")) as f:
 			writer = csv.writer(f, delimiter=',')
 			for row in approach_result_alloc:
 				writer.writerow(row)
 		
-		free_name = str("../results/free/") + time_string + str("_free_") + str(num_allocations) + str(".csv")
+		free_name = str("results/") + time_string + str("_free_") + str(num_allocations) + str(".csv")
 		with(open(free_name, "w")) as f:
 			writer = csv.writer(f, delimiter=',')
 			for row in approach_result_free:
@@ -156,7 +169,7 @@ def main():
 		plt.xlabel('Bytes')
 		plt.title("Allocation performance for " + str(num_allocations) + " allocations")
 		plt.legend()
-		plt.savefig(str("../results/allocation/") + time_string + "_alloc.pdf", dpi=600)
+		plt.savefig(str("results/") + time_string + "_alloc.pdf", dpi=600)
 
 		# Clear Figure
 		plt.clf()
@@ -173,7 +186,7 @@ def main():
 		plt.xlabel('Bytes')
 		plt.title("Free performance for " + str(num_allocations) + " allocations")
 		plt.legend()
-		plt.savefig(str("../results/free/") + time_string + "_free.pdf", dpi=600)
+		plt.savefig(str("results/") + time_string + "_free.pdf", dpi=600)
 
 	####################################################################################################
 	####################################################################################################
@@ -181,8 +194,8 @@ def main():
 	####################################################################################################
 	####################################################################################################
 	if clean_temporary_files:
-		for file in os.listdir("../results"):
-			filename = str("../results/") + os.fsdecode(file)
+		for file in os.listdir("results"):
+			filename = str("results/") + os.fsdecode(file)
 			if(os.path.isdir(filename)):
 				continue
 			os.remove(filename)

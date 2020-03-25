@@ -181,8 +181,8 @@ int main(int argc, char* argv[])
 	CHECK_ERROR(cudaMalloc(&d_memory, sizeof(int*) * num_allocations));
 
 	std::ofstream results_alloc, results_free;
-	results_alloc.open((std::string("../results/alloc_") + prop.name  + "_" + mem_name + "_" + std::to_string(num_allocations) + ".csv").c_str(), std::ios_base::app);
-	results_free.open((std::string("../results/free_") + prop.name + "_" + mem_name + "_" + std::to_string(num_allocations) + ".csv").c_str(), std::ios_base::app);
+	results_alloc.open((std::string("../results/tmp/alloc_") + prop.name  + "_" + mem_name + "_" + std::to_string(num_allocations) + ".csv").c_str(), std::ios_base::app);
+	results_free.open((std::string("../results/tmp/free_") + prop.name + "_" + mem_name + "_" + std::to_string(num_allocations) + ".csv").c_str(), std::ios_base::app);
 	results_alloc << "\n" << allocation_size_byte << ",";
 	results_free << "\n" << allocation_size_byte << ",";
 
