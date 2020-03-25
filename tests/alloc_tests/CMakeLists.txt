@@ -20,6 +20,7 @@ option(TEST_REG "Test Register-Efficient" True)
 include_directories(${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
 include_directories(${BASE_PATH}include)
 include_directories(${BASE_PATH}frameworks)
+include_directories(${BASE_PATH}externals/cub)
 
 ##########################################################################
 ##########################################################################
@@ -107,7 +108,7 @@ if(TEST_OUROBOROS)
 	)
 	target_compile_definitions(o_alloc_test_vac PUBLIC TEST_OUROBOROS)
 	target_compile_definitions(o_alloc_test_vac PUBLIC TEST_CHUNKS)
-	target_compile_definitions(o_alloc_test_vap PUBLIC TEST_VIRTUALIZED_ARRAY)
+	target_compile_definitions(o_alloc_test_vac PUBLIC TEST_VIRTUALIZED_ARRAY)
 	target_include_directories(o_alloc_test_vac PUBLIC ${BASE_PATH}frameworks/ouroboros/repository/include)
 
 	add_executable(o_alloc_test_vlp

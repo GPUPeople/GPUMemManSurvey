@@ -1,5 +1,8 @@
-import os
 import sys
+# the mock-0.3.1 dir contains testcase.py, testutils.py & mock.py
+sys.path.append('../../scripts')
+
+import os
 import shutil
 import time
 from datetime import datetime
@@ -8,9 +11,19 @@ import pandas
 import numpy as np
 import csv
 import matplotlib.pyplot as plt
+import seaborn as sns
 plt.style.use('seaborn-whitegrid')
 
-colours = {'Halloc' : 'Orange' , 'Ouroboros' : 'Red' , 'CUDA' : 'green' , 'ScatterAlloc' : 'blue'}
+colours = {
+	'Halloc' : 'orange' , 
+	'Ouroboros-P-VA' : 'lightcoral' , 'Ouroboros-P-VL' : 'darkred' , 'Ouroboros-P-S' : 'red' ,
+	'Ouroboros-C-VA' : 'red' , 'Ouroboros-C-VL' : 'red' , 'Ouroboros-C-S' : 'red' ,
+	'CUDA' : 'green' , 
+	'ScatterAlloc' : 'blue' , 
+	'FDGMalloc' : 'gold' , 
+	'RegEff-A' : 'mediumvioletred' , 'RegEff-AW' : 'orchid',
+	'RegEff-C' : 'purple' , 'RegEff-CF' : 'violet' , 'RegEff-CM' : 'indigo' , 'RegEff-CFM' : 'blueviolet'
+}
 
 import argparse
 
@@ -30,12 +43,12 @@ def main():
 	build_path = "build/"
 
 	parser = argparse.ArgumentParser(description='Test allocation performance for various frameworks')
-	parser.add_argument('-t', type=str, help='Specify which frameworks to test, separated by +, e.g. o+s+h+c')
+	parser.add_argument('-t', type=str, help='Specify which frameworks to test, separated by +, e.g. o+s+h+c+f+r ---> c : cuda | s : scatteralloc | h : halloc | o : ouroboros | f : fdgmalloc | r : register-efficient')
 	parser.add_argument('-num', type=int, help='How many allocations to perform')
 	parser.add_argument('-range', type=str, help='Sepcify Allocation Range, e.g. 4-1024')
 	parser.add_argument('-iter', type=int, help='How many iterations?')
-	parser.add_argument('-genplot', action='store_true', default=False, help='Generate results file and plot')
 	parser.add_argument('-genres', action='store_true', default=False, help='Run testcases and generate results')
+	parser.add_argument('-genplot', action='store_true', default=False, help='Generate results file and plot')
 	parser.add_argument('-cleantemp', action='store_true', default=False, help='Clean up temporary files')
 	parser.add_argument('-warp', action='store_true', default=False, help='Start testcases warp-based')
 
@@ -81,7 +94,10 @@ def main():
 		num_iterations = args.iter
 
 	# Generate results
-	test_warp_based = args.warp
+	if args.warp:
+		test_warp_based = 1
+	else:
+		test_warp_based = 0
 	
 	# Generate results
 	generate_results = args.genres
@@ -106,7 +122,7 @@ def main():
 		for executable in testcases:
 			smallest_allocation_size = 4
 			while smallest_allocation_size <= largest_allocation_size:
-				run_config = str(num_allocations) + " " + str(smallest_allocation_size) + " " + str(num_iterations) + " " + str(test_warp_based) + " 0 " + str(free_memory)
+				run_config = str(num_allocations) + " " + str(smallest_allocation_size) + " " + str(num_iterations) + " " + str(test_warp_based) + " 1 " + str(free_memory) + " results/tmp/"
 				executecommand = "{0} {1}".format(executable, run_config)
 				print(executecommand)
 				Command(executecommand).run(timeout=time_out_val)
@@ -162,8 +178,10 @@ def main():
 		for i in range(1, len(approach_result_alloc)):
 			df[str(approach_result_alloc[i][0])] = approach_result_alloc[i][1:]
 		
+		# for i in range(1, len(approach_result_alloc)):
+		# 	plt.plot(str(approach_result_alloc[0][0]), str(approach_result_alloc[i][0]), data=df, marker='', color=colours[str(approach_result_alloc[i][0])], linewidth=1, label=str(approach_result_alloc[i][0]))
 		for i in range(1, len(approach_result_alloc)):
-			plt.plot(str(approach_result_alloc[0][0]), str(approach_result_alloc[i][0]), data=df, marker='', color=colours[str(approach_result_alloc[i][0])], linewidth=1, label=str(approach_result_alloc[i][0]))
+			sns.plot(str(approach_result_alloc[0][0]), str(approach_result_alloc[i][0]), data=df, marker='', color=colours[str(approach_result_alloc[i][0])], linewidth=1, label=str(approach_result_alloc[i][0]))
 		plt.yscale("log")
 		plt.ylabel('ms')
 		plt.xlabel('Bytes')
@@ -194,8 +212,8 @@ def main():
 	####################################################################################################
 	####################################################################################################
 	if clean_temporary_files:
-		for file in os.listdir("results"):
-			filename = str("results/") + os.fsdecode(file)
+		for file in os.listdir("results/tmp"):
+			filename = str("results/tmp/") + os.fsdecode(file)
 			if(os.path.isdir(filename)):
 				continue
 			os.remove(filename)

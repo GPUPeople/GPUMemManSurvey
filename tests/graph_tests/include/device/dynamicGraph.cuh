@@ -19,6 +19,7 @@ struct DynGraph
     MemoryManagerType memory_manager;
 
     VertexDataType* d_vertices{nullptr};
+    unsigned int number_vertices;
     
     // Performance    
     PerfMeasure init_performance;
@@ -28,6 +29,9 @@ struct DynGraph
     // Methods
     template <typename DataType>
     void init(CSR<DataType>& input_graph);
+
+    template <typename DataType>
+	void dynGraphToCSR(CSR<DataType>& output_graph);
     
     void edgeInsertion(EdgeUpdateBatch<VertexDataType, EdgeDataType, MemoryManagerType>& update_batch);
 

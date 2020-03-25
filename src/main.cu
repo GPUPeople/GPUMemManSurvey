@@ -73,7 +73,12 @@ __global__ void d_testFree(MemoryManagerType mm, int** verification_ptr, int num
 
 int main(int argc, char* argv[])
 {
-	std::cout << "Usage: num_allocations allocation_size_in_bytes\n";
+	int device{0};
+	cudaSetDevice(device);
+	cudaDeviceProp prop;
+	cudaGetDeviceProperties(&prop, device);
+	std::cout << "Going to use " << prop.name << " " << prop.major << "." << prop.minor << "\n";
+
 	int num_allocations{10000};
 	int allocation_size_byte{16};
 	int num_iterations {10};

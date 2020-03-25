@@ -20,6 +20,7 @@ option(TEST_REG "Test Register-Efficient" True)
 include_directories(${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
 include_directories(${BASE_PATH}include)
 include_directories(${BASE_PATH}frameworks)
+include_directories(${BASE_PATH}externals/cub)
 
 ##########################################################################
 ##########################################################################

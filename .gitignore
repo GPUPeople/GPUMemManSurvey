@@ -5,3 +5,4 @@ frameworks/scatteralloc/repository
 frameworks/ouroboros/repository
 scripts/__pycache__
 .vscode/
+externals/

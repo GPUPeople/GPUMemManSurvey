@@ -65,8 +65,10 @@ int main(int argc, char* argv[])
 	unsigned int allocation_size_byte{16};
 	int num_iterations {25};
 	bool warp_based{false};
-	bool print_output{true};
+	bool print_output{false};
+	bool generate_output{true};
 	bool free_memory{true};
+	std::string initial_path{"../results/tmp/"};
 	if(argc >= 2)
 	{
 		num_allocations = atoi(argv[1]);
@@ -81,9 +83,15 @@ int main(int argc, char* argv[])
 					warp_based = static_cast<bool>(atoi(argv[4]));
 					if(argc >= 6)
 					{
-						print_output = static_cast<bool>(atoi(argv[5]));
+						generate_output = static_cast<bool>(atoi(argv[5]));
 						if(argc >= 7)
+						{
 							free_memory = static_cast<bool>(atoi(argv[6]));
+							if(argc >= 8)
+							{
+								initial_path = std::string(argv[7]);
+							}
+						}
 					}
 				}
 			}
@@ -181,10 +189,13 @@ int main(int argc, char* argv[])
 	CHECK_ERROR(cudaMalloc(&d_memory, sizeof(int*) * num_allocations));
 
 	std::ofstream results_alloc, results_free;
-	results_alloc.open((std::string("../results/tmp/alloc_") + prop.name  + "_" + mem_name + "_" + std::to_string(num_allocations) + ".csv").c_str(), std::ios_base::app);
-	results_free.open((std::string("../results/tmp/free_") + prop.name + "_" + mem_name + "_" + std::to_string(num_allocations) + ".csv").c_str(), std::ios_base::app);
-	results_alloc << "\n" << allocation_size_byte << ",";
-	results_free << "\n" << allocation_size_byte << ",";
+	if(generate_output)
+	{
+		results_alloc.open((initial_path + std::string("alloc_") + prop.name  + "_" + mem_name + "_" + std::to_string(num_allocations) + ".csv").c_str(), std::ios_base::app);
+		results_free.open((initial_path + std::string("free_") + prop.name + "_" + mem_name + "_" + std::to_string(num_allocations) + ".csv").c_str(), std::ios_base::app);
+		results_alloc << "\n" << allocation_size_byte << ",";
+		results_free << "\n" << allocation_size_byte << ",";
+	}
 
 	int blockSize {256};
 	int gridSize {Utils::divup<int>(num_allocations, blockSize)};
@@ -225,8 +236,11 @@ int main(int argc, char* argv[])
 		std::cout << "Testcase DONE!\n";
 	}
 	
-	results_alloc << timing_allocation;
-	results_free << timing_free;
+	if(generate_output)
+	{
+		results_alloc << timing_allocation;
+		results_free << timing_free;
+	}
 
 	return 0;
 }

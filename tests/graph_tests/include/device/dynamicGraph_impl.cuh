@@ -4,6 +4,15 @@
 #include "dCSR.h"
 #include "device/dynamicGraph.cuh"
 
+// ##############################################################################################################################################
+//
+//
+// Initialization
+//
+//
+// ##############################################################################################################################################
+
+
 template <typename VertexDataType, typename EdgeDataType, typename MemoryManagerType>
 __global__ void setupGraph(MemoryManagerType mm, VertexDataType* vertices, int num_vertices,
     const unsigned int* __restrict row_offsets,	const unsigned int* __restrict col_ids)
@@ -31,19 +40,94 @@ void DynGraph<VertexDataType, EdgeDataType, MemoryManagerType>::init(CSR<DataTyp
     // CSR on device
 	dCSR<DataType> d_csr_graph;
     convert(d_csr_graph, input_graph, 0);
+
+    number_vertices = input_graph.rows;
     
     memory_manager.init();
 
-    CHECK_ERROR(cudaMalloc(&d_vertices, sizeof(VertexDataType) * d_csr_graph.rows));
+    CHECK_ERROR(cudaMalloc(&d_vertices, sizeof(VertexDataType) * number_vertices));
 
     int blockSize {256};
-    int gridSize {Utils::divup<int>(d_csr_graph.rows, blockSize)};
+    int gridSize {Utils::divup<int>(number_vertices, blockSize)};
     init_performance.startMeasurement();
     setupGraph<VertexDataType, EdgeDataType, MemoryManagerType> <<<gridSize, blockSize>>>(
         memory_manager, 
         d_vertices, 
-        d_csr_graph.rows,
+        number_vertices,
         d_csr_graph.row_offsets,
         d_csr_graph.col_ids);
     init_performance.stopMeasurement();
+}
+
+// ##############################################################################################################################################
+//
+//
+// DynGraph -> CSR
+//
+//
+// ##############################################################################################################################################
+template <typename VertexDataType, typename EdgeDataType>
+__global__ void d_getOffsets(VertexDataType* vertices,
+                             unsigned int* __restrict offset,
+                             unsigned int number_vertices)
+{
+	int tid = threadIdx.x + blockIdx.x * blockDim.x;
+	if (tid >= number_vertices)
+		return;
+
+	offset[tid] = vertices[tid].meta_data.neighbours;
+}
+
+template <typename VertexDataType, typename EdgeDataType>
+__global__ void d_dynGraph_To_CSR(VertexDataType* vertices,
+                                  unsigned int* __restrict offset,
+                                  unsigned int* __restrict adjacency,
+                                  unsigned int number_vertices)
+{
+	int tid = threadIdx.x + blockIdx.x * blockDim.x;
+	if (tid >= number_vertices)
+		return;
+
+	auto adj_offset = offset[tid];
+	auto neighbours = vertices[tid].meta_data.neighbours;
+	auto adj = vertices[tid].adjacency;
+
+	for(auto i = 0; i < neighbours; ++i)
+	{
+		adjacency[adj_offset + i] = adj[i].destination;
+	}
+}
+
+template <typename VertexDataType, typename EdgeDataType, typename MemoryManagerType>
+template <typename DataType>
+void DynGraph<VertexDataType, EdgeDataType, MemoryManagerType>::dynGraphToCSR(CSR<DataType>& output_graph)
+{
+    auto block_size = 256;
+    int grid_size = (number_vertices / block_size) + 1;
+    
+    // Allocate output graph
+	dCSR<DataType> d_output_graph;
+	d_output_graph.rows = number_vertices;
+	d_output_graph.cols = number_vertices;
+    CHECK_ERROR(cudaMalloc(&(d_output_graph.row_offsets), sizeof(unsigned int) * (number_vertices + 1)));
+    CHECK_ERROR(cudaMemset(d_output_graph.row_offsets, 0, memory_manager.number_vertices + 1));
+
+    d_getOffsets<VertexDataType, EdgeDataType> << <grid_size, block_size >> > (d_vertices, d_output_graph.row_offsets, number_vertices);
+
+    // Sum up offsets correctly
+    Helper::thrustExclusiveSum(d_output_graph.row_offsets, number_vertices + 1);
+
+    auto num_edges{ 0U };
+    CHECK_ERROR(cudaMemcpy(&num_edges, d_output_graph.row_offsets + number_vertices, sizeof(unsigned int), cudaMemcpyDeviceToHost));
+    
+    // Allocate rest
+	d_output_graph.nnz = num_edges;
+	CHECK_ERROR(cudaMalloc(&(d_output_graph.col_ids), sizeof(unsigned int) * num_edges));
+    CHECK_ERROR(cudaMalloc(&(d_output_graph.data), sizeof(DataType) * num_edges));
+    
+    // Write Adjacency back
+	d_dynGraph_To_CSR<VertexDataType, EdgeDataType> << <grid_size, block_size >> > (
+        d_vertices, d_output_graph.row_offsets, d_output_graph.col_ids, number_vertices);
+    
+    convert(output_graph, d_output_graph);
 }
