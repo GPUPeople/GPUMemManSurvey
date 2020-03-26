@@ -1,9 +1,7 @@
 #pragma once
 #include "Definitions.h"
 #include "EdgeUpdate.h"
-#include "Utility.cuh"
 #include "MemoryLayout.h"
-
 #include <type_traits>
 
 // ##############################################################################################################################################
@@ -44,20 +42,20 @@ inline void EdgeDataWeightUpdateDevice::bringDataInOrder()
 {
 	CudaUniquePtr<vertex_t> d_helper_weights(size);
 	auto block_size = 256;
-	auto grid_size = divup(size , block_size);
+	auto grid_size = Utils::divup(size , block_size);
 	d_bringInOrder<int><<<grid_size, block_size>>>(size, pos.get(), d_weights.get(), d_helper_weights.get());
 	d_weights = std::move(d_helper_weights);
 }
 
 struct EdgeUpdatePreProcessing
 {
-	template <typename VertexDataType, typename EdgeDataType, typename MemoryManagerType>
-	void process(EdgeUpdateBatch<VertexDataType, EdgeDataType, MemoryManagerType>& update_batch, vertex_t number_vertices)
+	template <typename VertexDataType, typename EdgeDataType>
+	void process(EdgeUpdateBatch<VertexDataType, EdgeDataType>& update_batch, vertex_t number_vertices)
 	{
 		using UpdateType = typename TypeResolution<VertexDataType, EdgeDataType>::EdgeUpdateType;
 		const int batch_size = update_batch.edge_update.size();
 		auto block_size = 256;
-		int grid_size = divup(batch_size, block_size);
+		int grid_size = Utils::divup(batch_size, block_size);
 
 		// Allocate update helper
 		d_update_src_helper.allocate((number_vertices + 1) * 2);
@@ -88,8 +86,8 @@ inline void sortUpdates<VertexData, EdgeData, EdgeDataUpdateDevice>(EdgeDataUpda
 }
 
 
-template <typename VertexDataType, typename EdgeDataType, typename MemoryManagerType>
-void EdgeUpdateBatch<VertexDataType, EdgeDataType, MemoryManagerType>::prepareEdgeUpdates(bool sort)
+template <typename VertexDataType, typename EdgeDataType>
+void EdgeUpdateBatch<VertexDataType, EdgeDataType>::prepareEdgeUpdates(bool sort)
 {
     using UpdateType = typename TypeResolution<VertexDataType, EdgeDataType>::EdgeUpdateType;
 
@@ -115,8 +113,8 @@ void EdgeUpdateBatch<VertexDataType, EdgeDataType, MemoryManagerType>::prepareEd
 }
 
 
-template <typename VertexDataType, typename EdgeDataType, typename MemoryManagerType>
-void EdgeUpdateBatch<VertexDataType, EdgeDataType, MemoryManagerType>::generateEdgeUpdates(size_t number_vertices, size_t batch_size, unsigned int seed, unsigned int range, unsigned int offset)
+template <typename VertexDataType, typename EdgeDataType>
+void EdgeUpdateBatch<VertexDataType, EdgeDataType>::generateEdgeUpdates(size_t number_vertices, size_t batch_size, unsigned int seed, unsigned int range, unsigned int offset)
 {
     if(THRUST_SORT)
     {
@@ -149,13 +147,14 @@ void EdgeUpdateBatch<VertexDataType, EdgeDataType, MemoryManagerType>::generateE
         }
         else
         {
-            edge_update_cub.setValue(i, (src << (32 - cntlz(number_vertices))) + dest);
+            edge_update_cub.setValue(i, (src << (32 - Utils::cntlz(number_vertices))) + dest);
         }        
     }
 }
 
-template <typename VertexDataType, typename EdgeDataType, typename MemoryManagerType>
-void EdgeUpdateBatch<VertexDataType, EdgeDataType, MemoryManagerType>::generateEdgeUpdates(DynGraph<VertexDataType, EdgeDataType, MemoryManagerType>& dynGraph, size_t batch_size, unsigned int seed, unsigned int range, unsigned int offset)
+template <typename VertexDataType, typename EdgeDataType>
+template <typename MemoryManagerType>
+void EdgeUpdateBatch<VertexDataType, EdgeDataType>::generateEdgeUpdates(DynGraph<VertexDataType, EdgeDataType, MemoryManagerType>& dynGraph, size_t batch_size, unsigned int seed, unsigned int range, unsigned int offset)
 {
     if(THRUST_SORT)
     {
@@ -192,7 +191,7 @@ void EdgeUpdateBatch<VertexDataType, EdgeDataType, MemoryManagerType>::generateE
         }
         else
         {
-            edge_update_cub.setValue(i, (src << (32 - cntlz(current_graph.rows))) + dest);
+            edge_update_cub.setValue(i, (src << (32 - Utils::cntlz(current_graph.rows))) + dest);
         }   
     }
 }

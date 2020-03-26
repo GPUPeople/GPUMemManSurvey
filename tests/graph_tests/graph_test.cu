@@ -11,6 +11,9 @@
 #include "dCSR.h"
 #include "COO.h"
 #include "device/dynamicGraph_impl.cuh"
+#include "device/EdgeUpdate.cuh"
+#include "device/EdgeInsertion.cuh"
+#include "device/EdgeDeletion.cuh"
 #include "Definitions.h"
 
 // Json Reader
@@ -186,6 +189,27 @@ int main(int argc, char* argv[])
         #endif
 
         dynamic_graph.init(csr_mat);
+
+        size_t batch_size{10000};
+        unsigned int seed{0};
+        unsigned int range{0};
+        unsigned int offset{0};
+
+        EdgeUpdateBatch<VertexData, EdgeData> insertion_updates(dynamic_graph.number_vertices);
+        insertion_updates.generateEdgeUpdates(dynamic_graph.number_vertices, batch_size, seed, range, offset);
+        dynamic_graph.edgeInsertion(insertion_updates);
+
+        if (realistic_deletion)
+        {
+            EdgeUpdateBatch<VertexData, EdgeData> deletion_updates(dynamic_graph.number_vertices);
+            deletion_updates.generateEdgeUpdates(dynamic_graph, batch_size, seed, range, offset);
+
+            dynamic_graph.edgeDeletion(deletion_updates);
+        }
+        else
+        {
+            dynamic_graph.edgeDeletion(insertion_updates);
+        }
     }
     
     return 0;

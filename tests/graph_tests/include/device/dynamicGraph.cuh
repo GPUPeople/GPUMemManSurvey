@@ -6,7 +6,7 @@
 // Forward Declaration
 template<typename T>
 struct CSR;
-template <typename VertexDataType, typename EdgeDataType, typename MemoryManagerType>
+template <typename VertexDataType, typename EdgeDataType>
 struct EdgeUpdateBatch;
 
 template <typename VertexDataType, typename EdgeDataType, class MemoryManagerType>
@@ -33,7 +33,7 @@ struct DynGraph
     template <typename DataType>
 	void dynGraphToCSR(CSR<DataType>& output_graph);
     
-    void edgeInsertion(EdgeUpdateBatch<VertexDataType, EdgeDataType, MemoryManagerType>& update_batch);
+    void edgeInsertion(EdgeUpdateBatch<VertexDataType, EdgeDataType>& update_batch);
 
-    void edgeDeletion(EdgeUpdateBatch<VertexDataType, EdgeDataType, MemoryManagerType>& update_batch);
+    void edgeDeletion(EdgeUpdateBatch<VertexDataType, EdgeDataType>& update_batch);
 };

@@ -110,7 +110,7 @@ void DynGraph<VertexDataType, EdgeDataType, MemoryManagerType>::dynGraphToCSR(CS
 	d_output_graph.rows = number_vertices;
 	d_output_graph.cols = number_vertices;
     CHECK_ERROR(cudaMalloc(&(d_output_graph.row_offsets), sizeof(unsigned int) * (number_vertices + 1)));
-    CHECK_ERROR(cudaMemset(d_output_graph.row_offsets, 0, memory_manager.number_vertices + 1));
+    CHECK_ERROR(cudaMemset(d_output_graph.row_offsets, 0, number_vertices + 1));
 
     d_getOffsets<VertexDataType, EdgeDataType> << <grid_size, block_size >> > (d_vertices, d_output_graph.row_offsets, number_vertices);
 

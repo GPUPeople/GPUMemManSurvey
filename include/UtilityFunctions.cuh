@@ -84,6 +84,20 @@ namespace Utils
 	{
 		return divup<T, size_t>(size, alignment) * alignment;
 	}
+
+	// ##############################################################################################################################################
+	//
+	static constexpr int cntlz(unsigned int x)
+	{
+		if (x == 0) return 32;
+		int n = 0;
+		if (x <= 0x0000FFFF) { n = n + 16; x = x << 16; }
+		if (x <= 0x00FFFFFF) { n = n + 8; x = x << 8; }
+		if (x <= 0x0FFFFFFF) { n = n + 4; x = x << 4; }
+		if (x <= 0x3FFFFFFF) { n = n + 2; x = x << 2; }
+		if (x <= 0x7FFFFFFF) { n = n + 1; x = x << 1; }
+		return n;
+	}
 }
 
 namespace Helper
@@ -147,5 +161,55 @@ namespace Helper
 
 		CHECK_ERROR(cudaFree(d_temp_storage));
 	}
+
+	template<unsigned int X, int Completed = 0>
+	struct static_clz
+	{
+		static const int value = (X & 0x80000000) ? Completed : static_clz< (X << 1), Completed + 1 >::value;
+	};
+	template<unsigned int X>
+	struct static_clz<X, 32>
+	{
+		static const int value = 32;
+	};
+
+	struct AllocationHelper
+	{
+		template <typename T>
+		static __device__ __host__ __forceinline__ int getNextPow2(T n)
+		{
+			return 1 << (getNextPow2Pow(n));
+		}
+
+		template <typename T>
+		static __device__ __host__ __forceinline__ int getNextPow2Pow(T n)
+		{
+			if ((n & (n - 1)) == 0)
+				return 32 - __clz(n) - 1;
+			else
+				return 32 - __clz(n);
+		}
+
+		template <typename T, int minPageSize>
+		static __device__ __host__ __forceinline__ int getPageSize(T n)
+		{
+			return max(minPageSize, getNextPow2(n));
+		}
+
+		template <typename T, T n>
+		static constexpr int static_getNextPow2Pow()
+		{
+			if ((n & (n - 1)) == 0)
+				return 32 - static_clz<n>::value - 1;
+			else
+				return 32 - static_clz<n>::value;
+		}
+
+		template <typename T, T n>
+		static constexpr size_t static_getNextPow2()
+		{
+			return 1 << (static_getNextPow2Pow(n));
+		}
+	};
 }
 
