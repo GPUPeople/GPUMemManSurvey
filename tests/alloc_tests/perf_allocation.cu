@@ -2,6 +2,7 @@
 #include <fstream>
 
 #include "UtilityFunctions.cuh"
+#include "DevicePerformanceMeasure.cuh"
 
 // ########################
 #ifdef TEST_CUDA

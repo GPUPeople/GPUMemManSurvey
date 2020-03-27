@@ -28,6 +28,7 @@ struct PerfMeasure
 	float median()
 	{
 		std::vector<float> sorted_measurements(measurements_);
+		std::sort(sorted_measurements.begin(), sorted_measurements.end());
 		return sorted_measurements[sorted_measurements.size() / 2];
 	}
 	float std_dev(float mean)
@@ -35,7 +36,7 @@ struct PerfMeasure
 		std::vector<float> stdmean_measurements(measurements_);
 		for(auto& elem : stdmean_measurements)
 			elem = (elem - mean)*(elem - mean);
-		return sqrt(std::accumulate(measurements_.begin(), measurements_.end(), 0.0f) / static_cast<float>(measurements_.size()));
+		return sqrt(std::accumulate(stdmean_measurements.begin(), stdmean_measurements.end(), 0.0f) / static_cast<float>(stdmean_measurements.size()));
 	}
 
 	Result generateResult()
