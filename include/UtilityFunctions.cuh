@@ -213,3 +213,27 @@ namespace Helper
 	};
 }
 
+static constexpr char PBSTR[] = "##############################################################################################################";
+static constexpr int PBWIDTH = 99;
+
+static inline void printProgressBar(const double percentage)
+{
+	auto val = static_cast<int>(percentage * 100);
+	auto lpad = static_cast<int>(percentage * PBWIDTH);
+	auto rpad = PBWIDTH - lpad;
+#ifdef WIN32
+	printf("\r%3d%% [%.*s%*s]", val, lpad, PBSTR, rpad, "");
+#else
+	printf("\r\033[0;35m%3d%% [%.*s%*s]", val, lpad, PBSTR, rpad, "");
+#endif
+	fflush(stdout);
+}
+static inline void printProgressBarEnd()
+{
+#ifdef WIN32
+	printf("\n");
+#else
+	printf("\033[0m\n");
+#endif
+	fflush(stdout);
+}

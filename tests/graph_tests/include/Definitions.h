@@ -34,8 +34,6 @@ using MatrixList_t = std::vector<matrix_t>;
 
 static constexpr bool THRUST_SORT{false};
 
-static constexpr bool printDebug{true};
-
 static constexpr index_t DELETIONMARKER{ std::numeric_limits<index_t>::max() };
 
 // If edge insertions should also do updating when collision happens
@@ -44,6 +42,14 @@ static constexpr bool updateValues{false};
 static constexpr int minPageSize{16}; // Smallest Page Size is 16 Bytes
 
 static constexpr bool realistic_deletion{true};
+
+enum class OutputCodes : int
+{
+	OKAY = 0,
+	VERIFY_INITIALIZATION = 1,
+	VERIFY_INSERTION = 2,
+	VERIFY_DELETION = 3
+};
 
 namespace CLHighlight
 {

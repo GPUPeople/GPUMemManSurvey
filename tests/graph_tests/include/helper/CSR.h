@@ -21,6 +21,7 @@ struct DenseVector;
 template<typename T>
 struct CSR
 {
+	std::string filename;
 	size_t rows, cols, nnz;
 
 	std::unique_ptr<T[]> data;

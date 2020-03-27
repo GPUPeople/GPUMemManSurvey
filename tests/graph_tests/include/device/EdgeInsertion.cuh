@@ -148,8 +148,6 @@ __global__ void d_duplicateCheckingInSortedBatch(UpdateDataType* edge_update_dat
 template <typename VertexDataType, typename EdgeDataType, typename MemoryManagerType>
 void DynGraph<VertexDataType, EdgeDataType, MemoryManagerType>::edgeInsertion(EdgeUpdateBatch<VertexDataType, EdgeDataType>& update_batch)
 {
-    if (printDebug)
-		printf("Edge Insertion\n");
     using UpdateType = typename TypeResolution<VertexDataType, EdgeDataType>::EdgeUpdateType;
     
     int batch_size = update_batch.edge_update.size();
@@ -185,6 +183,7 @@ void DynGraph<VertexDataType, EdgeDataType, MemoryManagerType>::edgeInsertion(Ed
     // #######################################################################################
 	// Insertion
 	grid_size = Utils::divup(number_vertices, block_size);
+	insert_performance.startMeasurement();
 	d_edgeInsertionVertexCentric<VertexDataType, EdgeDataType, MemoryManagerType> << <grid_size, block_size >> >(
         d_vertices,
         number_vertices,
@@ -192,4 +191,5 @@ void DynGraph<VertexDataType, EdgeDataType, MemoryManagerType>::edgeInsertion(Ed
 		update_batch.d_edge_update.get(),
 		batch_size,
 		pre_processing.d_update_src_helper.get());
+	insert_performance.stopMeasurement();
 }
