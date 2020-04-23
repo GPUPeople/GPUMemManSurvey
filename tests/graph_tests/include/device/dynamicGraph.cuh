@@ -14,6 +14,7 @@ struct DynGraph
 {
     DynGraph() : memory_manager{2ULL * 1024ULL * 1024ULL * 1024ULL}{}
     DynGraph(size_t allocationSize) : memory_manager{allocationSize}{}
+    ~DynGraph();
 
     // Members
     MemoryManagerType memory_manager;
@@ -36,4 +37,6 @@ struct DynGraph
     void edgeInsertion(EdgeUpdateBatch<VertexDataType, EdgeDataType>& update_batch);
 
     void edgeDeletion(EdgeUpdateBatch<VertexDataType, EdgeDataType>& update_batch);
+
+    void cleanup();
 };

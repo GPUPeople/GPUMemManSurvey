@@ -17,8 +17,8 @@ namespace
 	{
 		if (mat.col_ids != nullptr)
 			cudaFree(mat.col_ids);
-		// if (mat.data != nullptr)
-		// 	cudaFree(mat.data);
+		if (mat.data != nullptr)
+			cudaFree(mat.data);
 		if (mat.row_offsets != nullptr)
 			cudaFree(mat.row_offsets);
 		mat.col_ids = nullptr;

@@ -1,5 +1,7 @@
 #include <iostream>
 #include <fstream>
+#include <algorithm>
+#include <numeric>
 
 #include "UtilityFunctions.cuh"
 #include "DevicePerformanceMeasure.cuh"
@@ -63,11 +65,11 @@ int main(int argc, char* argv[])
 {
 	// Usage: num_allocations size_of_allocation_in_byte print_output
 	unsigned int num_allocations{10000};
-	unsigned int allocation_size_byte{16};
-	int num_iterations {25};
+	unsigned int allocation_size_byte{8192};
+	int num_iterations {100};
 	bool warp_based{false};
-	bool print_output{false};
-	bool generate_output{true};
+	bool print_output{true};
+	bool generate_output{false};
 	bool free_memory{true};
 	std::string initial_path{"../results/tmp/"};
 	if(argc >= 2)
@@ -184,8 +186,6 @@ int main(int argc, char* argv[])
 	#endif
 #endif
 
-	memory_manager.init();
-
 	int** d_memory{nullptr};
 	CHECK_ERROR(cudaMalloc(&d_memory, sizeof(int*) * num_allocations));
 
@@ -202,6 +202,8 @@ int main(int argc, char* argv[])
 	int gridSize {Utils::divup<int>(num_allocations, blockSize)};
 	float timing_allocation{0.0f};
 	float timing_free{0.0f};
+	std::vector<float> v_timing_allocation;
+	std::vector<float> v_timing_free;
 	cudaEvent_t start, end;
 	for(auto i = 0; i < num_iterations; ++i)
 	{
@@ -210,7 +212,9 @@ int main(int argc, char* argv[])
 			d_testAllocation <decltype(memory_manager), true> <<<gridSize, blockSize>>>(memory_manager, d_memory, num_allocations, allocation_size_byte);
 		else
 			d_testAllocation <decltype(memory_manager), false> <<<gridSize, blockSize>>>(memory_manager, d_memory, num_allocations, allocation_size_byte);
-		timing_allocation += Utils::end_clock(start, end);
+		float timing{Utils::end_clock(start, end)};
+		printf("Timing: %f ms\n", timing);
+		v_timing_allocation.push_back(timing);
 
 		CHECK_ERROR(cudaDeviceSynchronize());
 
@@ -221,20 +225,22 @@ int main(int argc, char* argv[])
 				d_testFree <decltype(memory_manager), true> <<<gridSize, blockSize>>>(memory_manager, d_memory, num_allocations);
 			else
 				d_testFree <decltype(memory_manager), false> <<<gridSize, blockSize>>>(memory_manager, d_memory, num_allocations);
-			timing_free += Utils::end_clock(start, end);
+				v_timing_free.push_back(Utils::end_clock(start, end));
 	
 			CHECK_ERROR(cudaDeviceSynchronize());
 		}
 	}
-	timing_allocation /= num_iterations;
-	timing_free /= num_iterations;
+	std::sort(v_timing_allocation.begin(), v_timing_allocation.end());
+	std::sort(v_timing_free.begin(), v_timing_free.end());
+	float alloc_mean = std::accumulate(v_timing_allocation.begin(), v_timing_allocation.end(), 0.0f) / v_timing_allocation.size();
+	float alloc_median = v_timing_allocation[v_timing_allocation.size() / 2];
+	float free_mean = std::accumulate(v_timing_free.begin(), v_timing_free.end(), 0.0f) / v_timing_free.size();
+	float free_median = v_timing_free[v_timing_free.size() / 2];
 
 	if(print_output)
 	{
-		std::cout << "Timing Allocation: " << timing_allocation << "ms" << std::endl;
-		std::cout << "Timing       Free: " << timing_free << "ms" << std::endl;
-
-		std::cout << "Testcase DONE!\n";
+		std::cout << "Timing Allocation: Mean:" << alloc_mean << "ms" << std::endl;// " | Median: " << alloc_median << " ms" << std::endl;
+		std::cout << "Timing       Free: Mean:" << free_mean << "ms" << std::endl;// "  | Median: " << free_median << " ms" << std::endl;
 	}
 	
 	if(generate_output)

@@ -1,8 +1,10 @@
 build/
 async_build/
+sync_build/
 frameworks/halloc/repository
 frameworks/scatteralloc/repository
 frameworks/ouroboros/repository
 scripts/__pycache__
 .vscode/
 externals/
+tests/alloc_tests/results/tmp/

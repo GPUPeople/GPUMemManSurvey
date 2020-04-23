@@ -1,6 +1,31 @@
 {
-    "device": 0,
-    "graphs": [
-        { "filename": "data/email.mtx" }
-      ]
+  "device" : 0,
+  "iterations" : 10,
+  "update_iterations" : 0,
+  "batch_size" : 1000,
+  "range" : 0,
+  "verify" : true,
+  "realistic_deletion": false,
+  "write_csv" : false,
+  "csv_filename" : "result-",
+  "manageable_memory_mb" : 2048,
+  "graphs":
+  [
+      { "filename": "email.mtx" },  
+      { "filename": "luxembourg_osm.mtx" },
+      { "filename": "coAuthorsCiteseer.mtx" },
+      { "filename": "coAuthorsDBLP.mtx" },
+      { "filename": "ldoor.mtx" },
+      { "filename": "audikw_1.mtx" },
+      { "filename": "delaunay_n20.mtx" },
+      { "filename": "rgg_n_2_20_s0.mtx" },
+      { "filename": "hugetric-00000.mtx" },
+      { "filename": "delaunay_n23.mtx" },
+      { "filename": "germany_osm.mtx" },
+      { "filename": "nlpkkt120.mtx" },
+      { "filename": "nlpkkt200.mtx" },
+      { "filename": "nlpkkt240.mtx" },
+      { "filename": "europe_osm.mtx" }
+  ],
+  "path" : "../../../../graphs/"
 }

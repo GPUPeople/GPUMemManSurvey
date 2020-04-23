@@ -18,22 +18,15 @@ enum class RegEffVariants
 template <RegEffVariants variant=RegEffVariants::CudaMalloc>
 struct MemoryManagerRegEff : public MemoryManagerBase
 {
-	explicit MemoryManagerRegEff(size_t instantiation_size = 2048ULL*1024ULL*1024ULL) : MemoryManagerBase(instantiation_size) {}
-	~MemoryManagerRegEff()
-	{
-		if(variant != RegEffVariants::CudaMalloc)
-		{
-			char* m_mallocData{nullptr};
-			cudaMemcpyFromSymbol(&m_mallocData, g_heapBase, sizeof(char*));
-			cudaFree(m_mallocData);
-		}
-	}
-
-	virtual void init() override
+	explicit MemoryManagerRegEff(size_t instantiation_size = 2048ULL*1024ULL*1024ULL) : MemoryManagerBase(instantiation_size)
 	{
 		if(variant == RegEffVariants::CudaMalloc)
 		{
-			cudaDeviceSetLimit(cudaLimitMallocHeapSize, size);
+			if(!initialized)
+			{
+				cudaDeviceSetLimit(cudaLimitMallocHeapSize, size);
+				initialized = true;
+			}
 			return;
 		}
 
@@ -130,6 +123,23 @@ struct MemoryManagerRegEff : public MemoryManagerBase
 			{
 				CircularFusedMultiMallocPrepare3 <<<gridSize, blockSize>>> (numChunks, chunkSize);
 				cudaDeviceSynchronize();
+			}
+		}
+	}
+
+	~MemoryManagerRegEff()
+	{
+		if(variant != RegEffVariants::CudaMalloc)
+		{
+			char* m_mallocData{nullptr};
+			cudaMemcpyFromSymbol(m_mallocData, g_heapBase, sizeof(char*));
+			cudaFree(m_mallocData);
+			if (variant == RegEffVariants::CMalloc || variant == RegEffVariants::CFMalloc ||
+				variant == RegEffVariants::CMMalloc || variant == RegEffVariants::CFMMalloc)
+			{
+				unsigned int** m_multiOffset{nullptr};
+				cudaMemcpyFromSymbol(m_multiOffset, g_heapMultiOffset, sizeof(unsigned int**));
+				cudaFree(m_multiOffset);
 			}
 		}
 	}
@@ -236,4 +246,9 @@ struct MemoryManagerRegEff : public MemoryManagerBase
 	static constexpr unsigned int payload{4};
 	static constexpr double maxFrag{2.0};
 	static constexpr double chunkRatio{1.0};
+
+	static bool initialized;
 };
+
+template <RegEffVariants variant>
+bool MemoryManagerRegEff<variant>::initialized = false;

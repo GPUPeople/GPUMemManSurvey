@@ -43,6 +43,8 @@ static constexpr int minPageSize{16}; // Smallest Page Size is 16 Bytes
 
 static constexpr bool realistic_deletion{true};
 
+static constexpr bool printDebugMessages{true};
+
 enum class OutputCodes : int
 {
 	OKAY = 0,

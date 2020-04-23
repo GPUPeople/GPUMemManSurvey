@@ -3,15 +3,16 @@
 
 struct MemoryManagerCUDA : public MemoryManagerBase
 {
-	explicit MemoryManagerCUDA(size_t instantiation_size = 2048ULL*1024ULL*1024ULL) : MemoryManagerBase(instantiation_size){}
+	explicit MemoryManagerCUDA(size_t instantiation_size = 2048ULL*1024ULL*1024ULL) : MemoryManagerBase(instantiation_size)
+	{
+		if(initialized)
+			return;
+		cudaDeviceSetLimit(cudaLimitMallocHeapSize, size);
+		initialized = true;
+	}
 	~MemoryManagerCUDA(){};
 
 	static constexpr size_t alignment{16ULL};
-
-	virtual void init() override
-	{
-		cudaDeviceSetLimit(cudaLimitMallocHeapSize, size);
-	}
 
 	virtual __device__ __forceinline__ void* malloc(size_t size) override
 	{
@@ -22,4 +23,8 @@ struct MemoryManagerCUDA : public MemoryManagerBase
 	{
 		::free(ptr);
 	};
+
+	static bool initialized;
 };
+
+bool MemoryManagerCUDA::initialized = false;

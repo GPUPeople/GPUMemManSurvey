@@ -104,6 +104,8 @@ struct Verification
 		printProgressBarEnd();
 	}
 
+	// ##############################################################################################################################################
+	//
 	bool verify(const CSR<DataType>& dynGraph, const char* header, OutputCodes output_code)
 	{
 		auto correct{ true };
@@ -185,7 +187,6 @@ struct Verification
 			return true;
 		}
 	}
-
 
 	size_t rows_;
 	size_t cols_;

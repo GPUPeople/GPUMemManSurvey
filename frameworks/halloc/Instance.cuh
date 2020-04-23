@@ -5,15 +5,14 @@
 
 struct MemoryManagerHalloc : public MemoryManagerBase
 {
-	explicit MemoryManagerHalloc(size_t instantiation_size = 2048ULL*1024ULL*1024ULL) : MemoryManagerBase(instantiation_size){}
+	explicit MemoryManagerHalloc(size_t instantiation_size = 2048ULL*1024ULL*1024ULL) : MemoryManagerBase(instantiation_size)
+	{
+		ha_init(halloc_opts_t(size));
+	}
+
 	~MemoryManagerHalloc()
 	{
 		ha_shutdown();
-	}
-
-	virtual void init() override
-	{
-		ha_init(halloc_opts_t(size));
 	}
 
 	virtual __device__ __forceinline__ void* malloc(size_t size) override

@@ -9,6 +9,7 @@
 
 #include <cstddef>
 #include <algorithm>
+#include <stdio.h>
 
 template<typename T>
 struct CSR;
@@ -16,12 +17,12 @@ struct CSR;
 template<typename T>
 struct dCSR
 {
-	size_t rows, cols, nnz;
+	size_t rows{0}, cols{0}, nnz{0};
 	bool cudaMalloced{true};
 
-	T* data;
-	unsigned int* row_offsets;
-	unsigned int* col_ids;
+	T* data{nullptr};
+	unsigned int* row_offsets{nullptr};
+	unsigned int* col_ids{nullptr};
 
 	dCSR() : rows(0), cols(0), nnz(0), data(nullptr), row_offsets(nullptr), col_ids(nullptr) { }
 	void alloc(size_t rows, size_t cols, size_t nnz, bool allocOffsets = true);

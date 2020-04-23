@@ -64,13 +64,13 @@ int main(int argc, char* argv[])
     }
 
     std::string config_file;
-    unsigned int test_system_index{0xFFFFFFFFU};
+    unsigned int testcase_index{0xFFFFFFFFU};
     if(argc >= 2)
 	{
         config_file = std::string(argv[1]);
         if(argc >= 3)
         {
-            test_system_index = atoi(argv[2]);
+            testcase_index = atoi(argv[2]);
         }
     }
 
@@ -105,10 +105,11 @@ int main(int argc, char* argv[])
     for(auto const& elem : graphs)
 	{
         // If we get passed just a single testcase, only execute this specific graph
-        if(index++ != test_system_index && test_system_index != 0xFFFFFFFFU)
+        if(index++ != testcase_index && testcase_index != 0xFFFFFFFFU)
             continue;
         
-        std::string filename = elem.find("filename").value().get<std::string>();
+        const auto path{config.find("path").value().get<std::string>()};
+        std::string filename = path + elem.find("filename").value().get<std::string>();
         CSR<DataType> csr_mat;
         std::string csr_name = filename + typeext<DataType>() + ".csr";
         try
@@ -143,7 +144,8 @@ int main(int argc, char* argv[])
 				std::cout << ex.what() << std::endl;
 			}
         }
-        printf("Using: %s with %llu vertices and %llu edges\n", filename, csr_mat.rows, csr_mat.nnz);
+        std::cout << "Testing: " << elem.find("filename").value().get<std::string>();
+        std::cout << " with " << csr_mat.rows << " vertices and " << csr_mat.nnz << " edges\n";
 
         // #######################################################
         // #######################################################
@@ -238,6 +240,9 @@ void testrun(CSR<DataType>& input_graph, const json& config, std::ofstream& resu
     
     for(auto round = 0; round < iterations; ++round)
     {
+        if(printDebugMessages)
+            std::cout << "Round: " << round + 1 << " / " << iterations << std::endl;
+
         DynGraph<VertexData, EdgeData, MemoryManagerType> dynamic_graph(allocationSize);
         Verification<DataType> verification(input_graph);
 
@@ -254,6 +259,9 @@ void testrun(CSR<DataType>& input_graph, const json& config, std::ofstream& resu
 
         for(auto update_round = 0; update_round < update_iterations; ++update_round, offset += range)
         {
+            if(printDebugMessages)
+                std::cout << "UpdateRound: " << update_round + 1 << " / " << update_iterations << std::endl;
+
             EdgeUpdateBatch<VertexData, EdgeData> insertion_updates(dynamic_graph.number_vertices);
             insertion_updates.generateEdgeUpdates(dynamic_graph.number_vertices, batch_size, (round * update_iterations) + update_round, range, offset);
             dynamic_graph.edgeInsertion(insertion_updates);

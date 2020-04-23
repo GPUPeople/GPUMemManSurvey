@@ -179,8 +179,6 @@ int main(int argc, char* argv[])
 	#endif
 #endif
 
-	memory_manager.init();
-
 	int** d_memory{nullptr};
 	CHECK_ERROR(cudaMalloc(&d_memory, sizeof(int*) * num_allocations));
 

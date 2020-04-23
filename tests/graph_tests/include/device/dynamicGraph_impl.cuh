@@ -43,8 +43,6 @@ void DynGraph<VertexDataType, EdgeDataType, MemoryManagerType>::init(CSR<DataTyp
 
     number_vertices = input_graph.rows;
     
-    memory_manager.init();
-
     CHECK_ERROR(cudaMalloc(&d_vertices, sizeof(VertexDataType) * number_vertices));
 
     int blockSize {256};
@@ -57,6 +55,7 @@ void DynGraph<VertexDataType, EdgeDataType, MemoryManagerType>::init(CSR<DataTyp
         d_csr_graph.row_offsets,
         d_csr_graph.col_ids);
     init_performance.stopMeasurement();
+    CHECK_ERROR(cudaDeviceSynchronize());
 }
 
 // ##############################################################################################################################################
@@ -75,7 +74,7 @@ __global__ void d_getOffsets(VertexDataType* vertices,
 	if (tid >= number_vertices)
 		return;
 
-	offset[tid] = vertices[tid].meta_data.neighbours;
+    offset[tid] = vertices[tid].meta_data.neighbours;
 }
 
 template <typename VertexDataType, typename EdgeDataType>
@@ -104,15 +103,16 @@ void DynGraph<VertexDataType, EdgeDataType, MemoryManagerType>::dynGraphToCSR(CS
 {
     auto block_size = 256;
     int grid_size = (number_vertices / block_size) + 1;
-    
+
     // Allocate output graph
 	dCSR<DataType> d_output_graph;
 	d_output_graph.rows = number_vertices;
-	d_output_graph.cols = number_vertices;
+    d_output_graph.cols = number_vertices;
     CHECK_ERROR(cudaMalloc(&(d_output_graph.row_offsets), sizeof(unsigned int) * (number_vertices + 1)));
     CHECK_ERROR(cudaMemset(d_output_graph.row_offsets, 0, number_vertices + 1));
 
     d_getOffsets<VertexDataType, EdgeDataType> << <grid_size, block_size >> > (d_vertices, d_output_graph.row_offsets, number_vertices);
+    CHECK_ERROR(cudaDeviceSynchronize());
 
     // Sum up offsets correctly
     Helper::thrustExclusiveSum(d_output_graph.row_offsets, number_vertices + 1);
@@ -129,5 +129,48 @@ void DynGraph<VertexDataType, EdgeDataType, MemoryManagerType>::dynGraphToCSR(CS
 	d_dynGraph_To_CSR<VertexDataType, EdgeDataType> << <grid_size, block_size >> > (
         d_vertices, d_output_graph.row_offsets, d_output_graph.col_ids, number_vertices);
     
+    CHECK_ERROR(cudaDeviceSynchronize());
+    
     convert(output_graph, d_output_graph);
+}
+
+// ##############################################################################################################################################
+//
+//
+// Destructor
+//
+//
+// ##############################################################################################################################################
+template <typename VertexDataType, typename EdgeDataType, typename MemoryManagerType>
+__global__ void freeAdjacencies(MemoryManagerType mm, VertexDataType* vertices, int num_vertices)
+{
+    int tid = threadIdx.x + blockIdx.x * blockDim.x;
+    if(tid >= num_vertices)
+        return;
+    
+    const auto adjacency = vertices[tid].adjacency;
+    if(adjacency)
+        mm.free(adjacency);
+}
+
+template <typename VertexDataType, typename EdgeDataType, typename MemoryManagerType>
+void DynGraph<VertexDataType, EdgeDataType, MemoryManagerType>::cleanup()
+{
+    freeAdjacencies<VertexDataType, EdgeDataType, MemoryManagerType> <<<Utils::divup(number_vertices, 256), 256>>>(memory_manager, d_vertices, number_vertices);
+    CHECK_ERROR(cudaDeviceSynchronize());
+
+    // Free vertices
+    if(d_vertices)
+    {
+        CHECK_ERROR(cudaFree(d_vertices));
+        d_vertices = nullptr;
+    }
+
+    number_vertices = 0;
+}
+
+template <typename VertexDataType, typename EdgeDataType, typename MemoryManagerType>
+DynGraph<VertexDataType, EdgeDataType, MemoryManagerType>::~DynGraph()
+{
+    cleanup();    
 }

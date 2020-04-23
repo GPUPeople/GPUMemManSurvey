@@ -9,15 +9,13 @@
 template <typename OuroborosType=OuroPQ>
 struct MemoryManagerOuroboros : public MemoryManagerBase
 {
-	explicit MemoryManagerOuroboros(size_t instantiation_size = 2048ULL*1024ULL*1024ULL) : MemoryManagerBase(instantiation_size), memory_manager{new OuroborosType()} {}
-	~MemoryManagerOuroboros(){if(!IAMACOPY) {delete memory_manager;}}
-	MemoryManagerOuroboros(const MemoryManagerOuroboros& src) : memory_manager{src.memory_manager}, d_memory_manager{src.d_memory_manager}, IAMACOPY{true} {}
-
-	virtual void init() override
+	explicit MemoryManagerOuroboros(size_t instantiation_size = 2048ULL*1024ULL*1024ULL) : MemoryManagerBase(instantiation_size), memory_manager{new OuroborosType()}
 	{
 		memory_manager->initialize();
 		d_memory_manager = memory_manager->getDeviceMemoryManager();
 	}
+	~MemoryManagerOuroboros(){if(!IAMACOPY) {delete memory_manager;}}
+	MemoryManagerOuroboros(const MemoryManagerOuroboros& src) : memory_manager{src.memory_manager}, d_memory_manager{src.d_memory_manager}, IAMACOPY{true} {}
 
 	virtual __device__ __forceinline__ void* malloc(size_t size) override
 	{

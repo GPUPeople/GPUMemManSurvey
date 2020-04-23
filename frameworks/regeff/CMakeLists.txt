@@ -8,6 +8,7 @@ include(${BASE_LOCATION}/BaseCMake.cmake)
 # Include Directories
 include_directories(${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
 include_directories(${BASE_LOCATION}/include)
+include_directories(${BASE_PATH}/externals/cub)
 
 add_executable(memorymanagerrefeff_example
 	Instance.cuh

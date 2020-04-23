@@ -6,13 +6,14 @@
 
 struct MemoryManagerFDG : public MemoryManagerBase
 {
-	explicit MemoryManagerFDG(size_t instantiation_size = 2048ULL*1024ULL*1024ULL) : MemoryManagerBase(instantiation_size) {}
-	~MemoryManagerFDG(){}
-
-	virtual void init() override
+	explicit MemoryManagerFDG(size_t instantiation_size = 2048ULL*1024ULL*1024ULL) : MemoryManagerBase(instantiation_size) 
 	{
+		if(initialized)
+			return;
 		cudaDeviceSetLimit(cudaLimitMallocHeapSize, size);
+		initialized = true;
 	}
+	~MemoryManagerFDG(){}
 
 	virtual __device__ __forceinline__ void* malloc(size_t size) override
 	{
@@ -27,4 +28,7 @@ struct MemoryManagerFDG : public MemoryManagerBase
 	}
 
 	FDG::Warp* warp{nullptr};
+	static bool initialized;
 };
+
+bool MemoryManagerFDG::initialized = false;
