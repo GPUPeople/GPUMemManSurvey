@@ -153,8 +153,8 @@ void DynGraph<VertexDataType, EdgeDataType, MemoryManagerType>::edgeInsertion(Ed
     int batch_size = update_batch.edge_update.size();
 
     // Copy update data to device and sort
-    update_batch.prepareEdgeUpdates(true);
-    
+	update_batch.prepareEdgeUpdates(true);
+	
     // #######################################################################################
 	// Preprocessing
 	EdgeUpdatePreProcessing pre_processing;
@@ -170,7 +170,9 @@ void DynGraph<VertexDataType, EdgeDataType, MemoryManagerType>::edgeInsertion(Ed
 	d_duplicateCheckingInSortedBatch<VertexDataType, EdgeDataType, UpdateType> << < grid_size, block_size >> >(
 		update_batch.d_edge_update.get(),
 		batch_size,
-        pre_processing.d_update_src_helper.get());
+		pre_processing.d_update_src_helper.get());
+	
+	CHECK_ERROR(cudaDeviceSynchronize());
     
     // #######################################################################################
 	// Duplicate checking in Graph
@@ -178,7 +180,9 @@ void DynGraph<VertexDataType, EdgeDataType, MemoryManagerType>::edgeInsertion(Ed
 		d_vertices,
 		update_batch.d_edge_update.get(),
 		batch_size,
-        pre_processing.d_update_src_helper.get());
+		pre_processing.d_update_src_helper.get());
+		
+	CHECK_ERROR(cudaDeviceSynchronize());
     
     // #######################################################################################
 	// Insertion

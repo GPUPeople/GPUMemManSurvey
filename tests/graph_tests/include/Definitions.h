@@ -32,7 +32,7 @@ using MatrixList_t = std::vector<matrix_t>;
 #define SINGLE_THREAD (threadIdx.x == 0)
 #define SINGLE_THREAD_MULTI (threadID == 0)
 
-static constexpr bool THRUST_SORT{false};
+static constexpr bool THRUST_SORT{true};
 
 static constexpr index_t DELETIONMARKER{ std::numeric_limits<index_t>::max() };
 

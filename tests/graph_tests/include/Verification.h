@@ -64,8 +64,7 @@ struct Verification
 			
 		}
 		printProgressBarEnd();
-		printf("Duplicate on host: %u\n", duplicates);
-
+		// printf("Duplicate on host: %u\n", duplicates);
 	}
 
 	// ##############################################################################################################################################
@@ -186,6 +185,17 @@ struct Verification
 			printf("%s", CLHighlight::break_line_green_e);
 			return true;
 		}
+	}
+
+	void printAdjacency(unsigned int vertex_index)
+	{
+		auto offset = offset_[vertex_index];
+		auto neighbours = offset_[vertex_index + 1] - offset;
+		for(auto i = 0; i < neighbours; ++i)
+		{
+			std::cout << adjacency_[vertex_index][i] << " | ";
+		}
+		std::cout << std::endl;
 	}
 
 	size_t rows_;

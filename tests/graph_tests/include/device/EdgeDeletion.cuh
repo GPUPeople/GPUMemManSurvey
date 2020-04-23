@@ -51,17 +51,18 @@ __global__ void d_edgeDeletionVertexCentric(VertexDataType* vertices,
     // Early-Out for no updates for this vertexs
 	const auto number_updates = update_src_offsets[tid];
 	if (number_updates == 0)
-        return;
-    
+		return;
+	
     VertexDataType vertex = vertices[tid];
     EdgeDataType* end_iterator{vertex.adjacency + (vertex.meta_data.neighbours)}; // Point to one behind end
     const auto index_offset = update_src_offsets[(number_vertices + 1) + tid];
-    auto actual_updates{ 0U };
-
-    while(actual_updates != number_updates && end_iterator != vertex.adjacency)
+	auto actual_updates{ 0U };
+	
+	auto adjacency{vertex.adjacency};
+    while(actual_updates != number_updates && end_iterator != adjacency)
 	{
 		// Get current destination
-		auto dest = vertex.adjacency->destination;
+		auto dest = adjacency->destination;
 
 		// Try to locate edge in updates
 		if (d_binarySearchDeletion(edge_update_data, dest, index_offset, number_updates))
@@ -71,20 +72,21 @@ __global__ void d_edgeDeletionVertexCentric(VertexDataType* vertices,
 
 			// This element can been deleted
 			++actual_updates;
-			
+
 			// Do Compaction // TODO: If the end needs to be cleared, use this instead
 			// vertex.adjacency->destination = end_iterator->destination;
 			// end_iterator->destination = DELETIONMARKER;
-			vertex.adjacency->destination = end_iterator != vertex.adjacency ? end_iterator->destination : DELETIONMARKER;
+			adjacency->destination = end_iterator != adjacency ? end_iterator->destination : DELETIONMARKER;
 		}
 		else
-			++(vertex.adjacency);
-    }
+			++(adjacency);
+	}
     
     const auto page_size = Helper::AllocationHelper::template getPageSize<unsigned int, minPageSize>(vertex.meta_data.neighbours * sizeof(EdgeDataType));
     vertex.meta_data.neighbours -= actual_updates;
     const auto new_page_size = Helper::AllocationHelper::template getPageSize<unsigned int, minPageSize>(vertex.meta_data.neighbours * sizeof(EdgeDataType));
-    if(new_page_size != page_size)
+	
+	if(new_page_size != page_size)
     {
         auto adjacency = reinterpret_cast<EdgeDataType*>(memory_manager.malloc(new_page_size));
         if(adjacency == nullptr)
@@ -98,12 +100,16 @@ __global__ void d_edgeDeletionVertexCentric(VertexDataType* vertices,
 		for (auto i = 0U; i < iterations; ++i)
 		{
 			reinterpret_cast<uint4*>(adjacency)[i] = reinterpret_cast<uint4*>(vertex.adjacency)[i];
-        }
+		}
+		// for (auto i = 0U; i < vertex.meta_data.neighbours; ++i)
+		// {
+		// 	adjacency[i] = vertex.adjacency[i];
+        // }
         // Free old page and set new pointer and index
 		memory_manager.free(vertex.adjacency);
 		vertices[tid].adjacency = adjacency;
     }
-    // Update neighbours
+	// Update neighbours
 	vertices[tid].meta_data.neighbours = vertex.meta_data.neighbours;
 }
 
@@ -119,13 +125,13 @@ void DynGraph<VertexDataType, EdgeDataType, MemoryManagerType>::edgeDeletion(Edg
 	int grid_size = Utils::divup(number_vertices, block_size);
 
 	// Copy update data to device and sort
-    update_batch.prepareEdgeUpdates(true);
-    
+	update_batch.prepareEdgeUpdates(true);
+	
     // #######################################################################################
 	// Preprocessing
 	EdgeUpdatePreProcessing pre_processing;
-    pre_processing.process<VertexDataType, EdgeDataType>(update_batch, number_vertices);
-    
+	pre_processing.process<VertexDataType, EdgeDataType>(update_batch, number_vertices);
+	
     // #######################################################################################
 	// Deletion
 	delete_performance.startMeasurement();
@@ -136,5 +142,6 @@ void DynGraph<VertexDataType, EdgeDataType, MemoryManagerType>::edgeDeletion(Edg
 		update_batch.d_edge_update.get(),
 		batch_size,
 		pre_processing.d_update_src_helper.get());
-	delete_performance.stopMeasurement();
+		delete_performance.stopMeasurement();
+		CHECK_ERROR(cudaDeviceSynchronize());
 }

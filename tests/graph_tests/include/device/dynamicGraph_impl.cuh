@@ -22,11 +22,10 @@ __global__ void setupGraph(MemoryManagerType mm, VertexDataType* vertices, int n
         return;
 
     auto offset = row_offsets[tid];
-    auto neighbours = row_offsets[tid + 1] - offset;
     VertexDataType vertex;
-    vertex.meta_data.neighbours = neighbours;
-    vertex.adjacency = reinterpret_cast<EdgeDataType*>(mm.malloc(sizeof(EdgeDataType) * neighbours));
-    for(auto i = 0; i < neighbours; ++i)
+    vertex.meta_data.neighbours = row_offsets[tid + 1] - offset;
+    vertex.adjacency = reinterpret_cast<EdgeDataType*>(mm.malloc(Helper::AllocationHelper::template getPageSize<unsigned int, minPageSize>(vertex.meta_data.neighbours * sizeof(EdgeDataType))));
+    for(auto i = 0; i < vertex.meta_data.neighbours; ++i)
     {
         vertex.adjacency[i].destination = col_ids[offset + i];
     }
@@ -54,8 +53,8 @@ void DynGraph<VertexDataType, EdgeDataType, MemoryManagerType>::init(CSR<DataTyp
         number_vertices,
         d_csr_graph.row_offsets,
         d_csr_graph.col_ids);
-    init_performance.stopMeasurement();
-    CHECK_ERROR(cudaDeviceSynchronize());
+        init_performance.stopMeasurement();
+        CHECK_ERROR(cudaDeviceSynchronize());
 }
 
 // ##############################################################################################################################################

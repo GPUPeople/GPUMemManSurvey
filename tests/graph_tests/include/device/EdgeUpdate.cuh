@@ -65,7 +65,8 @@ struct EdgeUpdatePreProcessing
 			update_batch.d_edge_update.get(),
 			d_update_src_helper.get(),
 			number_vertices,
-			batch_size);
+            batch_size);
+        CHECK_ERROR(cudaDeviceSynchronize());
 
 		Helper::thrustExclusiveSum(d_update_src_helper.get(), number_vertices + 1, d_update_src_helper.get() + (number_vertices + 1));
 	}

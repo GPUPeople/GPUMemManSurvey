@@ -1,8 +1,8 @@
 {
   "device" : 0,
-  "iterations" : 10,
-  "update_iterations" : 0,
-  "batch_size" : 1000,
+  "iterations" : 5,
+  "update_iterations" : 2,
+  "batch_size" : 100,
   "range" : 0,
   "verify" : true,
   "realistic_deletion": false,

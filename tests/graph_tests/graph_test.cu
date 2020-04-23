@@ -235,6 +235,7 @@ void testrun(CSR<DataType>& input_graph, const json& config, std::ofstream& resu
     const auto range{config.find("range").value().get<unsigned int>()};
     unsigned int offset{0};
     const auto write_csv{config.find("write_csv").value().get<bool>()};
+    const bool printResults{true};
 
     PerfMeasure init_measure, insert_measure, delete_measure;
     
@@ -246,6 +247,8 @@ void testrun(CSR<DataType>& input_graph, const json& config, std::ofstream& resu
         DynGraph<VertexData, EdgeData, MemoryManagerType> dynamic_graph(allocationSize);
         Verification<DataType> verification(input_graph);
 
+        verification.printAdjacency(7);
+
         // Initialization
         dynamic_graph.init(input_graph);
 
@@ -253,15 +256,13 @@ void testrun(CSR<DataType>& input_graph, const json& config, std::ofstream& resu
         {
             // Test integrity
 			CSR<DataType> test_graph;
-			dynamic_graph.dynGraphToCSR(test_graph);
-			verification.verify(test_graph, "Initialization", OutputCodes::VERIFY_INITIALIZATION);
+            dynamic_graph.dynGraphToCSR(test_graph);
+            std::string header = std::string("Initialization - ") + std::to_string(round);
+			verification.verify(test_graph, header.c_str(), OutputCodes::VERIFY_INITIALIZATION);
         }
 
         for(auto update_round = 0; update_round < update_iterations; ++update_round, offset += range)
         {
-            if(printDebugMessages)
-                std::cout << "UpdateRound: " << update_round + 1 << " / " << update_iterations << std::endl;
-
             EdgeUpdateBatch<VertexData, EdgeData> insertion_updates(dynamic_graph.number_vertices);
             insertion_updates.generateEdgeUpdates(dynamic_graph.number_vertices, batch_size, (round * update_iterations) + update_round, range, offset);
             dynamic_graph.edgeInsertion(insertion_updates);
@@ -270,15 +271,18 @@ void testrun(CSR<DataType>& input_graph, const json& config, std::ofstream& resu
 			{
                 CSR<DataType> test_graph;
 				dynamic_graph.dynGraphToCSR(test_graph);
-				verification.hostEdgeInsertion(insertion_updates);
-				verification.verify(test_graph, "Insertion", OutputCodes::VERIFY_INSERTION);
+                verification.hostEdgeInsertion(insertion_updates);
+                std::string header = std::string("Insertion - ") + std::to_string(update_round);
+				verification.verify(test_graph, header.c_str(), OutputCodes::VERIFY_INSERTION);
             }
+
+            verification.printAdjacency(7);
 
             if (realistic_deletion)
             {
                 EdgeUpdateBatch<VertexData, EdgeData> deletion_updates(dynamic_graph.number_vertices);
                 deletion_updates.generateEdgeUpdates(dynamic_graph, batch_size, (round * update_iterations) + update_round, range, offset);
-
+                
                 dynamic_graph.edgeDeletion(deletion_updates);
 
                 if (verify_enabled)
@@ -286,7 +290,9 @@ void testrun(CSR<DataType>& input_graph, const json& config, std::ofstream& resu
                     CSR<DataType> test_graph;
                     dynamic_graph.dynGraphToCSR(test_graph);
                     verification.hostEdgeDeletion(deletion_updates);
-                    verification.verify(test_graph, "Deletion", OutputCodes::VERIFY_DELETION);
+                    verification.printAdjacency(7);
+                    std::string header = std::string("Deletion - ") + std::to_string(update_round);
+                    verification.verify(test_graph, header.c_str(), OutputCodes::VERIFY_DELETION);
                 }
             }
             else
@@ -297,7 +303,8 @@ void testrun(CSR<DataType>& input_graph, const json& config, std::ofstream& resu
                     CSR<DataType> test_graph;
                     dynamic_graph.dynGraphToCSR(test_graph);
                     verification.hostEdgeDeletion(insertion_updates);
-                    verification.verify(test_graph, "Deletion", OutputCodes::VERIFY_DELETION);
+                    std::string header = std::string("Deletion - ") + std::to_string(update_round);
+                    verification.verify(test_graph, header.c_str(), OutputCodes::VERIFY_DELETION);
                 }
             }
         }
@@ -344,4 +351,24 @@ void testrun(CSR<DataType>& input_graph, const json& config, std::ofstream& resu
             << delete_result.median_ << "\n";
     }
     
+    if(printResults)
+    {
+        int width{10};
+        std::cout  << std::setw(width) << "-" << " | "<< std::setw(width) << "iter" << " | " << std::setw(width) << "mean" << " | " << std::setw(width) << "std_dev" << " | " << std::setw(width) << "median\n";
+        std::cout << std::setw(width) << "Init" << " | " << std::setw(width)
+            << init_result.num_ << " | " << std::setw(width)
+            << init_result.mean_ << " | " << std::setw(width)
+            << init_result.std_dev_ << " | " << std::setw(width)
+            << init_result.median_ << "\n";
+        std::cout << std::setw(width) << "Insert" << " | " << std::setw(width)
+            << insert_result.num_ << " | "  << std::setw(width)
+            << insert_result.mean_ << " | " << std::setw(width)
+            << insert_result.std_dev_ << " | " << std::setw(width)
+            << insert_result.median_ << "\n";
+        std::cout<< std::setw(width) << "Delete" << " | " << std::setw(width)
+            << delete_result.num_ << " | " << std::setw(width)
+            << delete_result.mean_ << " | " << std::setw(width)
+            << delete_result.std_dev_ << " | " << std::setw(width)
+            << delete_result.median_ << "\n";
+    }
 }
