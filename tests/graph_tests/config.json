@@ -4,7 +4,7 @@
   "update_iterations" : 2,
   "batch_size" : 10000,
   "range" : 0,
-  "verify" : true,
+  "verify" : false,
   "realistic_deletion": false,
   "write_csv" : false,
   "csv_filename" : "result-",

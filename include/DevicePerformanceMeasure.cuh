@@ -30,9 +30,9 @@ struct ThreadResult
 {
     using Type = DevicePerf::Type;
 
-	double mean_{0.0f};
-	double std_dev_{0.0f};
-	Type median_{0LLU};
+	double mean_{0.0};
+	double std_dev_{0.0};
+	double median_{0.0};
 	int num_{0};
 };
 
@@ -40,39 +40,55 @@ struct DevicePerfMeasure
 {
     using Type = DevicePerf::Type;
     std::vector<Type> perf_;
+    std::vector<double> results;
     Type* d_perf_;
+    unsigned int iter{0};
+    unsigned int num_threads{0};
 
-    DevicePerfMeasure(unsigned int num_threads)
+    DevicePerfMeasure(unsigned int num_threads, unsigned int iterations) : num_threads{num_threads}
     {
         CHECK_ERROR(cudaMalloc(&d_perf_, sizeof(Type) * num_threads));
-        perf_.reserve(num_threads);
+        CHECK_ERROR(cudaMemset(d_perf_, 0, sizeof(Type) * num_threads));
+        perf_.resize(num_threads * iterations);
+        results.resize(num_threads * iterations);
+    }
+
+    ~DevicePerfMeasure()
+    {
+        CHECK_ERROR(cudaFree(d_perf_));
+    }
+
+    void acceptResultsFromDevice()
+    {
+        CHECK_ERROR(cudaMemcpy(&perf_[iter*num_threads], d_perf_, sizeof(Type) * num_threads, cudaMemcpyDeviceToHost));
+        CHECK_ERROR(cudaMemset(d_perf_, 0, sizeof(Type) * num_threads));
+        ++iter;
     }
 
     Type* getDevicePtr(){return d_perf_;}
 
     double mean()
 	{
-		return std::accumulate(perf_.begin(), perf_.end(), 0.0f) / static_cast<double>(perf_.size());
+		return std::accumulate(results.begin(), results.end(), 0.0) / static_cast<double>(perf_.size());
     }
-    Type median()
+    
+    double median()
 	{
-        std::vector<Type> sorted_measurements(perf_);
-        std::sort(sorted_measurements.begin(), sorted_measurements.end());
-		return sorted_measurements[sorted_measurements.size() / 2];
+        std::sort(results.begin(), results.end());
+		return results[results.size() / 2];
     }
     
     double std_dev(double mean)
 	{
-		std::vector<double> stdmean_measurements(perf_.begin(), perf_.end());
-		for(auto& elem : stdmean_measurements)
+		for(auto& elem : results)
 			elem = (elem - mean)*(elem - mean);
-		return sqrt(std::accumulate(stdmean_measurements.begin(), stdmean_measurements.end(), 0.0f) / static_cast<double>(stdmean_measurements.size()));
+		return sqrt(std::accumulate(results.begin(), results.end(), 0.0) / results.size());
 	}
 
-    ThreadResult computeResult()
+    ThreadResult generateResult()
     {
-        CHECK_ERROR(cudaMemcpy(perf_.data(), d_perf_, sizeof(Type) * perf_.size(), cudaMemcpyDeviceToHost));
-        double mean_ = mean();
+        std::copy(perf_.begin(), perf_.end(), results.begin());
+        auto mean_ = mean();
         return ThreadResult{
             mean_,
             std_dev(mean_),

@@ -4,6 +4,7 @@
 #include <numeric>
 
 #include "UtilityFunctions.cuh"
+#include "PerformanceMeasure.cuh"
 #include "DevicePerformanceMeasure.cuh"
 
 // ########################
@@ -41,6 +42,26 @@ __global__ void d_testAllocation(MemoryManagerType mm, int** verification_ptr, i
 	verification_ptr[tid] = reinterpret_cast<int*>(mm.malloc(allocation_size));
 }
 
+template <typename MemoryManagerType>
+__global__ void d_testAllocation(MemoryManagerType mm, int** verification_ptr, int num_allocations, int allocation_size, DevicePerfMeasure::Type* timing)
+{
+	int tid = threadIdx.x + blockIdx.x * blockDim.x;
+	if(tid >= num_allocations)
+		return;
+	
+	DevicePerf perf_measure;
+	
+	// Start Measure
+	perf_measure.startThreadMeasure();
+
+	auto ptr = reinterpret_cast<int*>(mm.malloc(allocation_size));
+	
+	// Stop Measure
+	timing[tid] = perf_measure.stopThreadMeasure();
+
+	verification_ptr[tid] = ptr;
+}
+
 template <typename MemoryManagerType, bool warp_based>
 __global__ void d_testFree(MemoryManagerType mm, int** verification_ptr, int num_allocations)
 {
@@ -61,13 +82,32 @@ __global__ void d_testFree(MemoryManagerType mm, int** verification_ptr, int num
 	mm.free(verification_ptr[tid]);
 }
 
+template <typename MemoryManagerType>
+__global__ void d_testFree(MemoryManagerType mm, int** verification_ptr, int num_allocations, DevicePerfMeasure::Type* timing)
+{
+	int tid = threadIdx.x + blockIdx.x * blockDim.x;
+	if(tid >= num_allocations)
+		return;
+	
+	DevicePerf perf_measure;
+
+	// Start Measure
+	perf_measure.startThreadMeasure();
+
+	mm.free(verification_ptr[tid]);
+
+	// Stop Measure
+	timing[tid] = perf_measure.stopThreadMeasure();
+}
+
 int main(int argc, char* argv[])
 {
-	// Usage: num_allocations size_of_allocation_in_byte print_output
+	// Usage: <num_allocations> <size_of_allocation_in_byte> <num_iterations> <onDeviceMeasure> <warp-based> <generateoutput> <free_memory> <initial_path>
 	unsigned int num_allocations{10000};
 	unsigned int allocation_size_byte{8192};
 	int num_iterations {100};
 	bool warp_based{false};
+	bool onDeviceMeasure{false};
 	bool print_output{true};
 	bool generate_output{false};
 	bool free_memory{true};
@@ -83,16 +123,25 @@ int main(int argc, char* argv[])
 				num_iterations = atoi(argv[3]);
 				if(argc >= 5)
 				{
-					warp_based = static_cast<bool>(atoi(argv[4]));
+					onDeviceMeasure = static_cast<bool>(atoi(argv[4]));
 					if(argc >= 6)
 					{
-						generate_output = static_cast<bool>(atoi(argv[5]));
+						warp_based = static_cast<bool>(atoi(argv[5]));
+						if(onDeviceMeasure && warp_based)
+						{
+							std::cout << "OnDeviceMeasure and warp-based not possible at the same!" << std::endl;
+							exit(-1);
+						}
 						if(argc >= 7)
 						{
-							free_memory = static_cast<bool>(atoi(argv[6]));
+							generate_output = static_cast<bool>(atoi(argv[6]));
 							if(argc >= 8)
 							{
-								initial_path = std::string(argv[7]);
+								free_memory = static_cast<bool>(atoi(argv[7]));
+								if(argc >= 9)
+								{
+									initial_path = std::string(argv[8]);
+								}
 							}
 						}
 					}
@@ -200,54 +249,84 @@ int main(int argc, char* argv[])
 
 	int blockSize {256};
 	int gridSize {Utils::divup<int>(num_allocations, blockSize)};
-	float timing_allocation{0.0f};
-	float timing_free{0.0f};
-	std::vector<float> v_timing_allocation;
-	std::vector<float> v_timing_free;
-	cudaEvent_t start, end;
+
+	PerfMeasure timing_allocation;
+	PerfMeasure timing_free;
+
+	DevicePerfMeasure per_thread_timing_allocation(num_allocations, num_iterations);
+	DevicePerfMeasure per_thread_timing_free(num_allocations, num_iterations);
+
 	for(auto i = 0; i < num_iterations; ++i)
 	{
-		Utils::start_clock(start, end);
-		if(warp_based)
-			d_testAllocation <decltype(memory_manager), true> <<<gridSize, blockSize>>>(memory_manager, d_memory, num_allocations, allocation_size_byte);
+		if(onDeviceMeasure)
+		{
+			d_testAllocation <<<gridSize, blockSize>>>(memory_manager, d_memory, num_allocations, allocation_size_byte, per_thread_timing_allocation.getDevicePtr());
+			CHECK_ERROR(cudaDeviceSynchronize());
+			per_thread_timing_allocation.acceptResultsFromDevice();
+		}
 		else
-			d_testAllocation <decltype(memory_manager), false> <<<gridSize, blockSize>>>(memory_manager, d_memory, num_allocations, allocation_size_byte);
-		float timing{Utils::end_clock(start, end)};
-		printf("Timing: %f ms\n", timing);
-		v_timing_allocation.push_back(timing);
-
-		CHECK_ERROR(cudaDeviceSynchronize());
+		{
+			timing_allocation.startMeasurement();
+			if(warp_based)
+				d_testAllocation <decltype(memory_manager), true> <<<gridSize, blockSize>>>(memory_manager, d_memory, num_allocations, allocation_size_byte);
+			else
+				d_testAllocation <decltype(memory_manager), false> <<<gridSize, blockSize>>>(memory_manager, d_memory, num_allocations, allocation_size_byte);
+			timing_allocation.stopMeasurement();
+			CHECK_ERROR(cudaDeviceSynchronize());
+		}
 
 		if(free_memory)
 		{
-			Utils::start_clock(start, end);
-			if(warp_based)
-				d_testFree <decltype(memory_manager), true> <<<gridSize, blockSize>>>(memory_manager, d_memory, num_allocations);
+			if(onDeviceMeasure)
+			{
+				d_testFree <<<gridSize, blockSize>>>(memory_manager, d_memory, num_allocations, per_thread_timing_free.getDevicePtr());
+				CHECK_ERROR(cudaDeviceSynchronize());
+				per_thread_timing_free.acceptResultsFromDevice();
+			}
 			else
-				d_testFree <decltype(memory_manager), false> <<<gridSize, blockSize>>>(memory_manager, d_memory, num_allocations);
-				v_timing_free.push_back(Utils::end_clock(start, end));
-	
-			CHECK_ERROR(cudaDeviceSynchronize());
+			{
+				timing_free.startMeasurement();
+				if(warp_based)
+					d_testFree <decltype(memory_manager), true> <<<gridSize, blockSize>>>(memory_manager, d_memory, num_allocations);
+				else
+					d_testFree <decltype(memory_manager), false> <<<gridSize, blockSize>>>(memory_manager, d_memory, num_allocations);
+				timing_free.stopMeasurement();
+				CHECK_ERROR(cudaDeviceSynchronize());
+			}
 		}
 	}
-	std::sort(v_timing_allocation.begin(), v_timing_allocation.end());
-	std::sort(v_timing_free.begin(), v_timing_free.end());
-	float alloc_mean = std::accumulate(v_timing_allocation.begin(), v_timing_allocation.end(), 0.0f) / v_timing_allocation.size();
-	float alloc_median = v_timing_allocation[v_timing_allocation.size() / 2];
-	float free_mean = std::accumulate(v_timing_free.begin(), v_timing_free.end(), 0.0f) / v_timing_free.size();
-	float free_median = v_timing_free[v_timing_free.size() / 2];
 
-	if(print_output)
+	if(onDeviceMeasure)
 	{
-		std::cout << "Timing Allocation: Mean:" << alloc_mean << "ms" << std::endl;// " | Median: " << alloc_median << " ms" << std::endl;
-		std::cout << "Timing       Free: Mean:" << free_mean << "ms" << std::endl;// "  | Median: " << free_median << " ms" << std::endl;
+		auto alloc_result = per_thread_timing_allocation.generateResult();
+		auto free_result = per_thread_timing_free.generateResult();
+
+		if(print_output)
+		{
+			std::cout << "Timing Allocation: Mean:" << alloc_result.mean_ << "cycles | Median: " << alloc_result.median_ << " ms" << std::endl;
+			std::cout << "Timing       Free: Mean:" << free_result.mean_ << "cycles | Median: " << free_result.median_ << " ms" << std::endl;
+		}
+		if(generate_output)
+		{
+			results_alloc << alloc_result.mean_ << "," << alloc_result.std_dev_ << "," << alloc_result.median_;
+			results_free << free_result.mean_ << "," << free_result.std_dev_ << "," << free_result.median_;
+		}
+	}
+	else
+	{
+		auto alloc_result = timing_allocation.generateResult();
+		auto free_result = timing_free.generateResult();
+		if(print_output)
+		{
+			std::cout << "Timing Allocation: Mean:" << alloc_result.mean_ << "ms" << std::endl;// " | Median: " << alloc_result.median_ << " ms" << std::endl;
+			std::cout << "Timing       Free: Mean:" << free_result.mean_ << "ms" << std::endl;// "  | Median: " << free_result.median_ << " ms" << std::endl;
+		}
+		if(generate_output)
+		{
+			results_alloc << alloc_result.mean_ << "," << alloc_result.std_dev_ << "," << alloc_result.median_;
+			results_free << free_result.mean_ << "," << free_result.std_dev_ << "," << free_result.median_;
+		}
 	}
 	
-	if(generate_output)
-	{
-		results_alloc << timing_allocation;
-		results_free << timing_free;
-	}
-
 	return 0;
 }
