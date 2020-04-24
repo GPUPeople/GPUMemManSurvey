@@ -21,6 +21,7 @@ struct DynGraph
 
     VertexDataType* d_vertices{nullptr};
     unsigned int number_vertices;
+    bool initialized{false};
     
     // Performance    
     PerfMeasure init_performance;

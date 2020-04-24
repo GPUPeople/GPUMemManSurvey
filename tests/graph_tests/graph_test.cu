@@ -239,15 +239,15 @@ void testrun(CSR<DataType>& input_graph, const json& config, std::ofstream& resu
 
     PerfMeasure init_measure, insert_measure, delete_measure;
     
+    // Instantiate graph
+    DynGraph<VertexData, EdgeData, MemoryManagerType> dynamic_graph(allocationSize);
+
     for(auto round = 0; round < iterations; ++round)
     {
         if(printDebugMessages)
             std::cout << "Round: " << round + 1 << " / " << iterations << std::endl;
 
-        DynGraph<VertexData, EdgeData, MemoryManagerType> dynamic_graph(allocationSize);
         Verification<DataType> verification(input_graph);
-
-        verification.printAdjacency(7);
 
         // Initialization
         dynamic_graph.init(input_graph);
@@ -275,8 +275,6 @@ void testrun(CSR<DataType>& input_graph, const json& config, std::ofstream& resu
                 std::string header = std::string("Insertion - ") + std::to_string(update_round);
 				verification.verify(test_graph, header.c_str(), OutputCodes::VERIFY_INSERTION);
             }
-
-            verification.printAdjacency(7);
 
             if (realistic_deletion)
             {
@@ -311,6 +309,8 @@ void testrun(CSR<DataType>& input_graph, const json& config, std::ofstream& resu
         init_measure.addMeasure(dynamic_graph.init_performance);
         insert_measure.addMeasure(dynamic_graph.insert_performance);
         delete_measure.addMeasure(dynamic_graph.delete_performance);
+
+        dynamic_graph.cleanup();
     }
     auto init_result = init_measure.generateResult();
     auto insert_result = insert_measure.generateResult();

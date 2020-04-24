@@ -36,6 +36,9 @@ template <typename VertexDataType, typename EdgeDataType, typename MemoryManager
 template <typename DataType>
 void DynGraph<VertexDataType, EdgeDataType, MemoryManagerType>::init(CSR<DataType>& input_graph)
 {
+    if(initialized)
+        return;
+    initialized = true;
     // CSR on device
 	dCSR<DataType> d_csr_graph;
     convert(d_csr_graph, input_graph, 0);
@@ -166,10 +169,12 @@ void DynGraph<VertexDataType, EdgeDataType, MemoryManagerType>::cleanup()
     }
 
     number_vertices = 0;
+    initialized = false;
 }
 
 template <typename VertexDataType, typename EdgeDataType, typename MemoryManagerType>
 DynGraph<VertexDataType, EdgeDataType, MemoryManagerType>::~DynGraph()
 {
-    cleanup();    
+    if(initialized)
+        cleanup();
 }

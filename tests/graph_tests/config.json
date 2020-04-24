@@ -1,14 +1,14 @@
 {
   "device" : 0,
-  "iterations" : 5,
+  "iterations" : 1,
   "update_iterations" : 2,
-  "batch_size" : 100,
+  "batch_size" : 10000,
   "range" : 0,
   "verify" : true,
   "realistic_deletion": false,
   "write_csv" : false,
   "csv_filename" : "result-",
-  "manageable_memory_mb" : 2048,
+  "manageable_memory_mb" : 8192,
   "graphs":
   [
       { "filename": "email.mtx" },  
