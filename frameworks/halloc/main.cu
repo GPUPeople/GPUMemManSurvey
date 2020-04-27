@@ -29,8 +29,6 @@ int main(int argc, char* argv[])
 
 	MemoryManagerHalloc memory_manager;
 
-	memory_manager.init();
-
 	d_testFunctions <<<1,1>>>(memory_manager);
 
 	cudaDeviceSynchronize();

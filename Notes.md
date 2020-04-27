@@ -19,3 +19,6 @@
 * Currently only works in warp-based manner
 
 ## Reg-Eff
+
+## DynaSOAr
+* Will be implemented with an workaround at the moment

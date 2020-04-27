@@ -66,6 +66,27 @@ def main():
 	print("Ouroboros is ready to use!")
 	print("------------------------")
 
+	
+	###########################################################################################################################################################################
+	print("------------------------")
+	print("Setup DynaSoar")
+	print("------------------------")
+
+	if not os.path.isdir("frameworks/dynasoar/repository"):
+		Repo.clone_from("https://github.com/prg-titech/dynasoar.git", "frameworks/dynasoar/repository")
+		print("DynaSoar Repository cloning done!")
+	else:
+		print("DynaSoar Repository already cloned")
+
+	print("Overwrite existing files with corrected files!")
+	filename = "frameworks/dynasoar/fixes/allocator_handle.h"
+	print("Copy file " + filename)
+	copyFile(filename, "frameworks/dynasoar/repository/allocator/")
+
+	print("------------------------")
+	print("DynaSoar is ready to use!")
+	print("------------------------")
+
 
 
 if __name__ == "__main__":

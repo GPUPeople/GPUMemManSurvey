@@ -2,7 +2,7 @@
 
 #include "Instance.cuh"
 
-__global__ void d_testFunctions(MemoryManagerCUDA memory_manager)
+__global__ void d_testFunctions(MemoryManagerDynaSOAr memory_manager)
 {
 	int tid = threadIdx.x + blockIdx.x * blockDim.x;
 	if(tid > 0)
@@ -24,9 +24,9 @@ __global__ void d_testFunctions(MemoryManagerCUDA memory_manager)
 
 int main(int argc, char* argv[])
 {
-	std::cout << "Simple CUDA Testcase\n";
+	std::cout << "Simple DynaSOAr Testcase\n";
 
-	MemoryManagerCUDA memory_manager;
+	MemoryManagerDynaSOAr memory_manager;
 
 	d_testFunctions <<<1,1>>>(memory_manager);
 

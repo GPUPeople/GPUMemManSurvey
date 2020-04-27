@@ -31,8 +31,6 @@ int main(int argc, char* argv[])
 	{
 		MemoryManagerRegEff<RegEffVariants::CudaMalloc> memory_manager;
 
-		memory_manager.init();
-
 		d_testFunctions <<<1,1>>>(memory_manager);
 
 		CHECK_ERROR(cudaDeviceSynchronize());
@@ -43,8 +41,6 @@ int main(int argc, char* argv[])
 
 	{
 		MemoryManagerRegEff<RegEffVariants::AtomicMalloc> memory_manager;
-
-		memory_manager.init();
 
 		d_testFunctions <<<1,1>>>(memory_manager);
 
@@ -57,8 +53,6 @@ int main(int argc, char* argv[])
 	{
 		MemoryManagerRegEff<RegEffVariants::AWMalloc> memory_manager;
 
-		memory_manager.init();
-
 		d_testFunctions <<<1,1>>>(memory_manager);
 
 		CHECK_ERROR(cudaDeviceSynchronize());
@@ -69,8 +63,6 @@ int main(int argc, char* argv[])
 
 	{
 		MemoryManagerRegEff<RegEffVariants::CMalloc> memory_manager;
-
-		memory_manager.init();
 
 		d_testFunctions <<<1,1>>>(memory_manager);
 
@@ -83,8 +75,6 @@ int main(int argc, char* argv[])
 	{
 		MemoryManagerRegEff<RegEffVariants::CFMalloc> memory_manager;
 
-		memory_manager.init();
-
 		d_testFunctions <<<1,1>>>(memory_manager);
 
 		CHECK_ERROR(cudaDeviceSynchronize());
@@ -96,8 +86,6 @@ int main(int argc, char* argv[])
 	{
 		MemoryManagerRegEff<RegEffVariants::CMMalloc> memory_manager;
 
-		memory_manager.init();
-
 		d_testFunctions <<<1,1>>>(memory_manager);
 
 		CHECK_ERROR(cudaDeviceSynchronize());
@@ -108,8 +96,6 @@ int main(int argc, char* argv[])
 
 	{
 		MemoryManagerRegEff<RegEffVariants::CFMMalloc> memory_manager;
-
-		memory_manager.init();
 
 		d_testFunctions <<<1,1>>>(memory_manager);
 

@@ -2,6 +2,7 @@ build/
 async_build/
 sync_build/
 frameworks/halloc/repository
+frameworks/dynasoar/repository
 frameworks/scatteralloc/repository
 frameworks/ouroboros/repository
 scripts/__pycache__

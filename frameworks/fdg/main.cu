@@ -31,8 +31,6 @@ int main(int argc, char* argv[])
 
 	MemoryManagerFDG memory_manager;
 
-	memory_manager.init();
-
 	d_testFunctions <<<1,64>>>(memory_manager);
 
 	CHECK_ERROR(cudaDeviceSynchronize());
