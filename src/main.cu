@@ -47,16 +47,13 @@ __global__ void d_testReadFromMemory(int** verification_ptr, int num_allocations
 	if(tid >= num_allocations)
 		return;
 	
-	if(threadIdx.x == 0 && blockIdx.x == 0)
-		printf("Test Read!\n");
-	
 	auto ptr = verification_ptr[tid];
 
 	for(auto i = 0; i < (allocation_size / sizeof(int)); ++i)
 	{
 		if(ptr[i] != tid)
 		{
-			printf("%d - %d | We got a wrong value here! %d vs %d\n", threadIdx.x, blockIdx.x, ptr[i], tid);
+			printf("%d | We got a wrong value here! %d vs %d\n", tid, ptr[i], tid);
 		}
 	}
 }

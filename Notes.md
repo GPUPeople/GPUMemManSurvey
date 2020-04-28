@@ -1,24 +1,52 @@
 # Some Notes on the Allocators
 
 ## Ouroboros
+---
 
 ## FDGMalloc
+---
 * Only allows for allocations on a warp-basis and cannot really free memory it seems
 
 ## CUDA
+---
 * Cuda Allocator cannot be resized once its size has been set once and allocations happened!
   * Probably needs a context reset for it to work
   * This means also that you can only have one instance of it running
     * Not sure if this is a major use case, but nonetheless
+* It seems there is also no difference between different iterations
+  * So no difference between the first round and subsequent iterations
 
 ## ScatterAlloc
+---
 * Have two variants of that now, the one from GitHub in mallocMC (currently in use) and the base version found in the RegEff Code
   * Probably should get the Original some time xD
 
 ## Halloc
+---
 * Currently only works in warp-based manner
 
 ## Reg-Eff
+---
+### Atomic
+* Simply increments an offset for each new allocation `return d_heap_base + offset`
+  * Can be used together with coalescing on a warp basis
+* Has no de-allocation and no re-use
+* Can only increase its offset, hence will over time simply run out of memory as soon as it reaches the end of the allocated memory
+### Atomic Wrap
+* Works the same as the basis *atomic* allocator, the only difference is what happens once it reaches the end of the allocated memory
+  * In this case it will try to *wrap around* to the beginning using successive atomicCAS operations
+    * So it will simply start overwriting data from the front
+* Has no de-allocation and no re-use
+### Circular
+Text
+### Circular Fused
+Text
+### Circular Multi
+Text
+### Circular Fused
+Text
 
 ## DynaSOAr
-* Will be implemented with an workaround at the moment
+---
+* Can only allocate objects implemented in their specific format
+  * Even with a hack it will not work for a general purpose memory allocator

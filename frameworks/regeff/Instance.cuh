@@ -20,6 +20,14 @@ struct MemoryManagerRegEff : public MemoryManagerBase
 {
 	explicit MemoryManagerRegEff(size_t instantiation_size = 2048ULL*1024ULL*1024ULL) : MemoryManagerBase(instantiation_size)
 	{
+		// Found those parameters in utils/AppEnvironment.cpp
+		AllocInfo alloc_info;
+		alloc_info.heapSize = size;
+		alloc_info.payload = 4;
+		alloc_info.maxFrag = 2.0;
+		alloc_info.chunkRatio = 1.0;
+
+		cudaMemcpyToSymbol(c_alloc, &alloc_info, sizeof(AllocInfo));
 		if(variant == RegEffVariants::CudaMalloc)
 		{
 			if(!initialized)
@@ -45,12 +53,19 @@ struct MemoryManagerRegEff : public MemoryManagerBase
 		if (variant == RegEffVariants::CMalloc || variant == RegEffVariants::CFMalloc ||
 			variant == RegEffVariants::CMMalloc || variant == RegEffVariants::CFMMalloc)
 		{
+			// Payload size
+			unsigned int payload = alloc_info.payload;
+
+			// Chunk ratio
+			double chunkRatio = alloc_info.chunkRatio;
+
 			// Init the heapMultiOffset
 			int device{0};
 			cudaGetDevice(&device);
 			int m_numSM{0};
 			cudaDeviceGetAttribute(&m_numSM, cudaDevAttrMultiProcessorCount, device);
 			cudaMemcpyToSymbol(g_numSM, &m_numSM, sizeof(unsigned int));
+			printf("Device: %d - NumSms: %d\n", device, m_numSM);
 
 			unsigned int** m_multiOffset{nullptr};
 			cudaMalloc(&m_multiOffset, m_numSM * sizeof(unsigned int*));
@@ -58,17 +73,17 @@ struct MemoryManagerRegEff : public MemoryManagerBase
 
 			// Init the header size
 			unsigned int heapSize = size;
-
+			
 			unsigned int headerSize{0};
 			if(variant == RegEffVariants::CMalloc || variant == RegEffVariants::CMMalloc)
 				headerSize = CIRCULAR_MALLOC_HEADER_SIZE;
 			else
 				headerSize = sizeof(unsigned int);
-			
+
 			unsigned int heapLock{0};
 			cudaMemcpyToSymbol(g_heapLock, &heapLock, sizeof(unsigned int));
 
-			// Set the chunk size
+			// // Set the chunk size
 			unsigned int numChunks{0};
 			unsigned int chunkSize{Utils::alignment<unsigned int>(static_cast<unsigned int>((headerSize + payload) * chunkRatio), ALIGN)};
 
