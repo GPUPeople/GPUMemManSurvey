@@ -134,7 +134,7 @@ def main():
 
 	####################################################################################################
 	####################################################################################################
-	# Generate new Results
+	# Run testcases
 	####################################################################################################
 	####################################################################################################
 	if run_testcases:
@@ -173,7 +173,7 @@ def main():
 				if "free" in filename:
 					if not written_header_free:
 						result_free.append(list(dataframe.iloc[:, 0]))
-						result_free[-1].insert(0, "Bytes")
+						result_free[-1].insert(0, "Threads")
 						written_header_free = True
 					result_free.append(list(dataframe.iloc[:, 1]))
 					result_free[-1].insert(0, approach_name + " - mean")
@@ -188,7 +188,7 @@ def main():
 				else:
 					if not written_header_alloc:
 						result_alloc.append(list(dataframe.iloc[:, 0]))
-						result_alloc[-1].insert(0, "Bytes")
+						result_alloc[-1].insert(0, "Threads")
 						written_header_alloc = True
 					result_alloc.append(list(dataframe.iloc[:, 1]))
 					result_alloc[-1].insert(0, approach_name + " - mean")

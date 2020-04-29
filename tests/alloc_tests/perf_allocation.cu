@@ -100,6 +100,38 @@ __global__ void d_testFree(MemoryManagerType mm, int** verification_ptr, int num
 	timing[tid] = perf_measure.stopThreadMeasure();
 }
 
+__global__ void d_testWriteToMemory(int** verification_ptr, int num_allocations, int allocation_size)
+{
+	int tid = threadIdx.x + blockIdx.x * blockDim.x;
+	if(tid >= num_allocations)
+		return;
+	
+	auto ptr = verification_ptr[tid];
+
+	for(auto i = 0; i < (allocation_size / sizeof(int)); ++i)
+	{
+		ptr[i] = tid;
+	}
+}
+
+__global__ void d_testReadFromMemory(int** verification_ptr, int num_allocations, int allocation_size)
+{
+	int tid = threadIdx.x + blockIdx.x * blockDim.x;
+	if(tid >= num_allocations)
+		return;
+	
+	auto ptr = verification_ptr[tid];
+
+	for(auto i = 0; i < (allocation_size / sizeof(int)); ++i)
+	{
+		if(ptr[i] != tid)
+		{
+			printf("%d | We got a wrong value here! %d vs %d\n", tid, ptr[i], tid);
+			__trap();
+		}
+	}
+}
+
 int main(int argc, char* argv[])
 {
 	// Usage: <num_allocations> <size_of_allocation_in_byte> <num_iterations> <onDeviceMeasure> <warp-based> <generateoutput> <free_memory> <initial_path>
@@ -284,6 +316,14 @@ int main(int argc, char* argv[])
 			timing_allocation.stopMeasurement();
 			CHECK_ERROR(cudaDeviceSynchronize());
 		}
+
+		d_testWriteToMemory<<<gridSize, blockSize>>>(d_memory, num_allocations, allocation_size_byte);
+
+		CHECK_ERROR(cudaDeviceSynchronize());
+
+		d_testReadFromMemory<<<gridSize, blockSize>>>(d_memory, num_allocations, allocation_size_byte);
+
+		CHECK_ERROR(cudaDeviceSynchronize());
 
 		if(free_memory)
 		{

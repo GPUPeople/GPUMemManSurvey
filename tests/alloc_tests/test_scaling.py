@@ -35,23 +35,26 @@ def main():
 	
 	# Specify which test configuration to use
 	testcases = list()
-	num_allocations = 10000
 	smallest_allocation_size = 4
 	largest_allocation_size = 1024
+	smallest_num_threads = 2 ** 0
+	largest_num_threads = 2 ** 10
 	num_iterations = 25
 	free_memory = 1
 	build_path = "build/"
 
 	parser = argparse.ArgumentParser(description='Test allocation performance for various frameworks')
 	parser.add_argument('-t', type=str, help='Specify which frameworks to test, separated by +, e.g. o+s+h+c+f+r ---> c : cuda | s : scatteralloc | h : halloc | o : ouroboros | f : fdgmalloc | r : register-efficient')
-	parser.add_argument('-numBytes', type=int, help='How many large the allocation should be')
-	parser.add_argument('-range', type=str, help='Sepcify Allocation Range, given as powers of two, e.g. 0-5 -> results in 1-32')
+	parser.add_argument('-byterange', type=str, help='Specify Allocation Range, given as powers of two, e.g. 0-5 -> results in 1-32')
+	parser.add_argument('-threadrange', type=str, help='Specify Allocation Range, given as powers of two, e.g. 0-5 -> results in 1-32')
 	parser.add_argument('-iter', type=int, help='How many iterations?')
-	parser.add_argument('-genres', action='store_true', default=False, help='Run testcases and generate results')
+	parser.add_argument('-runtest', action='store_true', default=False, help='Run testcases')
+	parser.add_argument('-genres', action='store_true', default=False, help='Generate results')
 	parser.add_argument('-genplot', action='store_true', default=False, help='Generate results file and plot')
 	parser.add_argument('-cleantemp', action='store_true', default=False, help='Clean up temporary files')
 	parser.add_argument('-warp', action='store_true', default=False, help='Start testcases warp-based')
 	parser.add_argument('-devmeasure', action='store_true', default=False, help='Measure performance on device in cycles')
+	parser.add_argument('-plotscale', type=str, help='log/linear')
 
 	args = parser.parse_args()
 
@@ -80,12 +83,14 @@ def main():
 			# testcases.append(build_path + str("r_alloc_test_cm"))
 			testcases.append(build_path + str("r_alloc_test_cfm"))
 	
-	# Parse num allocation
-	if(args.num):
-		num_bytes = args.num
+	# Parse allocation size
+	if(args.byterange):
+		selected_range = args.range.split('-')
+		smallest_allocation_size = 2 ** int(selected_range[0])
+		largest_allocation_size = 2 ** int(selected_range[1])
 
 	# Parse range
-	if(args.range):
+	if(args.threadrange):
 		selected_range = args.range.split('-')
 		smallest_num_threads = 2 ** int(selected_range[0])
 		largest_num_threads = 2 ** int(selected_range[1])
@@ -99,6 +104,9 @@ def main():
 		test_warp_based = 1
 	else:
 		test_warp_based = 0
+	
+	# Run Testcases
+	run_testcases = args.runtest
 	
 	# Generate results
 	generate_results = args.genres
@@ -126,17 +134,37 @@ def main():
 
 	####################################################################################################
 	####################################################################################################
+	# Run testcases
+	####################################################################################################
+	####################################################################################################
+	if run_testcases:
+		for executable in testcases:
+			allocation_size = smallest_allocation_size
+			while allocation_size <= largest_allocation_size:
+				num_threads = smallest_num_threads
+				while num_threads <= largest_num_threads:
+					run_config = str(smallest_num_threads) + " " + str(smallest_allocation_size) + " " + str(num_iterations) + " " + str(measure_on_device) + " " + str(test_warp_based) + " 1 " + str(free_memory) + " results/tmp/"
+					executecommand = "{0} {1}".format(executable, run_config)
+					print(executecommand)
+					Command(executecommand).run(timeout=time_out_val)
+					num_threads *= 2
+				allocation_size *= 2
+
+	####################################################################################################
+	####################################################################################################
 	# Generate new Results
 	####################################################################################################
 	####################################################################################################
 	if generate_results:
-		for executable in testcases:
-			while smallest_num_threads <= largest_num_threads:
-				run_config = str(smallest_num_threads) + " " + str(num_bytes) + " " + str(num_iterations) + " " + str(measure_on_device) + " " + str(test_warp_based) + " 1 " + str(free_memory) + " results/tmp/"
-				executecommand = "{0} {1}".format(executable, run_config)
-				print(executecommand)
-				Command(executecommand).run(timeout=time_out_val)
-				smallest_allocation_size *= 2
+		print("Generalte results")
+
+	####################################################################################################
+	####################################################################################################
+	# Generate plots
+	####################################################################################################
+	####################################################################################################
+	if generate_plots:
+		print("Generalte plots")
 
 	####################################################################################################
 	####################################################################################################
@@ -146,6 +174,16 @@ def main():
 	if clean_temporary_files:
 		for file in os.listdir("results/tmp"):
 			filename = str("results/tmp/") + os.fsdecode(file)
+			if(os.path.isdir(filename)):
+				continue
+			os.remove(filename)
+		for file in os.listdir("results/tmp/aggregate"):
+			filename = str("results/tmp/aggregate/") + os.fsdecode(file)
+			if(os.path.isdir(filename)):
+				continue
+			os.remove(filename)
+		for file in os.listdir("results/plots"):
+			filename = str("results/plots/") + os.fsdecode(file)
 			if(os.path.isdir(filename)):
 				continue
 			os.remove(filename)
