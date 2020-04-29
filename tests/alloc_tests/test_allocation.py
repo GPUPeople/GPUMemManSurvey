@@ -158,21 +158,23 @@ def main():
 	if generate_results:
 		# Gather results
 		result_alloc = list(list())
-		result_alloc.append(np.arange(smallest_allocation_size, largest_allocation_size + 4, 4).tolist())
-		result_alloc[0].insert(0, "Bytes")
 		result_free = list(list())
-		result_free.append(np.arange(smallest_allocation_size, largest_allocation_size + 4, 4).tolist())
-		result_free[0].insert(0, "Bytes")
 
-		# Go over files, read data and generate new 
+		# Go over files, read data and generate new
+		written_header_free = False
+		written_header_alloc = False
 		for file in os.listdir("results/tmp"):
 			filename = str("results/tmp/") + os.fsdecode(file)
-			approach_name = os.fsdecode(file).split('_')[2]
 			if(os.path.isdir(filename)):
 				continue
+			approach_name = os.fsdecode(file).split('_')[2]
 			with open(filename, newline='') as csv_file:
 				dataframe = pandas.read_csv(csv_file)
 				if "free" in filename:
+					if not written_header_free:
+						result_free.append(list(dataframe.iloc[:, 0]))
+						result_free[-1].insert(0, "Bytes")
+						written_header_free = True
 					result_free.append(list(dataframe.iloc[:, 1]))
 					result_free[-1].insert(0, approach_name + " - mean")
 					result_free.append(list(dataframe.iloc[:, 2]))
@@ -184,6 +186,10 @@ def main():
 					result_free.append(list(dataframe.iloc[:, 5]))
 					result_free[-1].insert(0, approach_name + " - median")
 				else:
+					if not written_header_alloc:
+						result_alloc.append(list(dataframe.iloc[:, 0]))
+						result_alloc[-1].insert(0, "Bytes")
+						written_header_alloc = True
 					result_alloc.append(list(dataframe.iloc[:, 1]))
 					result_alloc[-1].insert(0, approach_name + " - mean")
 					result_alloc.append(list(dataframe.iloc[:, 2]))
@@ -200,13 +206,13 @@ def main():
 		time_string = now.strftime("%b-%d-%Y_%H-%M-%S")
 
 		# Generate output file
-		alloc_name = str("results/") + time_string + str("_perf_alloc_") + str(num_allocations) + str(".csv")
+		alloc_name = str("results/tmp/aggregate/") + time_string + str("_perf_alloc_") + str(num_allocations) + str(".csv")
 		with(open(alloc_name, "w")) as f:
 			writer = csv.writer(f, delimiter=',')
 			for row in result_alloc:
 				writer.writerow(row)
 		
-		free_name = str("results/") + time_string + str("_perf_free_") + str(num_allocations) + str(".csv")
+		free_name = str("results/tmp/aggregate/") + time_string + str("_perf_free_") + str(num_allocations) + str(".csv")
 		with(open(free_name, "w")) as f:
 			writer = csv.writer(f, delimiter=',')
 			for row in result_free:
@@ -224,8 +230,8 @@ def main():
 		now = datetime.now()
 		time_string = now.strftime("%b-%d-%Y_%H-%M-%S")
 
-		for file in os.listdir("results"):
-			filename = str("results/") + os.fsdecode(file)
+		for file in os.listdir("results/tmp/aggregate"):
+			filename = str("results/tmp/aggregate/") + os.fsdecode(file)
 			if(os.path.isdir(filename)):
 				continue
 			# We want the one matching our input
@@ -242,6 +248,7 @@ def main():
 			y_values = np.asarray([float(i) for i in result_alloc[i][1:]])
 			y_stddev = np.asarray([float(i) for i in result_alloc[i+1][1:]])
 			labelname = result_alloc[i][0].split(" ")[0]
+			print(labelname)
 			plt.plot(x_values, y_values, marker='', color=colours[labelname], linewidth=1, label=labelname)
 			plt.fill_between(x_values, y_values-y_stddev, y_values+y_stddev, alpha=0.5, edgecolor=colours[labelname], facecolor=colours[labelname])
 		if plotscale == "log":
@@ -349,6 +356,16 @@ def main():
 	if clean_temporary_files:
 		for file in os.listdir("results/tmp"):
 			filename = str("results/tmp/") + os.fsdecode(file)
+			if(os.path.isdir(filename)):
+				continue
+			os.remove(filename)
+		for file in os.listdir("results/tmp/aggregate"):
+			filename = str("results/tmp/aggregate/") + os.fsdecode(file)
+			if(os.path.isdir(filename)):
+				continue
+			os.remove(filename)
+		for file in os.listdir("results/plots"):
+			filename = str("results/plots/") + os.fsdecode(file)
 			if(os.path.isdir(filename)):
 				continue
 			os.remove(filename)
