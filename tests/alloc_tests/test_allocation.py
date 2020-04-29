@@ -45,13 +45,15 @@ def main():
 	parser = argparse.ArgumentParser(description='Test allocation performance for various frameworks')
 	parser.add_argument('-t', type=str, help='Specify which frameworks to test, separated by +, e.g. o+s+h+c+f+r ---> c : cuda | s : scatteralloc | h : halloc | o : ouroboros | f : fdgmalloc | r : register-efficient')
 	parser.add_argument('-num', type=int, help='How many allocations to perform')
-	parser.add_argument('-range', type=str, help='Sepcify Allocation Range, e.g. 4-1024')
+	parser.add_argument('-range', type=str, help='Specify Allocation Range, e.g. 4-1024')
 	parser.add_argument('-iter', type=int, help='How many iterations?')
-	parser.add_argument('-genres', action='store_true', default=False, help='Run testcases and generate results')
+	parser.add_argument('-runtest', action='store_true', default=False, help='Run testcases')
+	parser.add_argument('-genres', action='store_true', default=False, help='Generate results')
 	parser.add_argument('-genplot', action='store_true', default=False, help='Generate results file and plot')
 	parser.add_argument('-cleantemp', action='store_true', default=False, help='Clean up temporary files')
 	parser.add_argument('-warp', action='store_true', default=False, help='Start testcases warp-based')
 	parser.add_argument('-devmeasure', action='store_true', default=False, help='Measure performance on device in cycles')
+	parser.add_argument('-plotscale', type=str, help='log/linear')
 
 	args = parser.parse_args()
 
@@ -100,11 +102,17 @@ def main():
 	else:
 		test_warp_based = 0
 	
+	# Run Testcases
+	run_testcases = args.runtest
+	
 	# Generate results
 	generate_results = args.genres
 
 	# Generate plots
 	generate_plots = args.genplot
+
+	# Plot Axis scaling
+	plotscale = args.plotscale
 
 	# Clean temporary files
 	clean_temporary_files = args.cleantemp
@@ -129,15 +137,80 @@ def main():
 	# Generate new Results
 	####################################################################################################
 	####################################################################################################
-	if generate_results:
+	if run_testcases:
+		# Run Testcase
+		write_header = 1
 		for executable in testcases:
 			smallest_allocation_size = 4
 			while smallest_allocation_size <= largest_allocation_size:
-				run_config = str(num_allocations) + " " + str(smallest_allocation_size) + " " + str(num_iterations) + " " + str(measure_on_device) + " " + str(test_warp_based) + " 1 " + str(free_memory) + " results/tmp/"
+				run_config = str(num_allocations) + " " + str(smallest_allocation_size) + " " + str(num_iterations) + " " + str(measure_on_device) + " " + str(test_warp_based) + " 1 " + str(write_header) + " " + str(free_memory) + " results/tmp/"
 				executecommand = "{0} {1}".format(executable, run_config)
 				print(executecommand)
 				Command(executecommand).run(timeout=time_out_val)
 				smallest_allocation_size += 4
+				write_header = 0
+
+	####################################################################################################
+	####################################################################################################
+	# Generate new Results
+	####################################################################################################
+	####################################################################################################
+	if generate_results:
+		# Gather results
+		result_alloc = list(list())
+		result_alloc.append(np.arange(smallest_allocation_size, largest_allocation_size + 4, 4).tolist())
+		result_alloc[0].insert(0, "Bytes")
+		result_free = list(list())
+		result_free.append(np.arange(smallest_allocation_size, largest_allocation_size + 4, 4).tolist())
+		result_free[0].insert(0, "Bytes")
+
+		# Go over files, read data and generate new 
+		for file in os.listdir("results/tmp"):
+			filename = str("results/tmp/") + os.fsdecode(file)
+			approach_name = os.fsdecode(file).split('_')[2]
+			if(os.path.isdir(filename)):
+				continue
+			with open(filename, newline='') as csv_file:
+				dataframe = pandas.read_csv(csv_file)
+				if "free" in filename:
+					result_free.append(list(dataframe.iloc[:, 1]))
+					result_free[-1].insert(0, approach_name + " - mean")
+					result_free.append(list(dataframe.iloc[:, 2]))
+					result_free[-1].insert(0, approach_name + " - std_dev")
+					result_free.append(list(dataframe.iloc[:, 3]))
+					result_free[-1].insert(0, approach_name + " - min")
+					result_free.append(list(dataframe.iloc[:, 4]))
+					result_free[-1].insert(0, approach_name + " - max")
+					result_free.append(list(dataframe.iloc[:, 5]))
+					result_free[-1].insert(0, approach_name + " - median")
+				else:
+					result_alloc.append(list(dataframe.iloc[:, 1]))
+					result_alloc[-1].insert(0, approach_name + " - mean")
+					result_alloc.append(list(dataframe.iloc[:, 2]))
+					result_alloc[-1].insert(0, approach_name + " - std_dev")
+					result_alloc.append(list(dataframe.iloc[:, 3]))
+					result_alloc[-1].insert(0, approach_name + " - min")
+					result_alloc.append(list(dataframe.iloc[:, 4]))
+					result_alloc[-1].insert(0, approach_name + " - max")
+					result_alloc.append(list(dataframe.iloc[:, 5]))
+					result_alloc[-1].insert(0, approach_name + " - median")
+
+		# Get Timestring
+		now = datetime.now()
+		time_string = now.strftime("%b-%d-%Y_%H-%M-%S")
+
+		# Generate output file
+		alloc_name = str("results/") + time_string + str("_perf_alloc_") + str(num_allocations) + str(".csv")
+		with(open(alloc_name, "w")) as f:
+			writer = csv.writer(f, delimiter=',')
+			for row in result_alloc:
+				writer.writerow(row)
+		
+		free_name = str("results/") + time_string + str("_perf_free_") + str(num_allocations) + str(".csv")
+		with(open(free_name, "w")) as f:
+			writer = csv.writer(f, delimiter=',')
+			for row in result_free:
+				writer.writerow(row)
 	
 	####################################################################################################
 	####################################################################################################
@@ -145,75 +218,128 @@ def main():
 	####################################################################################################
 	####################################################################################################
 	if generate_plots:
-		result_alloc_mean = list(list())
-		result_alloc_mean.append(np.arange(smallest_allocation_size, largest_allocation_size, 4).tolist())
-		result_alloc_mean[0].insert(0, "Bytes")
-		result_free_mean = list(list())
-		result_free_mean.append(np.arange(smallest_allocation_size, largest_allocation_size, 4).tolist())
-		result_free_mean[0].insert(0, "Bytes")
-
-		# Go over files, read data and generate new 
-		for file in os.listdir("results/tmp"):
-			filename = str("results/tmp/") + os.fsdecode(file)
-			if(os.path.isdir(filename)):
-				continue
-			with open(filename, newline='') as csv_file:
-				dataframe = pandas.read_csv(csv_file)
-				if "free" in filename:
-					result_free_mean.append(list(dataframe.iloc[:, 1]))
-					result_free_mean[-1].insert(0, os.fsdecode(file).split('_')[2])
-				else:
-					result_alloc_mean.append(list(dataframe.iloc[:, 1]))
-					result_alloc_mean[-1].insert(0, os.fsdecode(file).split('_')[2])
-
+		result_alloc = list(list())
+		result_free = list(list())
 		# Get Timestring
 		now = datetime.now()
 		time_string = now.strftime("%b-%d-%Y_%H-%M-%S")
 
-		# Generate output file
-		alloc_name = str("results/") + time_string + str("_alloc_") + str(num_allocations) + str(".csv")
-		with(open(alloc_name, "w")) as f:
-			writer = csv.writer(f, delimiter=',')
-			for row in result_alloc_mean:
-				writer.writerow(row)
-		
-		free_name = str("results/") + time_string + str("_free_") + str(num_allocations) + str(".csv")
-		with(open(free_name, "w")) as f:
-			writer = csv.writer(f, delimiter=',')
-			for row in result_free_mean:
-				writer.writerow(row)
+		for file in os.listdir("results"):
+			filename = str("results/") + os.fsdecode(file)
+			if(os.path.isdir(filename)):
+				continue
+			# We want the one matching our input
+			if filename.split("_")[4].split(".")[0] == str(num_allocations):
+				with open(filename) as f:
+					reader = csv.reader(f)
+					if "free" in filename:
+						result_free = list(reader)
+					else:
+						result_alloc = list(reader)
 
-		# Generate output plots
-		# Plot allocation plot
-		df = pandas.DataFrame({str(result_alloc_mean[0][0]) : result_alloc_mean[0][1:]})
-		for i in range(1, len(result_alloc_mean)):
-			df[str(result_alloc_mean[i][0])] = result_alloc_mean[i][1:]
-		
-		for i in range(1, len(result_alloc_mean)):
-			plt.plot(str(result_alloc_mean[0][0]), str(result_alloc_mean[i][0]), data=df, marker='', color=colours[str(result_alloc_mean[i][0])], linewidth=1, label=str(result_alloc_mean[i][0]))
-		plt.yscale("log")
+		x_values = np.asarray([float(i) for i in result_alloc[0][1:]])
+		for i in range(1, len(result_alloc), 5):
+			y_values = np.asarray([float(i) for i in result_alloc[i][1:]])
+			y_stddev = np.asarray([float(i) for i in result_alloc[i+1][1:]])
+			labelname = result_alloc[i][0].split(" ")[0]
+			plt.plot(x_values, y_values, marker='', color=colours[labelname], linewidth=1, label=labelname)
+			plt.fill_between(x_values, y_values-y_stddev, y_values+y_stddev, alpha=0.5, edgecolor=colours[labelname], facecolor=colours[labelname])
+		if plotscale == "log":
+			plt.yscale("log")
 		plt.ylabel('ms')
 		plt.xlabel('Bytes')
-		plt.title("Allocation performance for " + str(num_allocations) + " allocations")
+		plt.title("Allocation performance for " + str(num_allocations) + " allocations (mean + std-dev)")
 		plt.legend()
-		plt.savefig(str("results/") + time_string + "_alloc.pdf", dpi=600)
+		plt.savefig(str("results/plots/") + time_string + "_alloc.pdf", dpi=600)		
 
 		# Clear Figure
 		plt.clf()
 
 		# Plot free plot
-		df = pandas.DataFrame({str(result_free_mean[0][0]) : result_free_mean[0][1:]})
-		for i in range(1, len(result_free_mean)):
-			df[str(result_free_mean[i][0])] = result_free_mean[i][1:]
-		
-		for i in range(1, len(result_free_mean)):
-			plt.plot(str(result_free_mean[0][0]), str(result_free_mean[i][0]), data=df, marker='', color=colours[str(result_free_mean[i][0])], linewidth=1, label=str(result_free_mean[i][0]))
-		plt.yscale("log")
+		x_values = np.asarray([float(i) for i in result_free[0][1:]])
+		for i in range(1, len(result_free), 5):
+			y_values = np.asarray([float(i) for i in result_free[i][1:]])
+			y_stddev = np.asarray([float(i) for i in result_free[i+1][1:]])
+			labelname = result_free[i][0].split(" ")[0]
+			plt.plot(x_values, y_values, marker='', color=colours[labelname], linewidth=1, label=labelname)
+			plt.fill_between(x_values, y_values-y_stddev, y_values+y_stddev, alpha=0.5, edgecolor=colours[labelname], facecolor=colours[labelname])
+		if plotscale == "log":
+			plt.yscale("log")
 		plt.ylabel('ms')
 		plt.xlabel('Bytes')
-		plt.title("Free performance for " + str(num_allocations) + " allocations")
+		plt.title("Free performance for " + str(num_allocations) + " allocations (mean + std-dev)")
 		plt.legend()
-		plt.savefig(str("results/") + time_string + "_free.pdf", dpi=600)
+		plt.savefig(str("results/plots/") + time_string + "_free.pdf", dpi=600)
+
+		# Clear Figure
+		plt.clf()
+
+		x_values = np.asarray([float(i) for i in result_alloc[0][1:]])
+		for i in range(1, len(result_alloc), 5):
+			y_values = np.asarray([float(i) for i in result_alloc[i][1:]])
+			y_min = np.asarray([float(i) for i in result_alloc[i+2][1:]])
+			y_max = np.asarray([float(i) for i in result_alloc[i+3][1:]])
+			labelname = result_alloc[i][0].split(" ")[0]
+			plt.plot(x_values, y_values, marker='', color=colours[labelname], linewidth=1, label=labelname)
+			plt.fill_between(x_values, y_min, y_max, alpha=0.5, edgecolor=colours[labelname], facecolor=colours[labelname])
+		if plotscale == "log":
+			plt.yscale("log")
+		plt.ylabel('ms')
+		plt.xlabel('Bytes')
+		plt.title("Allocation performance for " + str(num_allocations) + " allocations (mean + min/max)")
+		plt.legend()
+		plt.savefig(str("results/plots/") + time_string + "_alloc_min_max.pdf", dpi=600)
+
+		# Clear Figure
+		plt.clf()
+
+		x_values = np.asarray([float(i) for i in result_free[0][1:]])
+		for i in range(1, len(result_free), 5):
+			y_values = np.asarray([float(i) for i in result_free[i][1:]])
+			y_min = np.asarray([float(i) for i in result_free[i+2][1:]])
+			y_max = np.asarray([float(i) for i in result_free[i+3][1:]])
+			labelname = result_free[i][0].split(" ")[0]
+			plt.plot(x_values, y_values, marker='', color=colours[labelname], linewidth=1, label=labelname)
+			plt.fill_between(x_values, y_min, y_max, alpha=0.5, edgecolor=colours[labelname], facecolor=colours[labelname])
+		if plotscale == "log":
+			plt.yscale("log")
+		plt.ylabel('ms')
+		plt.xlabel('Bytes')
+		plt.title("Free performance for " + str(num_allocations) + " allocations (mean + min/max)")
+		plt.legend()
+		plt.savefig(str("results/plots/") + time_string + "_free_min_max.pdf", dpi=600)
+
+		plt.clf()
+
+		x_values = np.asarray([float(i) for i in result_alloc[0][1:]])
+		for i in range(1, len(result_alloc), 5):
+			y_values = np.asarray([float(i) for i in result_alloc[i+4][1:]])
+			labelname = result_alloc[i][0].split(" ")[0]
+			plt.plot(x_values, y_values, marker='', color=colours[labelname], linewidth=1, label=labelname)
+		if plotscale == "log":
+			plt.yscale("log")
+		plt.ylabel('ms')
+		plt.xlabel('Bytes')
+		plt.title("Allocation performance for " + str(num_allocations) + " allocations (median)")
+		plt.legend()
+		plt.savefig(str("results/plots/") + time_string + "_alloc_median.pdf", dpi=600)		
+
+		# Clear Figure
+		plt.clf()
+
+		# Plot free plot
+		x_values = np.asarray([float(i) for i in result_free[0][1:]])
+		for i in range(1, len(result_free), 5):
+			y_values = np.asarray([float(i) for i in result_free[i+4][1:]])
+			labelname = result_free[i][0].split(" ")[0]
+			plt.plot(x_values, y_values, marker='', color=colours[labelname], linewidth=1, label=labelname)
+		if plotscale == "log":
+			plt.yscale("log")
+		plt.ylabel('ms')
+		plt.xlabel('Bytes')
+		plt.title("Free performance for " + str(num_allocations) + " allocations (median)")
+		plt.legend()
+		plt.savefig(str("results/plots/") + time_string + "_free_median.pdf", dpi=600)
 
 	####################################################################################################
 	####################################################################################################

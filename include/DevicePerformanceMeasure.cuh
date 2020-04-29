@@ -32,7 +32,9 @@ struct ThreadResult
 
 	double mean_{0.0};
 	double std_dev_{0.0};
-	double median_{0.0};
+    double median_{0.0};
+    double min_{0.0};
+    double max_{0.0};
 	int num_{0};
 };
 
@@ -93,6 +95,8 @@ struct DevicePerfMeasure
             mean_,
             std_dev(mean_),
             median(),
+            *std::min_element(results.begin(), results.end()),
+			*std::max_element(results.begin(), results.end()),
             static_cast<int>(perf_.size())
         };
     }

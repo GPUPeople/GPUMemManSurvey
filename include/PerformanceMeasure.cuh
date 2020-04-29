@@ -9,6 +9,8 @@ struct Result
 	float mean_{0.0f};
 	float std_dev_{0.0f};
 	float median_{0.0f};
+	float min_{0.0f};
+	float max_{0.0f};
 	int num_{0};
 };
 
@@ -46,6 +48,8 @@ struct PerfMeasure
 			mean_val,
 			std_dev(mean_val),
 			median(),
+			*std::min_element(measurements_.begin(), measurements_.end()),
+			*std::max_element(measurements_.begin(), measurements_.end()),
 			static_cast<int>(measurements_.size())
 		};
 	}

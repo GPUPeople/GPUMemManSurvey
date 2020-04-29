@@ -110,6 +110,7 @@ int main(int argc, char* argv[])
 	bool onDeviceMeasure{false};
 	bool print_output{true};
 	bool generate_output{false};
+	bool write_header{false};
 	bool free_memory{true};
 	std::string initial_path{"../results/tmp/"};
 	if(argc >= 2)
@@ -137,10 +138,14 @@ int main(int argc, char* argv[])
 							generate_output = static_cast<bool>(atoi(argv[6]));
 							if(argc >= 8)
 							{
-								free_memory = static_cast<bool>(atoi(argv[7]));
+								write_header = static_cast<bool>(atoi(argv[7]));
 								if(argc >= 9)
 								{
-									initial_path = std::string(argv[8]);
+									free_memory = static_cast<bool>(atoi(argv[8]));
+									if(argc >= 9)
+									{
+										initial_path = std::string(argv[9]);
+									}
 								}
 							}
 						}
@@ -243,6 +248,11 @@ int main(int argc, char* argv[])
 	{
 		results_alloc.open((initial_path + std::string("alloc_") + prop.name  + "_" + mem_name + "_" + std::to_string(num_allocations) + ".csv").c_str(), std::ios_base::app);
 		results_free.open((initial_path + std::string("free_") + prop.name + "_" + mem_name + "_" + std::to_string(num_allocations) + ".csv").c_str(), std::ios_base::app);
+		if(write_header)
+		{
+			results_alloc << "AllocationSize (in Byte), mean, std-dev, min, max, median";
+			results_free << "AllocationSize (in Byte), mean, std-dev, min, max, median";
+		}
 		results_alloc << "\n" << allocation_size_byte << ",";
 		results_free << "\n" << allocation_size_byte << ",";
 	}
@@ -308,8 +318,8 @@ int main(int argc, char* argv[])
 		}
 		if(generate_output)
 		{
-			results_alloc << alloc_result.mean_ << "," << alloc_result.std_dev_ << "," << alloc_result.median_;
-			results_free << free_result.mean_ << "," << free_result.std_dev_ << "," << free_result.median_;
+			results_alloc << alloc_result.mean_ << "," << alloc_result.std_dev_ << "," << alloc_result.min_ << "," << alloc_result.max_ << "," << alloc_result.median_;
+			results_free << free_result.mean_ << "," << free_result.std_dev_ << "," << free_result.min_ << "," << free_result.max_ << "," << free_result.median_;
 		}
 	}
 	else
@@ -323,8 +333,8 @@ int main(int argc, char* argv[])
 		}
 		if(generate_output)
 		{
-			results_alloc << alloc_result.mean_ << "," << alloc_result.std_dev_ << "," << alloc_result.median_;
-			results_free << free_result.mean_ << "," << free_result.std_dev_ << "," << free_result.median_;
+			results_alloc << alloc_result.mean_ << "," << alloc_result.std_dev_ << "," << alloc_result.min_ << "," << alloc_result.max_ << "," << alloc_result.median_;
+			results_free << free_result.mean_ << "," << free_result.std_dev_ << "," << alloc_result.min_ << "," << alloc_result.max_ << "," << free_result.median_;
 		}
 	}
 	
