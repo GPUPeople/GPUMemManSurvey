@@ -7,6 +7,8 @@ import shutil
 import time
 from datetime import datetime
 from timedprocess import Command
+from Helper import generateResultsFromFileAllocation
+from Helper import plotMean
 import pandas
 import numpy as np
 import csv
@@ -139,13 +141,13 @@ def main():
 	####################################################################################################
 	if run_testcases:
 		# Run Testcase
-		write_header = 1
 		for executable in testcases:
+			write_header = 1
 			smallest_allocation_size = 4
 			while smallest_allocation_size <= largest_allocation_size:
 				run_config = str(num_allocations) + " " + str(smallest_allocation_size) + " " + str(num_iterations) + " " + str(measure_on_device) + " " + str(test_warp_based) + " 1 " + str(write_header) + " " + str(free_memory) + " results/tmp/"
 				executecommand = "{0} {1}".format(executable, run_config)
-				print(executecommand)
+				print("Running -> " + executecommand)
 				Command(executecommand).run(timeout=time_out_val)
 				smallest_allocation_size += 4
 				write_header = 0
@@ -156,67 +158,7 @@ def main():
 	####################################################################################################
 	####################################################################################################
 	if generate_results:
-		# Gather results
-		result_alloc = list(list())
-		result_free = list(list())
-
-		# Go over files, read data and generate new
-		written_header_free = False
-		written_header_alloc = False
-		for file in os.listdir("results/tmp"):
-			filename = str("results/tmp/") + os.fsdecode(file)
-			if(os.path.isdir(filename)):
-				continue
-			approach_name = os.fsdecode(file).split('_')[2]
-			with open(filename, newline='') as csv_file:
-				dataframe = pandas.read_csv(csv_file)
-				if "free" in filename:
-					if not written_header_free:
-						result_free.append(list(dataframe.iloc[:, 0]))
-						result_free[-1].insert(0, "Threads")
-						written_header_free = True
-					result_free.append(list(dataframe.iloc[:, 1]))
-					result_free[-1].insert(0, approach_name + " - mean")
-					result_free.append(list(dataframe.iloc[:, 2]))
-					result_free[-1].insert(0, approach_name + " - std_dev")
-					result_free.append(list(dataframe.iloc[:, 3]))
-					result_free[-1].insert(0, approach_name + " - min")
-					result_free.append(list(dataframe.iloc[:, 4]))
-					result_free[-1].insert(0, approach_name + " - max")
-					result_free.append(list(dataframe.iloc[:, 5]))
-					result_free[-1].insert(0, approach_name + " - median")
-				else:
-					if not written_header_alloc:
-						result_alloc.append(list(dataframe.iloc[:, 0]))
-						result_alloc[-1].insert(0, "Threads")
-						written_header_alloc = True
-					result_alloc.append(list(dataframe.iloc[:, 1]))
-					result_alloc[-1].insert(0, approach_name + " - mean")
-					result_alloc.append(list(dataframe.iloc[:, 2]))
-					result_alloc[-1].insert(0, approach_name + " - std_dev")
-					result_alloc.append(list(dataframe.iloc[:, 3]))
-					result_alloc[-1].insert(0, approach_name + " - min")
-					result_alloc.append(list(dataframe.iloc[:, 4]))
-					result_alloc[-1].insert(0, approach_name + " - max")
-					result_alloc.append(list(dataframe.iloc[:, 5]))
-					result_alloc[-1].insert(0, approach_name + " - median")
-
-		# Get Timestring
-		now = datetime.now()
-		time_string = now.strftime("%b-%d-%Y_%H-%M-%S")
-
-		# Generate output file
-		alloc_name = str("results/tmp/aggregate/") + time_string + str("_perf_alloc_") + str(num_allocations) + str(".csv")
-		with(open(alloc_name, "w")) as f:
-			writer = csv.writer(f, delimiter=',')
-			for row in result_alloc:
-				writer.writerow(row)
-		
-		free_name = str("results/tmp/aggregate/") + time_string + str("_perf_free_") + str(num_allocations) + str(".csv")
-		with(open(free_name, "w")) as f:
-			writer = csv.writer(f, delimiter=',')
-			for row in result_free:
-				writer.writerow(row)
+		generateResultsFromFileAllocation(num_allocations, "Bytes", "perf")
 	
 	####################################################################################################
 	####################################################################################################
@@ -234,6 +176,8 @@ def main():
 			filename = str("results/tmp/aggregate/") + os.fsdecode(file)
 			if(os.path.isdir(filename)):
 				continue
+			if filename.split("_")[2] != "perf":
+				continue
 			# We want the one matching our input
 			if filename.split("_")[4].split(".")[0] == str(num_allocations):
 				with open(filename) as f:
@@ -243,110 +187,75 @@ def main():
 					else:
 						result_alloc = list(reader)
 
-		x_values = np.asarray([float(i) for i in result_alloc[0][1:]])
-		for i in range(1, len(result_alloc), 5):
-			y_values = np.asarray([float(i) for i in result_alloc[i][1:]])
-			y_stddev = np.asarray([float(i) for i in result_alloc[i+1][1:]])
-			labelname = result_alloc[i][0].split(" ")[0]
-			print(labelname)
-			plt.plot(x_values, y_values, marker='', color=colours[labelname], linewidth=1, label=labelname)
-			plt.fill_between(x_values, y_values-y_stddev, y_values+y_stddev, alpha=0.5, edgecolor=colours[labelname], facecolor=colours[labelname])
-		if plotscale == "log":
-			plt.yscale("log")
-		plt.ylabel('ms')
-		plt.xlabel('Bytes')
-		plt.title("Allocation performance for " + str(num_allocations) + " allocations (mean + std-dev)")
-		plt.legend()
-		plt.savefig(str("results/plots/") + time_string + "_alloc.pdf", dpi=600)		
+		std_dev_offset = 1
+		min_offset = 2
+		max_offset = 3
+		median_offset = 4
+		####################################################################################################
+		# Alloc - Mean - Std-dev
+		####################################################################################################
+		plotMean(result_alloc, 
+			plotscale, 
+			'Bytes', 
+			'ms', 
+			"Allocation performance for " + str(num_allocations) + " allocations (mean + std-dev)", 
+			str("results/plots/") + time_string + "_alloc.pdf",
+			"stddev")
 
-		# Clear Figure
-		plt.clf()
+		####################################################################################################
+		# Free - Mean - Std-dev
+		####################################################################################################
+		plotMean(result_free, 
+			plotscale, 
+			'Bytes', 
+			'ms', 
+			"Free performance for " + str(num_allocations) + " allocations (mean + std-dev)", 
+			str("results/plots/") + time_string + "_free.pdf",
+			"stddev")
 
-		# Plot free plot
-		x_values = np.asarray([float(i) for i in result_free[0][1:]])
-		for i in range(1, len(result_free), 5):
-			y_values = np.asarray([float(i) for i in result_free[i][1:]])
-			y_stddev = np.asarray([float(i) for i in result_free[i+1][1:]])
-			labelname = result_free[i][0].split(" ")[0]
-			plt.plot(x_values, y_values, marker='', color=colours[labelname], linewidth=1, label=labelname)
-			plt.fill_between(x_values, y_values-y_stddev, y_values+y_stddev, alpha=0.5, edgecolor=colours[labelname], facecolor=colours[labelname])
-		if plotscale == "log":
-			plt.yscale("log")
-		plt.ylabel('ms')
-		plt.xlabel('Bytes')
-		plt.title("Free performance for " + str(num_allocations) + " allocations (mean + std-dev)")
-		plt.legend()
-		plt.savefig(str("results/plots/") + time_string + "_free.pdf", dpi=600)
+		####################################################################################################
+		# Alloc - Mean - Min/Max
+		####################################################################################################
+		plotMean(result_alloc, 
+			plotscale, 
+			'Bytes', 
+			'ms', 
+			"Allocation performance for " + str(num_allocations) + " allocations (mean + min/max)", 
+			str("results/plots/") + time_string + "_alloc_min_max.pdf",
+			"minmax")
 
-		# Clear Figure
-		plt.clf()
+		####################################################################################################
+		# Free - Mean - Min/Max
+		####################################################################################################
+		plotMean(result_free, 
+			plotscale, 
+			'Bytes', 
+			'ms', 
+			"Free performance for " + str(num_allocations) + " allocations (mean + min/max)", 
+			str("results/plots/") + time_string + "_free_min_max.pdf",
+			"minmax")
 
-		x_values = np.asarray([float(i) for i in result_alloc[0][1:]])
-		for i in range(1, len(result_alloc), 5):
-			y_values = np.asarray([float(i) for i in result_alloc[i][1:]])
-			y_min = np.asarray([float(i) for i in result_alloc[i+2][1:]])
-			y_max = np.asarray([float(i) for i in result_alloc[i+3][1:]])
-			labelname = result_alloc[i][0].split(" ")[0]
-			plt.plot(x_values, y_values, marker='', color=colours[labelname], linewidth=1, label=labelname)
-			plt.fill_between(x_values, y_min, y_max, alpha=0.5, edgecolor=colours[labelname], facecolor=colours[labelname])
-		if plotscale == "log":
-			plt.yscale("log")
-		plt.ylabel('ms')
-		plt.xlabel('Bytes')
-		plt.title("Allocation performance for " + str(num_allocations) + " allocations (mean + min/max)")
-		plt.legend()
-		plt.savefig(str("results/plots/") + time_string + "_alloc_min_max.pdf", dpi=600)
+		####################################################################################################
+		# Alloc - Median
+		####################################################################################################
+		plotMean(result_alloc, 
+			plotscale, 
+			'Bytes', 
+			'ms', 
+			"Allocation performance for " + str(num_allocations) + " allocations (median)", 
+			str("results/plots/") + time_string + "_alloc_median.pdf",
+			"median")
 
-		# Clear Figure
-		plt.clf()
-
-		x_values = np.asarray([float(i) for i in result_free[0][1:]])
-		for i in range(1, len(result_free), 5):
-			y_values = np.asarray([float(i) for i in result_free[i][1:]])
-			y_min = np.asarray([float(i) for i in result_free[i+2][1:]])
-			y_max = np.asarray([float(i) for i in result_free[i+3][1:]])
-			labelname = result_free[i][0].split(" ")[0]
-			plt.plot(x_values, y_values, marker='', color=colours[labelname], linewidth=1, label=labelname)
-			plt.fill_between(x_values, y_min, y_max, alpha=0.5, edgecolor=colours[labelname], facecolor=colours[labelname])
-		if plotscale == "log":
-			plt.yscale("log")
-		plt.ylabel('ms')
-		plt.xlabel('Bytes')
-		plt.title("Free performance for " + str(num_allocations) + " allocations (mean + min/max)")
-		plt.legend()
-		plt.savefig(str("results/plots/") + time_string + "_free_min_max.pdf", dpi=600)
-
-		plt.clf()
-
-		x_values = np.asarray([float(i) for i in result_alloc[0][1:]])
-		for i in range(1, len(result_alloc), 5):
-			y_values = np.asarray([float(i) for i in result_alloc[i+4][1:]])
-			labelname = result_alloc[i][0].split(" ")[0]
-			plt.plot(x_values, y_values, marker='', color=colours[labelname], linewidth=1, label=labelname)
-		if plotscale == "log":
-			plt.yscale("log")
-		plt.ylabel('ms')
-		plt.xlabel('Bytes')
-		plt.title("Allocation performance for " + str(num_allocations) + " allocations (median)")
-		plt.legend()
-		plt.savefig(str("results/plots/") + time_string + "_alloc_median.pdf", dpi=600)		
-
-		# Clear Figure
-		plt.clf()
-
-		# Plot free plot
-		x_values = np.asarray([float(i) for i in result_free[0][1:]])
-		for i in range(1, len(result_free), 5):
-			y_values = np.asarray([float(i) for i in result_free[i+4][1:]])
-			labelname = result_free[i][0].split(" ")[0]
-			plt.plot(x_values, y_values, marker='', color=colours[labelname], linewidth=1, label=labelname)
-		if plotscale == "log":
-			plt.yscale("log")
-		plt.ylabel('ms')
-		plt.xlabel('Bytes')
-		plt.title("Free performance for " + str(num_allocations) + " allocations (median)")
-		plt.legend()
-		plt.savefig(str("results/plots/") + time_string + "_free_median.pdf", dpi=600)
+		####################################################################################################
+		# Free - Median
+		####################################################################################################
+		plotMean(result_free, 
+			plotscale, 
+			'Bytes', 
+			'ms', 
+			"Free performance for " + str(num_allocations) + " allocations (median)", 
+			str("results/plots/") + time_string + "_free_median.pdf",
+			"median")
 
 	####################################################################################################
 	####################################################################################################

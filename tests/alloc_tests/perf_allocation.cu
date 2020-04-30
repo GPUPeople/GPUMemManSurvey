@@ -142,7 +142,7 @@ int main(int argc, char* argv[])
 	bool onDeviceMeasure{false};
 	bool print_output{true};
 	bool generate_output{false};
-	bool write_header{false};
+	int write_header{0};
 	bool free_memory{true};
 	std::string initial_path{"../results/tmp/"};
 	if(argc >= 2)
@@ -170,7 +170,7 @@ int main(int argc, char* argv[])
 							generate_output = static_cast<bool>(atoi(argv[6]));
 							if(argc >= 8)
 							{
-								write_header = static_cast<bool>(atoi(argv[7]));
+								write_header = atoi(argv[7]);
 								if(argc >= 9)
 								{
 									free_memory = static_cast<bool>(atoi(argv[8]));
@@ -278,15 +278,30 @@ int main(int argc, char* argv[])
 	std::ofstream results_alloc, results_free;
 	if(generate_output)
 	{
-		results_alloc.open((initial_path + std::string("alloc_") + prop.name  + "_" + mem_name + "_" + std::to_string(num_allocations) + ".csv").c_str(), std::ios_base::app);
-		results_free.open((initial_path + std::string("free_") + prop.name + "_" + mem_name + "_" + std::to_string(num_allocations) + ".csv").c_str(), std::ios_base::app);
-		if(write_header)
+		if(write_header < 2)
 		{
-			results_alloc << "AllocationSize (in Byte), mean, std-dev, min, max, median";
-			results_free << "AllocationSize (in Byte), mean, std-dev, min, max, median";
+			results_alloc.open((initial_path + std::string("alloc_") + prop.name  + "_" + mem_name + "_" + std::to_string(num_allocations) + ".csv").c_str(), std::ios_base::app);
+			results_free.open((initial_path + std::string("free_") + prop.name + "_" + mem_name + "_" + std::to_string(num_allocations) + ".csv").c_str(), std::ios_base::app);
+			if(write_header == 1)
+			{
+				results_alloc << "AllocationSize (in Byte), mean, std-dev, min, max, median";
+				results_free << "AllocationSize (in Byte), mean, std-dev, min, max, median";
+			}
+			results_alloc << "\n" << allocation_size_byte << ",";
+			results_free << "\n" << allocation_size_byte << ",";
 		}
-		results_alloc << "\n" << allocation_size_byte << ",";
-		results_free << "\n" << allocation_size_byte << ",";
+		else
+		{
+			results_alloc.open((initial_path + std::string("alloc_") + prop.name  + "_" + mem_name + "_" + std::to_string(allocation_size_byte) + ".csv").c_str(), std::ios_base::app);
+			results_free.open((initial_path + std::string("free_") + prop.name + "_" + mem_name + "_" + std::to_string(allocation_size_byte) + ".csv").c_str(), std::ios_base::app);
+			if(write_header == 3)
+			{
+				results_alloc << "Number Threads, mean, std-dev, min, max, median";
+				results_free << "Number Threads, mean, std-dev, min, max, median";
+			}
+			results_alloc << "\n" << num_allocations << ",";
+			results_free << "\n" << num_allocations << ",";
+		}
 	}
 
 	int blockSize {256};
@@ -317,13 +332,13 @@ int main(int argc, char* argv[])
 			CHECK_ERROR(cudaDeviceSynchronize());
 		}
 
-		d_testWriteToMemory<<<gridSize, blockSize>>>(d_memory, num_allocations, allocation_size_byte);
+		// d_testWriteToMemory<<<gridSize, blockSize>>>(d_memory, num_allocations, allocation_size_byte);
 
-		CHECK_ERROR(cudaDeviceSynchronize());
+		// CHECK_ERROR(cudaDeviceSynchronize());
 
-		d_testReadFromMemory<<<gridSize, blockSize>>>(d_memory, num_allocations, allocation_size_byte);
+		// d_testReadFromMemory<<<gridSize, blockSize>>>(d_memory, num_allocations, allocation_size_byte);
 
-		CHECK_ERROR(cudaDeviceSynchronize());
+		// CHECK_ERROR(cudaDeviceSynchronize());
 
 		if(free_memory)
 		{

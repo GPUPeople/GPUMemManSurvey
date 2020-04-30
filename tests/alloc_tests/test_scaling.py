@@ -7,6 +7,8 @@ import shutil
 import time
 from datetime import datetime
 from timedprocess import Command
+from Helper import generateResultsFromFileAllocation
+from Helper import plotMean
 import pandas
 import numpy as np
 import csv
@@ -45,8 +47,8 @@ def main():
 
 	parser = argparse.ArgumentParser(description='Test allocation performance for various frameworks')
 	parser.add_argument('-t', type=str, help='Specify which frameworks to test, separated by +, e.g. o+s+h+c+f+r ---> c : cuda | s : scatteralloc | h : halloc | o : ouroboros | f : fdgmalloc | r : register-efficient')
-	parser.add_argument('-byterange', type=str, help='Specify Allocation Range, given as powers of two, e.g. 0-5 -> results in 1-32')
-	parser.add_argument('-threadrange', type=str, help='Specify Allocation Range, given as powers of two, e.g. 0-5 -> results in 1-32')
+	parser.add_argument('-byterange', type=str, help='Specify Allocation Range, e.g. 16-8192')
+	parser.add_argument('-threadrange', type=str, help='Specify number of threads, given as powers of two, e.g. 0-5 -> results in 1-32')
 	parser.add_argument('-iter', type=int, help='How many iterations?')
 	parser.add_argument('-runtest', action='store_true', default=False, help='Run testcases')
 	parser.add_argument('-genres', action='store_true', default=False, help='Generate results')
@@ -66,11 +68,11 @@ def main():
 			testcases.append(build_path + str("s_alloc_test"))
 		if any("o" in s for s in args.t):
 			testcases.append(build_path + str("o_alloc_test_p"))
-			testcases.append(build_path + str("o_alloc_test_c"))
-			testcases.append(build_path + str("o_alloc_test_vap"))
-			testcases.append(build_path + str("o_alloc_test_vac"))
-			testcases.append(build_path + str("o_alloc_test_vlp"))
-			testcases.append(build_path + str("o_alloc_test_vlc"))
+			# testcases.append(build_path + str("o_alloc_test_c"))
+			# testcases.append(build_path + str("o_alloc_test_vap"))
+			# testcases.append(build_path + str("o_alloc_test_vac"))
+			# testcases.append(build_path + str("o_alloc_test_vlp"))
+			# testcases.append(build_path + str("o_alloc_test_vlc"))
 		if any("c" in s for s in args.t):
 			testcases.append(build_path + str("c_alloc_test"))
 		if any("f" in s for s in args.t):
@@ -85,13 +87,13 @@ def main():
 	
 	# Parse allocation size
 	if(args.byterange):
-		selected_range = args.range.split('-')
-		smallest_allocation_size = 2 ** int(selected_range[0])
-		largest_allocation_size = 2 ** int(selected_range[1])
+		selected_range = args.byterange.split('-')
+		smallest_allocation_size = int(selected_range[0])
+		largest_allocation_size = int(selected_range[1])
 
 	# Parse range
 	if(args.threadrange):
-		selected_range = args.range.split('-')
+		selected_range = args.threadrange.split('-')
 		smallest_num_threads = 2 ** int(selected_range[0])
 		largest_num_threads = 2 ** int(selected_range[1])
 
@@ -113,6 +115,9 @@ def main():
 
 	# Generate plots
 	generate_plots = args.genplot
+	
+	# Plot Axis scaling
+	plotscale = args.plotscale
 
 	# Clean temporary files
 	clean_temporary_files = args.cleantemp
@@ -138,17 +143,19 @@ def main():
 	####################################################################################################
 	####################################################################################################
 	if run_testcases:
-		for executable in testcases:
-			allocation_size = smallest_allocation_size
-			while allocation_size <= largest_allocation_size:
+		allocation_size = smallest_allocation_size
+		while allocation_size <= largest_allocation_size:
+			for executable in testcases:
+				write_header = 3
 				num_threads = smallest_num_threads
 				while num_threads <= largest_num_threads:
-					run_config = str(smallest_num_threads) + " " + str(smallest_allocation_size) + " " + str(num_iterations) + " " + str(measure_on_device) + " " + str(test_warp_based) + " 1 " + str(free_memory) + " results/tmp/"
+					run_config = str(num_threads) + " " + str(allocation_size) + " " + str(num_iterations) + " " + str(measure_on_device) + " " + str(test_warp_based) + " 1 " + str(write_header) + " " + str(free_memory) + " results/tmp/"
 					executecommand = "{0} {1}".format(executable, run_config)
-					print(executecommand)
+					print("Running -> " + executecommand)
 					Command(executecommand).run(timeout=time_out_val)
 					num_threads *= 2
-				allocation_size *= 2
+					write_header = 2
+			allocation_size *= 2
 
 	####################################################################################################
 	####################################################################################################
@@ -156,7 +163,10 @@ def main():
 	####################################################################################################
 	####################################################################################################
 	if generate_results:
-		print("Generalte results")
+		allocation_size = smallest_allocation_size
+		while allocation_size <= largest_allocation_size:
+			generateResultsFromFileAllocation(allocation_size, "Threads", "scale")
+			allocation_size *= 2
 
 	####################################################################################################
 	####################################################################################################
@@ -164,7 +174,106 @@ def main():
 	####################################################################################################
 	####################################################################################################
 	if generate_plots:
-		print("Generalte plots")
+		# Get Timestring
+		now = datetime.now()
+		time_string = now.strftime("%b-%d-%Y_%H-%M-%S")
+
+		# Generate plots for each byte size
+		byte_range = []
+		start_val = smallest_allocation_size
+		while start_val <= largest_allocation_size:
+			byte_range.append(start_val)
+			start_val *= 2
+
+		for num_bytes in byte_range:
+			# Generate plots for this byte size
+			print("Generate plots for size: " + str(num_bytes) + " Bytes")
+			result_alloc = list(list())
+			result_free = list(list())			
+
+			for file in os.listdir("results/tmp/aggregate"):
+				filename = str("results/tmp/aggregate/") + os.fsdecode(file)
+				if(os.path.isdir(filename)):
+					continue
+				if filename.split("_")[2] != "scale":
+					continue
+				# We want the one matching our input
+				if filename.split("_")[4].split(".")[0] == str(num_bytes):
+					with open(filename) as f:
+						reader = csv.reader(f)
+						if "free" in filename:
+							result_free = list(reader)
+						else:
+							result_alloc = list(reader)
+
+			print(result_alloc)
+			print(result_free)
+			####################################################################################################
+		# Alloc - Mean - Std-dev
+		####################################################################################################
+		plotMean(result_alloc, 
+			plotscale, 
+			'Bytes', 
+			'ms', 
+			"Allocation Scaling for " + str(num_bytes) + " allocations (mean + std-dev)", 
+			str("results/plots/") + time_string + "_alloc.pdf",
+			"stddev")
+
+		####################################################################################################
+		# Free - Mean - Std-dev
+		####################################################################################################
+		plotMean(result_free, 
+			plotscale, 
+			'Bytes', 
+			'ms', 
+			"Free scaling for " + str(num_bytes) + " allocations (mean + std-dev)", 
+			str("results/plots/") + time_string + "_free.pdf",
+			"stddev")
+
+		####################################################################################################
+		# Alloc - Mean - Min/Max
+		####################################################################################################
+		plotMean(result_alloc, 
+			plotscale, 
+			'Bytes', 
+			'ms', 
+			"Allocation scaling for " + str(num_bytes) + " allocations (mean + min/max)", 
+			str("results/plots/") + time_string + "_alloc_min_max.pdf",
+			"minmax")
+
+		####################################################################################################
+		# Free - Mean - Min/Max
+		####################################################################################################
+		plotMean(result_free, 
+			plotscale, 
+			'Bytes', 
+			'ms', 
+			"Free scaling for " + str(num_bytes) + " allocations (mean + min/max)", 
+			str("results/plots/") + time_string + "_free_min_max.pdf",
+			"minmax")
+
+		####################################################################################################
+		# Alloc - Median
+		####################################################################################################
+		plotMean(result_alloc, 
+			plotscale, 
+			'Bytes', 
+			'ms', 
+			"Allocation scaling for " + str(num_bytes) + " allocations (median)", 
+			str("results/plots/") + time_string + "_alloc_median.pdf",
+			"median")
+
+		####################################################################################################
+		# Free - Median
+		####################################################################################################
+		plotMean(result_free, 
+			plotscale, 
+			'Bytes', 
+			'ms', 
+			"Free scaling for " + str(num_bytes) + " allocations (median)", 
+			str("results/plots/") + time_string + "_free_median.pdf",
+			"median")
+
 
 	####################################################################################################
 	####################################################################################################
