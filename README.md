@@ -10,7 +10,7 @@ Then execute the automated script!
 | Framework | Status | Link to Paper | Code |
 |:---:|:---:|:---:| :---:|
 | CUDA Device Allocator | Done 	| - | - |
-| XMalloc (2010)				| 	X 	| [Webpage](http://hdl.handle.net/2142/16137) | - |
+| XMalloc (2010)				| 	WIP 	| [Webpage](http://hdl.handle.net/2142/16137) | - |
 | ScatterAlloc (2012) 			| Done 	| [Webpage](https://ieeexplore.ieee.org/document/6339604) | [GitHub - Repository](https://github.com/ax3l/scatteralloc) |
 | FDGMalloc (2013) 			    |  Bug 	| [Webpage](https://www.gcc.tu-darmstadt.de/media/gcc/papers/Widmer_2013_FDM.pdf) | [Webpage](https://www.gcc.tu-darmstadt.de/home/proj/fdgmalloc/index.en.jsp) |
 | Register Efficient (2014)	    | Done	| [Webpage](https://diglib.eg.org/bitstream/handle/10.2312/hpg.20141090.019-027/019-027.pdf?sequence=1&isAllowed=y) | [Webpage](http://decibel.fi.muni.cz/~xvinkl/CMalloc/) |

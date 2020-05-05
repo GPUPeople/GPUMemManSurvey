@@ -1,0 +1,30 @@
+The XMalloc library is distributed as an open source project.  See the LICENSE
+file for details.  This release of XMalloc has seen limited testing, and may
+therefore have bugs.
+
+To incorporate XMalloc into a project, include the following two lines in the
+CUDA files that use XMalloc:
+
+#define XMC_DISABLE_SUPERBLOCKS
+#include "Xmalloc.cu"
+
+The purpose of the preprocessor variable definition is to disable an XMalloc
+feature that, according to our most recent performance tests, does not improve
+the performance of the allocator.
+
+XMalloc requires CUDA compute capability 2.0 or higher.  When compiling using
+NVCC, a flag such as -arch=sm_20 may be required to enable CUDA compute
+capability 2.0.
+
+A program using XMalloc must initialize the heap by calling xmcInit() before
+allocating memory from XMalloc.  Optionally, the heap may be resized using
+the CUDA API before calling xmcInit().  Memory is allocated by calling
+xmcMalloc(n) where n is the number of bytes to allocate.  A pointer p is freed
+by calling xmcFree(p).
+
+The CUDA programming model imposes some additional requirements on data that is
+used for inter-thread communication.  Data that is used to send data from one
+thread block to another thread block in the same kernel must be qualified with
+the 'volatile' keyword.  It is not necessary to use 'volatile' to qualify data
+that is written and read entirely within a single thread block and/or data that
+is read after the termination of the kernel that wrote it.

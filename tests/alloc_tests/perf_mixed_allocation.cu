@@ -24,7 +24,38 @@
 
 int main(int argc, char* argv[])
 {
-    
+	unsigned int num_allocations{10000};
+	unsigned int allocation_size_byte_low{4};
+	unsigned int allocation_size_byte_high{8192};
+	int num_iterations {100};
+	bool warp_based{false};
+	bool onDeviceMeasure{false};
+	bool generate_output{false};
+	bool free_memory{true};
+	std::string alloc_csv_path{"../results/tmp/"};
+	std::string free_csv_path{"../results/tmp/"};
+	if(argc >= 11)
+	{
+		num_allocations = atoi(argv[1]);
+		allocation_size_byte_low = atoi(argv[2]);
+		allocation_size_byte_high = atoi(argv[3]);
+		num_iterations = atoi(argv[4]);
+		onDeviceMeasure = static_cast<bool>(atoi(argv[5]));
+		warp_based = static_cast<bool>(atoi(argv[6]));
+		generate_output = static_cast<bool>(atoi(argv[7]));
+		free_memory = static_cast<bool>(atoi(argv[8]));
+		alloc_csv_path = std::string(argv[9]);
+		free_csv_path = std::string(argv[10]);
+	}
+	else
+	{
+		std::cout << "Invalid configuration!\n";
+		std::cout << "Call as ./mixed_allocation <num_alloc> <min_size_range> <max_size_range> ";
+		std::cout << "<num_iter> <device_measure> <warp_based> <output> <free_mem> <alloc_csv> <free_csv>\n";
+		exit(-1);
+	}
+			
+
 #ifdef TEST_CUDA
 	std::cout << "--- CUDA ---\n";
 	MemoryManagerCUDA memory_manager;
