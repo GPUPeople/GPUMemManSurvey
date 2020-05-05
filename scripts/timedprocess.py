@@ -27,11 +27,13 @@ class Command(object):
         thread = threading.Thread(target=self.run_command, args=(capture,))
         thread.start()
         thread.join(timeout)
+        thread_killed = False
         if thread.is_alive():
             print('Command timeout, kill it: ' + self.cmd)
             self.process.terminate()
             thread.join()
-        return self.out
+            thread_killed = True
+        return self.out, thread_killed
 
 
 # Example

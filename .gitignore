@@ -8,5 +8,4 @@ frameworks/ouroboros/repository
 scripts/__pycache__
 .vscode/
 externals/
-tests/alloc_tests/results/tmp/
 tests/alloc_tests/results/plots/

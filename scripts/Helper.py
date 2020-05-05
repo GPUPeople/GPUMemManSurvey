@@ -22,8 +22,8 @@ colours = {
 # Generate new Results
 ####################################################################################################
 ####################################################################################################
-def generateResultsFromFileAllocation(identifier, dimension_name, output_name_short):
-    print("Generate Results for identifier " + str(identifier))
+def generateResultsFromFileAllocation(param1, param2, param3, dimension_name, output_name_short):
+    print("Generate Results for identifier " + str(param1) + "_" + str(param2) + "-" + str(param3))
     # Gather results
     result_alloc = list(list())
     result_free = list(list())
@@ -35,7 +35,7 @@ def generateResultsFromFileAllocation(identifier, dimension_name, output_name_sh
         filename = str("results/tmp/") + os.fsdecode(file)
         if(os.path.isdir(filename)):
             continue
-        if str(identifier) != filename.split('_')[3].split(".")[0]:
+        if str(param1) != filename.split('_')[3] or str(param2) + "-" + str(param3) != filename.split('_')[4].split(".")[0]:
             continue
         print("Processing -> " + str(filename))
         approach_name = filename.split('_')[2]
@@ -78,15 +78,15 @@ def generateResultsFromFileAllocation(identifier, dimension_name, output_name_sh
 
     # Generate output file
     print("------------------")
-    print("Generating -> " + time_string + str("_") + output_name_short + str("_alloc_") + str(identifier) + str(".csv"))
-    alloc_name = str("results/tmp/aggregate/") + time_string + str("_") + output_name_short + str("_alloc_") + str(identifier) + str(".csv")
+    print("Generating -> " + time_string + str("_") + output_name_short + str("_alloc_") + str(param1) + "_" + str(param2) + "-" + str(param3) + str(".csv"))
+    alloc_name = str("results/tmp/aggregate/") + time_string + str("_") + output_name_short + str("_alloc_") + str(param1) + "_" + str(param2) + "-" + str(param3) + str(".csv")
     with(open(alloc_name, "w")) as f:
         writer = csv.writer(f, delimiter=',')
         for row in result_alloc:
             writer.writerow(row)
     
-    print("Generating -> " + time_string + str("_") + output_name_short + str("_free_") + str(identifier) + str(".csv"))
-    free_name = str("results/tmp/aggregate/") + time_string + str("_") + output_name_short + str("_free_") + str(identifier) + str(".csv")
+    print("Generating -> " + time_string + str("_") + output_name_short + str("_free_") + str(param1) + "_" + str(param2) + "-" + str(param3) + str(".csv"))
+    free_name = str("results/tmp/aggregate/") + time_string + str("_") + output_name_short + str("_free_") + str(param1) + "_" + str(param2) + "-" + str(param3) + str(".csv")
     with(open(free_name, "w")) as f:
         writer = csv.writer(f, delimiter=',')
         for row in result_free:
@@ -99,7 +99,7 @@ max_offset = 3
 median_offset = 4
 
 # Plot mean as a line plot with std-dev
-def plotMean(results, plotscale, xlabel, ylabel, title, filename, variant):
+def plotMean(results, plotscale, plotrange, xlabel, ylabel, title, filename, variant):
     x_values = np.asarray([float(i) for i in results[0][1:]])
     for i in range(1, len(results), 5):
         y_values = None
@@ -117,9 +117,9 @@ def plotMean(results, plotscale, xlabel, ylabel, title, filename, variant):
             y_min = np.asarray([float(i) for i in results[i+min_offset][1:]])
             y_max = np.asarray([float(i) for i in results[i+max_offset][1:]])
         labelname = results[i][0].split(" ")[0]
-        print(labelname)
+        print("Generate plot for " + labelname + " with " + variant)
         plt.plot(x_values, y_values, marker='', color=colours[labelname], linewidth=1, label=labelname)
-        if variant != "median":
+        if plotrange:
             plt.fill_between(x_values, y_min, y_max, alpha=0.5, edgecolor=colours[labelname], facecolor=colours[labelname])
     if plotscale == "log":
         plt.yscale("log")
