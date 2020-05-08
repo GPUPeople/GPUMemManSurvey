@@ -170,6 +170,7 @@ int main(int argc, char* argv[])
 	cudaEvent_t start, end;
 	for(auto i = 0; i < num_iterations; ++i)
 	{
+		std::cout << "Iteration " << i + 1 << " / " << num_iterations << std::endl;
 		Utils::start_clock(start, end);
 		d_testAllocation <decltype(memory_manager)> <<<gridSize, blockSize>>>(memory_manager, d_memory, num_allocations, allocation_size_byte);
 		timing_allocation += Utils::end_clock(start, end);

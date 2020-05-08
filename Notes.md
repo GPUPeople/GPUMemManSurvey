@@ -47,6 +47,11 @@ Text
 ### Circular Fused
 Text
 
+## XMalloc
+---
+* Only works in sync-mode
+* Allocates from the cudaHeap, hence cannot reallocate unfortunately
+
 ## DynaSOAr
 ---
 * Can only allocate objects implemented in their specific format

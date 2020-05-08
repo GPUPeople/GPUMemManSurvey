@@ -9,7 +9,7 @@ struct MemoryManagerXMalloc : public MemoryManagerBase
 	{
 		if(initialized)
 			return;
-		// cudaDeviceSetLimit(cudaLimitMallocHeapSize, size);
+		cudaDeviceSetLimit(cudaLimitMallocHeapSize, size);
 		if(xmcInit(size) == 0)
 		{
 			printf("Error on Init for XMalloc!\n");
