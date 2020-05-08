@@ -82,13 +82,13 @@ InitializeGPUHeap(void)
 // Allocate (don't initialize) global heap data and free lists.
 // Initialize constant data in xmcConstants.
 int
-xmcInit(void)
+xmcInit(size_t heap_size)
 {
   ConstantSystemHeader constants;
 
   // How big is the heap?
-  size_t heap_size;
-	cudaDeviceGetLimit(&heap_size, cudaLimitMallocHeapSize);
+  // size_t heap_size;
+	// cudaDeviceGetLimit(&heap_size, cudaLimitMallocHeapSize);
   constants.heapSize = heap_size;
 
   // Allocate free lists on the heap.  Also, use the memory address to

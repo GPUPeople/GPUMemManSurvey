@@ -8,8 +8,9 @@ import matplotlib.pyplot as plt
 
 colours = {
 	'Halloc' : 'orange' , 
+    'XMalloc' : 'silver',
 	'Ouroboros-P-VA' : 'lightcoral' , 'Ouroboros-P-VL' : 'darkred' , 'Ouroboros-P-S' : 'red' ,
-	'Ouroboros-C-VA' : 'red' , 'Ouroboros-C-VL' : 'red' , 'Ouroboros-C-S' : 'red' ,
+	'Ouroboros-C-VA' : 'deepskyblue' , 'Ouroboros-C-VL' : 'royalblue' , 'Ouroboros-C-S' : 'navy' ,
 	'CUDA' : 'green' , 
 	'ScatterAlloc' : 'blue' , 
 	'FDGMalloc' : 'gold' , 

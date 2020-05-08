@@ -12,6 +12,7 @@ option(TEST_SCATTERALLOC "Test ScatterAlloc" True)
 option(TEST_OUROBOROS "Test Ouroboros" True)
 option(TEST_FDG "Test FDGMalloc" True)
 option(TEST_REG "Test Register-Efficient" True)
+option(TEST_XMALLOC "Test XMalloc" True)
 
 ##########################################################################
 ##########################################################################
@@ -52,6 +53,23 @@ if(TEST_HALLOC)
 	)
 	target_compile_definitions(h_frag_test PUBLIC TEST_HALLOC)
 	target_include_directories(h_frag_test PUBLIC ${BASE_PATH}frameworks/halloc/repository/src)
+
+endif ()
+
+##########################################################################
+##########################################################################
+##########################################################################
+# XMalloc
+##########################################################################
+##########################################################################
+##########################################################################
+if(TEST_XMALLOC)
+	
+	add_executable(x_frag_test
+		frag_memory_overhead.cu
+	)
+	target_compile_definitions(x_frag_test PUBLIC TEST_XMALLOC)
+	target_include_directories(x_frag_test PUBLIC ${BASE_PATH}frameworks/xmalloc)
 
 endif ()
 

@@ -12,6 +12,7 @@ option(TEST_SCATTERALLOC "Test ScatterAlloc" True)
 option(TEST_OUROBOROS "Test Ouroboros" True)
 option(TEST_FDG "Test FDGMalloc" True)
 option(TEST_REG "Test Register-Efficient" True)
+option(TEST_XMALLOC "Test XMalloc" True)
 
 ##########################################################################
 ##########################################################################
@@ -37,6 +38,23 @@ if(TEST_CUDA)
 	target_compile_definitions(c_main PUBLIC TEST_CUDA)
 
 endif()
+
+##########################################################################
+##########################################################################
+##########################################################################
+# XMalloc
+##########################################################################
+##########################################################################
+##########################################################################
+if(TEST_XMALLOC)
+
+	add_executable(x_main
+		src/main.cu
+	)
+	target_compile_definitions(x_main PUBLIC TEST_XMALLOC)
+	target_include_directories(x_main PUBLIC ${BASE_PATH}frameworks/xmalloc)
+
+endif ()
 
 ##########################################################################
 ##########################################################################

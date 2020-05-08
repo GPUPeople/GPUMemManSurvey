@@ -12,6 +12,7 @@ option(TEST_SCATTERALLOC "Test ScatterAlloc" True)
 option(TEST_OUROBOROS "Test Ouroboros" True)
 option(TEST_FDG "Test FDGMalloc" True)
 option(TEST_REG "Test Register-Efficient" True)
+option(TEST_XMALLOC "Test Xmalloc" True)
 
 ##########################################################################
 ##########################################################################
@@ -86,6 +87,29 @@ if(TEST_SCATTERALLOC)
 	)
 	target_compile_definitions(s_mixed_alloc_test PUBLIC TEST_SCATTERALLOC)
 	target_include_directories(s_mixed_alloc_test PUBLIC ${BASE_PATH}frameworks/scatteralloc/repository/src/include/mallocMC)
+
+endif ()
+
+##########################################################################
+##########################################################################
+##########################################################################
+# XMalloc
+##########################################################################
+##########################################################################
+##########################################################################
+if(TEST_XMALLOC)
+
+	add_executable(x_alloc_test
+		perf_allocation.cu
+	)
+	target_compile_definitions(x_alloc_test PUBLIC TEST_XMALLOC)
+	target_include_directories(x_alloc_test PUBLIC ${BASE_PATH}frameworks/xmalloc)
+
+	add_executable(x_mixed_alloc_test
+		perf_mixed_allocation.cu
+	)
+	target_compile_definitions(x_mixed_alloc_test PUBLIC TEST_XMALLOC)
+	target_include_directories(x_mixed_alloc_test PUBLIC ${BASE_PATH}frameworks/xmalloc)
 
 endif ()
 

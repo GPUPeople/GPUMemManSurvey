@@ -21,7 +21,7 @@ def main():
 	print("##############################################################################")
 	
 	# Specify which test configuration to use
-	testcases = list()
+	testcases = {}
 	num_allocations = 10000
 	smallest_allocation_size = 4
 	largest_allocation_size = 1024
@@ -47,15 +47,30 @@ def main():
 
 	# Parse approaches
 	if(args.t):
-		selected_approaches = args.t.split('+')
-		if any("h" in s for s in args.t):
-			testcases.append(build_path + str("h_fragmentation"))
-		if any("s" in s for s in args.t):
-			testcases.append(build_path + str("s_fragmentation"))
-		if any("o" in s for s in args.t):
-			testcases.append(build_path + str("o_fragmentation"))
 		if any("c" in s for s in args.t):
-			testcases.append(build_path + str("c_fragmentation"))
+			testcases["CUDA"] = build_path + str("c_alloc_test")
+		if any("x" in s for s in args.t):
+			testcases["XMalloc"] = build_path + str("x_alloc_test")
+		if any("h" in s for s in args.t):
+			testcases["Halloc"] = build_path + str("h_alloc_test")
+		if any("s" in s for s in args.t):
+			testcases["ScatterAlloc"] = sync_build_path + str("s_alloc_test")
+		if any("o" in s for s in args.t):
+			testcases["Ouroboros-P-S"] = build_path + str("o_alloc_test_p")
+			testcases["Ouroboros-C-S"] = build_path + str("o_alloc_test_c")
+			testcases["Ouroboros-P-VA"] = build_path + str("o_alloc_test_vap")
+			testcases["Ouroboros-C-VA"] = build_path + str("o_alloc_test_vac")
+			testcases["Ouroboros-P-VL"] = build_path + str("o_alloc_test_vlp")
+			testcases["Ouroboros-C-VL"] = build_path + str("o_alloc_test_vlc")
+		if any("f" in s for s in args.t):
+			testcases["FDGMalloc"] = build_path + str("f_alloc_test")
+		if any("r" in s for s in args.t):
+			testcases["RegEff-A"] = build_path + str("r_alloc_test_a")
+			testcases["RegEff-AW"] = build_path + str("r_alloc_test_aw")
+			# testcases["RegEff-C"] = build_path + str("r_alloc_test_c")
+			testcases["RegEff-CF"] = build_path + str("r_alloc_test_cf")
+			# testcases["RegEff-CM"] = build_path + str("r_alloc_test_cm")
+			testcases["RegEff-CFM"] = build_path + str("r_alloc_test_cfm")
 	
 	# Parse num allocation
 	if(args.num):
@@ -83,10 +98,8 @@ def main():
 	# Generate plots
 	clean_temporary_files = args.cleantemp
 
-	testcases.sort()
-
 	# Timeout (in seconds)
-	time_out_val = 5;
+	time_out_val = 5
 
 	####################################################################################################
 	####################################################################################################
@@ -94,7 +107,7 @@ def main():
 	####################################################################################################
 	####################################################################################################
 	if generate_results:
-		for executable in testcases:
+		for _, executable in testcases.items():
 			smallest_allocation_size = 4
 			while smallest_allocation_size <= largest_allocation_size:
 				warp_based = 0

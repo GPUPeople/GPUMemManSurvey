@@ -11,6 +11,8 @@
 #include "cuda/Instance.cuh"
 #elif TEST_HALLOC
 #include "halloc/Instance.cuh"
+#elif TEST_XMALLOC
+#include "xmalloc/Instance.cuh"
 #elif TEST_SCATTERALLOC
 #include "scatteralloc/Instance.cuh"
 #elif TEST_OUROBOROS
@@ -106,6 +108,10 @@ int main(int argc, char* argv[])
 	std::cout << "--- CUDA ---\n";
 	MemoryManagerCUDA memory_manager;
 	std::string mem_name("CUDA");
+#elif TEST_XMALLOC
+	std::cout << "--- XMalloc ---\n";
+	MemoryManagerXMalloc memory_manager;
+	std::string mem_name("XMalloc");
 #elif TEST_HALLOC
 	std::cout << "--- Halloc ---\n";
 	MemoryManagerHalloc memory_manager;

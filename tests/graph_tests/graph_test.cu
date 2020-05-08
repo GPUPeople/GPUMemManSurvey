@@ -26,6 +26,8 @@ using json = nlohmann::json;
 #include "cuda/Instance.cuh"
 #elif TEST_HALLOC
 #include "halloc/Instance.cuh"
+#elif TEST_XMALLOC
+#include "xmalloc/Instance.cuh"
 #elif TEST_SCATTERALLOC
 #include "scatteralloc/Instance.cuh"
 #elif TEST_OUROBOROS
@@ -160,6 +162,9 @@ int main(int argc, char* argv[])
         #elif TEST_HALLOC
         std::cout << "--- Halloc ---\n";
         using MemoryManagerType = MemoryManagerHalloc;
+        #elif TEST_XMALLOC
+        std::cout << "--- XMalloc ---\n";
+        using MemoryManagerType = MemoryManagerXMalloc;
         #elif TEST_SCATTERALLOC
         std::cout << "--- ScatterAlloc ---\n";
         using MemoryManagerType = MemoryManagerScatterAlloc;

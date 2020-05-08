@@ -21,7 +21,7 @@
 
 // Initialize XMalloc.
 // Returns zero on error, nonzero on success.
-int xmcInit(void);
+int xmcInit(size_t size);
 
 // Read and print performance statistics.  This will do nothing unless
 // XMC_PERFCOUNT is defined.

@@ -30,7 +30,7 @@ def main():
 	sync_build_path = "sync_build/"
 
 	parser = argparse.ArgumentParser(description='Test allocation performance for various frameworks')
-	parser.add_argument('-t', type=str, help='Specify which frameworks to test, separated by +, e.g. o+s+h+c+f+r ---> c : cuda | s : scatteralloc | h : halloc | o : ouroboros | f : fdgmalloc | r : register-efficient')
+	parser.add_argument('-t', type=str, help='Specify which frameworks to test, separated by +, e.g. o+s+h+c+f+r+x ---> c : cuda | s : scatteralloc | h : halloc | o : ouroboros | f : fdgmalloc | r : register-efficient | x : xmalloc')
 	parser.add_argument('-byterange', type=str, help='Specify Allocation Range, e.g. 16-8192')
 	parser.add_argument('-threadrange', type=str, help='Specify number of threads, given as powers of two, e.g. 0-5 -> results in 1-32')
 	parser.add_argument('-iter', type=int, help='How many iterations?')
@@ -48,6 +48,10 @@ def main():
 
 	# Parse approaches
 	if(args.t):
+		if any("c" in s for s in args.t):
+			testcases["CUDA"] = build_path + str("c_alloc_test")
+		if any("x" in s for s in args.t):
+			testcases["XMalloc"] = build_path + str("x_alloc_test")
 		if any("h" in s for s in args.t):
 			testcases["Halloc"] = build_path + str("h_alloc_test")
 		if any("s" in s for s in args.t):
@@ -59,8 +63,6 @@ def main():
 			testcases["Ouroboros-C-VA"] = build_path + str("o_alloc_test_vac")
 			testcases["Ouroboros-P-VL"] = build_path + str("o_alloc_test_vlp")
 			testcases["Ouroboros-C-VL"] = build_path + str("o_alloc_test_vlc")
-		if any("c" in s for s in args.t):
-			testcases["CUDA"] = build_path + str("c_alloc_test")
 		if any("f" in s for s in args.t):
 			testcases["FDGMalloc"] = build_path + str("f_alloc_test")
 		if any("r" in s for s in args.t):

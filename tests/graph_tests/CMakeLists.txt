@@ -12,6 +12,7 @@ option(TEST_SCATTERALLOC "Test ScatterAlloc" True)
 option(TEST_OUROBOROS "Test Ouroboros" True)
 option(TEST_FDG "Test FDGMalloc" True)
 option(TEST_REG "Test Register-Efficient" True)
+option(TEST_XMALLOC "Test XMalloc" True)
 
 ##########################################################################
 ##########################################################################
@@ -71,6 +72,25 @@ if(TEST_HALLOC)
 	target_include_directories(h_graph_test PUBLIC ${BASE_PATH}frameworks/halloc/repository/src)
 
 	target_link_libraries(h_graph_test helper)
+
+endif ()
+
+##########################################################################
+##########################################################################
+##########################################################################
+# XMalloc
+##########################################################################
+##########################################################################
+##########################################################################
+if(TEST_XMALLOC)
+	
+	add_executable(x_graph_test
+		graph_test.cu
+	)
+	target_compile_definitions(x_graph_test PUBLIC TEST_XMALLOC)
+	target_include_directories(x_graph_test PUBLIC ${BASE_PATH}frameworks/xmalloc)
+
+	target_link_libraries(x_graph_test helper)
 
 endif ()
 
