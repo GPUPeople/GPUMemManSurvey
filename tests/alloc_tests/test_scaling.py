@@ -51,7 +51,7 @@ def main():
 		if any("c" in s for s in args.t):
 			testcases["CUDA"] = build_path + str("c_alloc_test")
 		if any("x" in s for s in args.t):
-			testcases["XMalloc"] = build_path + str("x_alloc_test")
+			testcases["XMalloc"] = sync_build_path + str("x_alloc_test")
 		if any("h" in s for s in args.t):
 			testcases["Halloc"] = build_path + str("h_alloc_test")
 		if any("s" in s for s in args.t):
@@ -315,6 +315,10 @@ def main():
 	####################################################################################################
 	####################################################################################################
 	if clean_temporary_files:
+		print("Do you REALLY want to delete all temporary files?:")
+		inputfromconsole = input()
+		if not (inputfromconsole == "yes" or inputfromconsole == "y"):
+			exit(-1)
 		for file in os.listdir("results/tmp"):
 			filename = str("results/tmp/") + os.fsdecode(file)
 			if(os.path.isdir(filename)):

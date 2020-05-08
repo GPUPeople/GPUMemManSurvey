@@ -290,6 +290,8 @@ int main(int argc, char* argv[])
 
 	int blockSize {256};
 	int gridSize {Utils::divup<int>(num_allocations, blockSize)};
+	if(warp_based)
+		gridSize *= 32;
 
 	PerfMeasure timing_allocation;
 	PerfMeasure timing_free;

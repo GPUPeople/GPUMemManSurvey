@@ -2,6 +2,7 @@
 #include <fstream>
 #include <algorithm>
 #include <numeric>
+#include <random>
 
 #include "UtilityFunctions.cuh"
 #include "PerformanceMeasure.cuh"
@@ -138,5 +139,49 @@ int main(int argc, char* argv[])
 	std::string mem_name("RegEff-CFM");
 	#endif
 #endif
+
+	std::vector<unsigned int> allocation_sizes(num_allocations);
+	unsigned int* d_allocation_sizes{nullptr};
+	int* d_memory{nullptr};
+	CHECK_ERROR(cudaMalloc(&d_memory, sizeof(int*) * num_allocations));
+	CHECK_ERROR(cudaMalloc(&d_allocation_sizes, sizeof(unsigned int) * num_allocations));
+
+	std::ofstream results_alloc, results_free;
+	if(generate_output)
+	{
+		results_alloc.open(alloc_csv_path.c_str(), std::ios_base::app);
+		results_free.open(free_csv_path.c_str(), std::ios_base::app);
+	}
+
+	int blockSize {256};
+	int gridSize {Utils::divup<int>(num_allocations, blockSize)};
+	if(warp_based)
+		gridSize *= 32;
+
+	PerfMeasure timing_allocation;
+	PerfMeasure timing_free;
+
+	DevicePerfMeasure per_thread_timing_allocation(num_allocations, num_iterations);
+	DevicePerfMeasure per_thread_timing_free(num_allocations, num_iterations);
+
+
+	auto range = allocation_size_byte_high - allocation_size_byte_low;
+	auto offset = allocation_size_byte_low;
+	for(auto i = 0; i < num_iterations; ++i)
+	{
+		std::mt19937 gen(i); //Standard mersenne_twister_engine seeded with rd()
+    	std::uniform_real_distribution<> dis(0.0, 1.0);
+		// Generate sizes
+		srand(i);
+		for(auto i = 0; i < num_allocations; ++i)
+			allocation_sizes[i] = offset + dis(gen) * range;
+		CHECK_ERROR(cudaMemcpy(d_allocation_sizes, allocation_sizes.data(), sizeof(unsigned int) * num_allocations, cudaMemcpyHostToDevice));
+
+		// TODO:: Continue
+	}
+
+	CHECK_ERROR(cudaFree(d_allocation_sizes));
+	CHECK_ERROR(cudaFree(d_memory));
+
     return 0;
 }
