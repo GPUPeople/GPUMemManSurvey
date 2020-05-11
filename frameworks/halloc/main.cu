@@ -6,10 +6,14 @@ template <typename MemoryManager>
 __global__ void d_testFunctions(MemoryManager memory_manager)
 {
 	int tid = threadIdx.x + blockIdx.x * blockDim.x;
-	if(tid > 0)
+	if(tid > 1)
 		return;
 
-	int* test_array = reinterpret_cast<int*>(memory_manager.malloc(sizeof(int) * 16));
+	int* test_array{nullptr};
+	if(tid == 0)
+		test_array = reinterpret_cast<int*>(memory_manager.malloc(sizeof(int) * 16));
+	else
+		test_array = reinterpret_cast<int*>(memory_manager.malloc(sizeof(int) * 32));
 
 	for(int i = 0; i < 16; ++i)
 	{
@@ -29,7 +33,7 @@ int main(int argc, char* argv[])
 
 	MemoryManagerHalloc memory_manager;
 
-	d_testFunctions <<<1,1>>>(memory_manager);
+	d_testFunctions <<<1,32>>>(memory_manager);
 
 	cudaDeviceSynchronize();
 

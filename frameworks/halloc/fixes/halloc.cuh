@@ -13,7 +13,7 @@
 #include "sbset.h"
 #include "size-info.h"
 #include "slab.h"
-#include "utils.h"
+#include "utils.cuh"
 
 // global variables used by multiple .cuh files
 #include "globals.cuh"
@@ -68,21 +68,45 @@ __device__ inline uint size_id_from_nbytes(uint nbytes) {
 
 /** increments counter for specific size, does so in warp-aggregating-friendly
 		fashion */
+// __device__ __forceinline__ uint size_ctr_inc(uint size_id) {
+// 	//return atomicAdd(&counters_g[size_id], 1);
+// 	bool want_inc = true;
+// 	uint mask, old_counter, lid = lane_id(), leader_lid, group_mask, change;
+// 	//uint change = 1;
+// 	//while(mask = __ballot_sync(0xFFFFFFFF, want_inc)) {
+// 	//	if(want_inc) {
+// 	//mask = __ballot_sync(0xFFFFFFFF, 1);
+// 	while(want_inc) {
+// 		mask = __ballot_sync(0xFFFFFFFF, want_inc);
+// 		leader_lid = warp_leader(mask);
+// 		uint leader_size_id = size_id;
+// 		leader_size_id = warp_bcast(leader_size_id, leader_lid);
+// 		group_mask = __ballot_sync(0xFFFFFFFF, size_id == leader_size_id);
+// 		//group_mask = __ballot_sync(0xFFFFFFFF, 1);
+
+// 		mask &= ~group_mask;
+// 		want_inc = want_inc && size_id != leader_size_id;
+// 		//want_inc = false;
+// 		// }
+// 	}  // while
+// 	if(lid == leader_lid)
+// 		old_counter = atomicAdd(&counters_g[size_id], __popc(group_mask));
+// 	old_counter = warp_bcast(old_counter, leader_lid);
+// 	change =  __popc(group_mask & ((1 << lid) - 1));
+// 	uint cv = old_counter + change;
+// 	return cv;
+// }  // sb_ctr_inc
+
 __device__ __forceinline__ uint size_ctr_inc(uint size_id) {
-	//return atomicAdd(&counters_g[size_id], 1);
 	bool want_inc = true;
 	uint mask, old_counter, lid = lane_id(), leader_lid, group_mask, change;
-	//uint change = 1;
-	//while(mask = __ballot_sync(0xFFFFFFFF, want_inc)) {
-	//	if(want_inc) {
-	//mask = __ballot_sync(0xFFFFFFFF, 1);
+	mask = __activemask();
 	while(want_inc) {
-		mask = __ballot_sync(0xFFFFFFFF, want_inc);
+		mask = __ballot_sync(mask, want_inc);
 		leader_lid = warp_leader(mask);
 		uint leader_size_id = size_id;
 		leader_size_id = warp_bcast(leader_size_id, leader_lid);
-		group_mask = __ballot_sync(0xFFFFFFFF, size_id == leader_size_id);
-		//group_mask = __ballot_sync(0xFFFFFFFF, 1);
+		group_mask = __ballot_sync(mask, size_id == leader_size_id);
 
 		mask &= ~group_mask;
 		want_inc = want_inc && size_id != leader_size_id;
@@ -125,13 +149,20 @@ __device__ inline uint ichunk_init
 __device__ __forceinline__ void *hamalloc_small(uint nbytes) {
 	// the head; having multiple heads actually doesn't help
 	//uint ihead = (blockIdx.x / 32) % NHEADS;
+	printf("%d - %d | Hello!\n", threadIdx.x, blockIdx.x);
 	uint ihead = 0;
 	uint size_id = size_id_from_nbytes(nbytes);
 	size_info_t *size_info = &size_infos_g[size_id];
 	uint head_sb = *(volatile uint *)&head_sbs_g[ihead][size_id];
 
+	printf("%d - %d | NBytes: %u - sizeid: %u - headsb: %u\n", threadIdx.x, blockIdx.x, nbytes, size_id, head_sb);
+	// return nullptr;
+
 	uint cv = size_ctr_inc(size_id);
 	void *p = 0;
+
+	printf("%d - %d | NBytes: %u - sizeid: %u - headsb: %u - cv: %u\n", threadIdx.x, blockIdx.x, nbytes, size_id, head_sb, cv);
+	// return nullptr;
 
 	uint ichunk = ichunk_init(cv, size_id, size_info);
 	//ichunk = ichunk * ldca(&size_info->nchunks_in_block) &
@@ -142,6 +173,13 @@ __device__ __forceinline__ void *hamalloc_small(uint nbytes) {
 	// use two-level loop to avoid warplocks
 	//uint ntries = 0;
 	uint itry = 0;
+	
+
+	// ------ we left it here, the masks may be a problem, reverted it to 0xFFFFFFFF for the moment
+	printf("It starts to stink after here!\n");
+	return;
+
+	uint mask = __activemask();
 	do {
 		if(want_alloc) {
 			//if(res_mask & 4)
@@ -150,8 +188,9 @@ __device__ __forceinline__ void *hamalloc_small(uint nbytes) {
 			p = sb_alloc_in(ihead, head_sb, ichunk, itry, size_id, need_roomy_sb);
 			want_alloc = !p;
 			//assert(!want_alloc || need_roomy_sb);
-			while(__any_sync(0xFFFFFFFF, need_roomy_sb)) {
-				uint need_roomy_mask = __ballot_sync(0xFFFFFFFF, need_roomy_sb);
+			uint innermask = __activemask();
+			while(__any_sync(innermask, need_roomy_sb)) {
+				uint need_roomy_mask = __ballot_sync(innermask, need_roomy_sb);
 				if(need_roomy_sb) {
 					uint leader_lid = warp_leader(need_roomy_mask);
 					uint leader_size_id = size_id;
@@ -176,7 +215,7 @@ __device__ __forceinline__ void *hamalloc_small(uint nbytes) {
 			//ntries++;
 			//assert(ntries < 256);
 		}
-	} while(__any_sync(0xFFFFFFFF, want_alloc));
+	} while(__any_sync(mask, want_alloc));
 	//__threadfence();
 	return p;
 }  // hamalloc_small
