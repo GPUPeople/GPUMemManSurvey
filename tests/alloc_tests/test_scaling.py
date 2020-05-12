@@ -176,7 +176,7 @@ def main():
 	if generate_results:
 		allocation_size = smallest_allocation_size
 		while allocation_size <= largest_allocation_size:
-			generateResultsFromFileAllocation("results/scaling", allocation_size, smallest_num_threads, largest_allocation_size, "Threads", "scale")
+			generateResultsFromFileAllocation("results/scaling", allocation_size, smallest_num_threads, largest_allocation_size, "Threads", "scale", 2)
 			allocation_size *= 2
 
 	####################################################################################################

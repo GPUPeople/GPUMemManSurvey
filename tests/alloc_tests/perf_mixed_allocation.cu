@@ -256,6 +256,7 @@ int main(int argc, char* argv[])
 	auto offset = allocation_size_byte_low;
 	for(auto i = 0; i < num_iterations; ++i)
 	{
+		std::cout << "#";
 		std::mt19937 gen(i); //Standard mersenne_twister_engine seeded with iteration
     	std::uniform_real_distribution<> dis(0.0, 1.0);
 		// Generate sizes
@@ -310,6 +311,8 @@ int main(int argc, char* argv[])
 			}
 		}
 	}
+
+	std::cout << std::endl;
 
 	if(onDeviceMeasure)
 	{

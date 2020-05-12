@@ -166,6 +166,14 @@ def main():
 					print("Success!")
 				allocation_size *= 2
 
+	####################################################################################################
+	####################################################################################################
+	# Generate new Results
+	####################################################################################################
+	####################################################################################################
+	if generate_results:
+		generateResultsFromFileAllocation("results/mixed_performance", num_allocations, smallest_allocation_size, largest_allocation_size, "Byte-Range", "perf_mixed", 4)
+
 
 if __name__ == "__main__":
 	main()

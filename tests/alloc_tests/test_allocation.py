@@ -172,7 +172,7 @@ def main():
 	####################################################################################################
 	####################################################################################################
 	if generate_results:
-		generateResultsFromFileAllocation("results/performance", num_allocations, smallest_allocation_size, largest_allocation_size, "Bytes", "perf")
+		generateResultsFromFileAllocation("results/performance", num_allocations, smallest_allocation_size, largest_allocation_size, "Bytes", "perf", 2)
 	
 	####################################################################################################
 	####################################################################################################

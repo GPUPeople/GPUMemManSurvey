@@ -23,7 +23,7 @@ colours = {
 # Generate new Results
 ####################################################################################################
 ####################################################################################################
-def generateResultsFromFileAllocation(folderpath, param1, param2, param3, dimension_name, output_name_short):
+def generateResultsFromFileAllocation(folderpath, param1, param2, param3, dimension_name, output_name_short, approach_pos):
     print("Generate Results for identifier " + str(param1) + "_" + str(param2) + "-" + str(param3))
     # Gather results
     result_alloc = list(list())
@@ -36,10 +36,10 @@ def generateResultsFromFileAllocation(folderpath, param1, param2, param3, dimens
         filename = folderpath + str("/") + os.fsdecode(file)
         if(os.path.isdir(filename)):
             continue
-        if str(param1) != filename.split('_')[3] or str(param2) + "-" + str(param3) != filename.split('_')[4].split(".")[0]:
+        if str(param1) != filename.split('_')[approach_pos+1] or str(param2) + "-" + str(param3) != filename.split('_')[approach_pos+2].split(".")[0]:
             continue
         print("Processing -> " + str(filename))
-        approach_name = filename.split('_')[2]
+        approach_name = filename.split('_')[approach_pos]
         with open(filename, newline='') as csv_file:
             dataframe = pandas.read_csv(csv_file)
             if "free" in filename:
