@@ -136,8 +136,13 @@ def main():
 		allocation_size = smallest_allocation_size
 		while allocation_size <= largest_allocation_size:
 			for name, path in testcases.items():
-				csv_path_alloc = "results/tmp/scale_alloc_" + name + "_" + str(allocation_size) + "_" + str(smallest_num_threads) + "-" + str(largest_num_threads) + ".csv"
-				csv_path_free = "results/tmp/scale_free_" + name + "_" + str(allocation_size) + "_" + str(smallest_num_threads) + "-" + str(largest_num_threads) + ".csv"
+				csv_path_alloc = "results/scaling/scale_alloc_" + name + "_" + str(allocation_size) + "_" + str(smallest_num_threads) + "-" + str(largest_num_threads) + ".csv"
+				csv_path_free = "results/scaling/scale_free_" + name + "_" + str(allocation_size) + "_" + str(smallest_num_threads) + "-" + str(largest_num_threads) + ".csv"
+				if(os.path.isfile(csv_path_alloc)):
+					print("This file already exists, do you really want to OVERWRITE?")
+					inputfromconsole = input()
+					if not (inputfromconsole == "yes" or inputfromconsole == "y"):
+						continue
 				with open(csv_path_alloc, "w", newline='') as csv_file:
 					csv_file.write("NumThreads, mean, std-dev, min, max, median")
 				with open(csv_path_free, "w", newline='') as csv_file:
@@ -157,9 +162,9 @@ def main():
 					if process_killed :
 						print("We killed the process!")
 						with open(csv_path_alloc, "a", newline='') as csv_file:
-							csv_file.write("0.00,0.00,0.00,0.00,0.00,Ran longer than " + str(time_out_val * 1000))
+							csv_file.write("0.00,0.00,0.00,0.00,0.00,-------------------> Ran longer than " + str(time_out_val * 1000))
 						with open(csv_path_free, "a", newline='') as csv_file:
-							csv_file.write("0.00,0.00,0.00,0.00,0.00,Ran longer than " + str(time_out_val * 1000))
+							csv_file.write("0.00,0.00,0.00,0.00,0.00,-------------------> Ran longer than " + str(time_out_val * 1000))
 					num_threads *= 2
 			allocation_size *= 2
 
@@ -171,7 +176,7 @@ def main():
 	if generate_results:
 		allocation_size = smallest_allocation_size
 		while allocation_size <= largest_allocation_size:
-			generateResultsFromFileAllocation(allocation_size, smallest_num_threads, largest_allocation_size, "Threads", "scale")
+			generateResultsFromFileAllocation("results/scaling", allocation_size, smallest_num_threads, largest_allocation_size, "Threads", "scale")
 			allocation_size *= 2
 
 	####################################################################################################
@@ -200,8 +205,8 @@ def main():
 			result_alloc = list(list())
 			result_free = list(list())			
 
-			for file in os.listdir("results/tmp/aggregate"):
-				filename = str("results/tmp/aggregate/") + os.fsdecode(file)
+			for file in os.listdir("results/scaling/aggregate"):
+				filename = str("results/scaling/aggregate/") + os.fsdecode(file)
 				if(os.path.isdir(filename)):
 					continue
 				if filename.split("_")[2] != "scale" or str(num_bytes) != filename.split('_')[4] or str(smallest_num_threads) + "-" + str(largest_num_threads) != filename.split('_')[5].split(".")[0]:
@@ -224,7 +229,7 @@ def main():
 				'Threads', 
 				'ms', 
 				"Allocation Scaling for " + str(num_bytes) + " Bytes (mean)", 
-				str("results/plots/") + time_string + "_alloc_scale_" + str(num_bytes) + "_mean." + filetype,
+				str("results/plots/scaling/") + time_string + "_alloc_scale_" + str(num_bytes) + "_mean." + filetype,
 				"stddev")
 			plotMean(result_alloc, 
 				plotscale,
@@ -232,7 +237,7 @@ def main():
 				'Threads', 
 				'ms', 
 				"Allocation Scaling for " + str(num_bytes) + " Bytes (mean + std-dev)", 
-				str("results/plots/") + time_string + "_alloc_scale_" + str(num_bytes) + "_mean_stddev." + filetype,
+				str("results/plots/scaling/") + time_string + "_alloc_scale_" + str(num_bytes) + "_mean_stddev." + filetype,
 				"stddev")
 
 			####################################################################################################
@@ -245,7 +250,7 @@ def main():
 				'Threads', 
 				'ms', 
 				"Free scaling for " + str(num_bytes) + " Bytes (mean)", 
-				str("results/plots/") + time_string + "_free_scale_" + str(num_bytes) + "_mean." + filetype,
+				str("results/plots/scaling/") + time_string + "_free_scale_" + str(num_bytes) + "_mean." + filetype,
 				"stddev")
 			plotMean(result_free, 
 				plotscale,
@@ -253,7 +258,7 @@ def main():
 				'Threads', 
 				'ms', 
 				"Free scaling for " + str(num_bytes) + " Bytes (mean + std-dev)", 
-				str("results/plots/") + time_string + "_free_scale_" + str(num_bytes) + "_mean_stddev." + filetype,
+				str("results/plots/scaling/") + time_string + "_free_scale_" + str(num_bytes) + "_mean_stddev." + filetype,
 				"stddev")
 
 			####################################################################################################
@@ -266,7 +271,7 @@ def main():
 				'Threads', 
 				'ms', 
 				"Allocation scaling for " + str(num_bytes) + " Bytes (mean + min/max)", 
-				str("results/plots/") + time_string + "_alloc_scale_" + str(num_bytes) + "_min_max." + filetype,
+				str("results/plots/scaling/") + time_string + "_alloc_scale_" + str(num_bytes) + "_min_max." + filetype,
 				"minmax")
 
 			####################################################################################################
@@ -279,7 +284,7 @@ def main():
 				'Threads', 
 				'ms', 
 				"Free scaling for " + str(num_bytes) + " Bytes (mean + min/max)", 
-				str("results/plots/") + time_string + "_free_scale_" + str(num_bytes) + "_min_max." + filetype,
+				str("results/plots/scaling/") + time_string + "_free_scale_" + str(num_bytes) + "_min_max." + filetype,
 				"minmax")
 
 			####################################################################################################
@@ -292,7 +297,7 @@ def main():
 				'Threads', 
 				'ms', 
 				"Allocation scaling for " + str(num_bytes) + " Bytes (median)", 
-				str("results/plots/") + time_string + "_alloc_scale_" + str(num_bytes) + "_median." + filetype,
+				str("results/plots/scaling/") + time_string + "_alloc_scale_" + str(num_bytes) + "_median." + filetype,
 				"median")
 
 			####################################################################################################
@@ -305,7 +310,7 @@ def main():
 				'Threads', 
 				'ms', 
 				"Free scaling for " + str(num_bytes) + " Bytes (median)", 
-				str("results/plots/") + time_string + "_free_scale_" + str(num_bytes) + "_median." + filetype,
+				str("results/plots/scaling/") + time_string + "_free_scale_" + str(num_bytes) + "_median." + filetype,
 				"median")
 
 

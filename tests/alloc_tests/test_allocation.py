@@ -12,7 +12,6 @@ import csv
 import argparse
 
 def main():
-	# Run all files from a directory
 	print("##############################################################################")
 	print("Callable as: python test_allocation.py -h")
 	print("##############################################################################")
@@ -134,8 +133,13 @@ def main():
 	if run_testcases:
 		# Run Testcase
 		for name, path in testcases.items():
-			csv_path_alloc = "results/tmp/perf_alloc_" + name + "_" + str(num_allocations) + "_" + str(smallest_allocation_size) + "-" + str(largest_allocation_size) + ".csv"
-			csv_path_free = "results/tmp/perf_free_" + name + "_" + str(num_allocations) + "_" + str(smallest_allocation_size) + "-" + str(largest_allocation_size) + ".csv"
+			csv_path_alloc = "results/performance/perf_alloc_" + name + "_" + str(num_allocations) + "_" + str(smallest_allocation_size) + "-" + str(largest_allocation_size) + ".csv"
+			csv_path_free = "results/performance/perf_free_" + name + "_" + str(num_allocations) + "_" + str(smallest_allocation_size) + "-" + str(largest_allocation_size) + ".csv"
+			if(os.path.isfile(csv_path_alloc)):
+				print("This file already exists, do you really want to OVERWRITE?")
+				inputfromconsole = input()
+				if not (inputfromconsole == "yes" or inputfromconsole == "y"):
+					continue
 			with open(csv_path_alloc, "w", newline='') as csv_file:
 				csv_file.write("AllocationSize (in Byte), mean, std-dev, min, max, median")
 			with open(csv_path_free, "w", newline='') as csv_file:
@@ -155,9 +159,9 @@ def main():
 				if process_killed :
 					print("We killed the process!")
 					with open(csv_path_alloc, "a", newline='') as csv_file:
-						csv_file.write("0.00,0.00,0.00,0.00,0.00,Ran longer than " + str(time_out_val * 1000))
+						csv_file.write("0.00,0.00,0.00,0.00,0.00,-------------------> Ran longer than " + str(time_out_val * 1000))
 					with open(csv_path_free, "a", newline='') as csv_file:
-						csv_file.write("0.00,0.00,0.00,0.00,0.00,Ran longer than " + str(time_out_val * 1000))
+						csv_file.write("0.00,0.00,0.00,0.00,0.00,-------------------> Ran longer than " + str(time_out_val * 1000))
 				else:
 					print("Success!")
 				allocation_size += 4
@@ -168,7 +172,7 @@ def main():
 	####################################################################################################
 	####################################################################################################
 	if generate_results:
-		generateResultsFromFileAllocation(num_allocations, smallest_allocation_size, largest_allocation_size, "Bytes", "perf")
+		generateResultsFromFileAllocation("results/performance", num_allocations, smallest_allocation_size, largest_allocation_size, "Bytes", "perf")
 	
 	####################################################################################################
 	####################################################################################################
@@ -187,8 +191,8 @@ def main():
 		else:
 			time_string += "_lin"
 
-		for file in os.listdir("results/tmp/aggregate"):
-			filename = str("results/tmp/aggregate/") + os.fsdecode(file)
+		for file in os.listdir("results/performance/aggregate"):
+			filename = str("results/performance/aggregate/") + os.fsdecode(file)
 			if(os.path.isdir(filename)):
 				continue
 			if filename.split("_")[2] != "perf" or str(num_allocations) != filename.split('_')[4] or str(smallest_allocation_size) + "-" + str(largest_allocation_size) != filename.split('_')[5].split(".")[0]:
@@ -210,7 +214,7 @@ def main():
 			'Bytes', 
 			'ms', 
 			"Allocation performance for " + str(num_allocations) + " allocations (mean)", 
-			str("results/plots/") + time_string + "_alloc." + filetype,
+			str("results/plots/performance/") + time_string + "_alloc." + filetype,
 			"stddev")
 		plotMean(result_alloc, 
 			plotscale,
@@ -218,7 +222,7 @@ def main():
 			'Bytes', 
 			'ms', 
 			"Allocation performance for " + str(num_allocations) + " allocations (mean + std-dev)", 
-			str("results/plots/") + time_string + "_alloc_stddev." + filetype,
+			str("results/plots/performance/") + time_string + "_alloc_stddev." + filetype,
 			"stddev")
 
 		####################################################################################################
@@ -230,7 +234,7 @@ def main():
 			'Bytes', 
 			'ms', 
 			"Free performance for " + str(num_allocations) + " allocations (mean)", 
-			str("results/plots/") + time_string + "_free." + filetype,
+			str("results/plots/performance/") + time_string + "_free." + filetype,
 			"stddev")
 		plotMean(result_free, 
 			plotscale,
@@ -238,7 +242,7 @@ def main():
 			'Bytes', 
 			'ms', 
 			"Free performance for " + str(num_allocations) + " allocations (mean + std-dev)", 
-			str("results/plots/") + time_string + "_free_stddev." + filetype,
+			str("results/plots/performance/") + time_string + "_free_stddev." + filetype,
 			"stddev")
 
 		####################################################################################################
@@ -250,7 +254,7 @@ def main():
 			'Bytes', 
 			'ms', 
 			"Allocation performance for " + str(num_allocations) + " allocations (mean + min/max)", 
-			str("results/plots/") + time_string + "_alloc_min_max." + filetype,
+			str("results/plots/performance/") + time_string + "_alloc_min_max." + filetype,
 			"minmax")
 
 		####################################################################################################
@@ -262,7 +266,7 @@ def main():
 			'Bytes', 
 			'ms', 
 			"Free performance for " + str(num_allocations) + " allocations (mean + min/max)", 
-			str("results/plots/") + time_string + "_free_min_max." + filetype,
+			str("results/plots/performance/") + time_string + "_free_min_max." + filetype,
 			"minmax")
 
 		####################################################################################################
@@ -274,7 +278,7 @@ def main():
 			'Bytes', 
 			'ms', 
 			"Allocation performance for " + str(num_allocations) + " allocations (median)", 
-			str("results/plots/") + time_string + "_alloc_median." + filetype,
+			str("results/plots/performance/") + time_string + "_alloc_median." + filetype,
 			"median")
 
 		####################################################################################################
@@ -286,7 +290,7 @@ def main():
 			'Bytes', 
 			'ms', 
 			"Free performance for " + str(num_allocations) + " allocations (median)", 
-			str("results/plots/") + time_string + "_free_median." + filetype,
+			str("results/plots/performance/") + time_string + "_free_median." + filetype,
 			"median")
 
 	####################################################################################################

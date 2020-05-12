@@ -23,7 +23,7 @@ colours = {
 # Generate new Results
 ####################################################################################################
 ####################################################################################################
-def generateResultsFromFileAllocation(param1, param2, param3, dimension_name, output_name_short):
+def generateResultsFromFileAllocation(folderpath, param1, param2, param3, dimension_name, output_name_short):
     print("Generate Results for identifier " + str(param1) + "_" + str(param2) + "-" + str(param3))
     # Gather results
     result_alloc = list(list())
@@ -32,8 +32,8 @@ def generateResultsFromFileAllocation(param1, param2, param3, dimension_name, ou
     # Go over files, read data and generate new
     written_header_free = False
     written_header_alloc = False
-    for file in os.listdir("results/tmp"):
-        filename = str("results/tmp/") + os.fsdecode(file)
+    for file in os.listdir(folderpath):
+        filename = folderpath + str("/") + os.fsdecode(file)
         if(os.path.isdir(filename)):
             continue
         if str(param1) != filename.split('_')[3] or str(param2) + "-" + str(param3) != filename.split('_')[4].split(".")[0]:
@@ -80,14 +80,14 @@ def generateResultsFromFileAllocation(param1, param2, param3, dimension_name, ou
     # Generate output file
     print("------------------")
     print("Generating -> " + time_string + str("_") + output_name_short + str("_alloc_") + str(param1) + "_" + str(param2) + "-" + str(param3) + str(".csv"))
-    alloc_name = str("results/tmp/aggregate/") + time_string + str("_") + output_name_short + str("_alloc_") + str(param1) + "_" + str(param2) + "-" + str(param3) + str(".csv")
+    alloc_name = folderpath + str("/aggregate/") + time_string + str("_") + output_name_short + str("_alloc_") + str(param1) + "_" + str(param2) + "-" + str(param3) + str(".csv")
     with(open(alloc_name, "w")) as f:
         writer = csv.writer(f, delimiter=',')
         for row in result_alloc:
             writer.writerow(row)
     
     print("Generating -> " + time_string + str("_") + output_name_short + str("_free_") + str(param1) + "_" + str(param2) + "-" + str(param3) + str(".csv"))
-    free_name = str("results/tmp/aggregate/") + time_string + str("_") + output_name_short + str("_free_") + str(param1) + "_" + str(param2) + "-" + str(param3) + str(".csv")
+    free_name = folderpath + str("/aggregate/")  + time_string + str("_") + output_name_short + str("_free_") + str(param1) + "_" + str(param2) + "-" + str(param3) + str(".csv")
     with(open(free_name, "w")) as f:
         writer = csv.writer(f, delimiter=',')
         for row in result_free:
