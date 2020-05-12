@@ -18,7 +18,7 @@ enum class RegEffVariants
 template <RegEffVariants variant=RegEffVariants::CudaMalloc>
 struct MemoryManagerRegEff : public MemoryManagerBase
 {
-	explicit MemoryManagerRegEff(size_t instantiation_size = 2048ULL*1024ULL*1024ULL) : MemoryManagerBase(instantiation_size)
+	explicit MemoryManagerRegEff(size_t instantiation_size) : MemoryManagerBase(instantiation_size)
 	{
 		// Found those parameters in utils/AppEnvironment.cpp
 		AllocInfo alloc_info;

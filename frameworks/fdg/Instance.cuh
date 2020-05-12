@@ -6,7 +6,7 @@
 
 struct MemoryManagerFDG : public MemoryManagerBase
 {
-	explicit MemoryManagerFDG(size_t instantiation_size = 2048ULL*1024ULL*1024ULL) : MemoryManagerBase(instantiation_size) 
+	explicit MemoryManagerFDG(size_t instantiation_size) : MemoryManagerBase(instantiation_size) 
 	{
 		if(initialized)
 			return;

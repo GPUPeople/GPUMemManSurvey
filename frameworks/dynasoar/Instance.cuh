@@ -30,7 +30,7 @@ public:
 
 struct MemoryManagerDynaSOAr : public MemoryManagerBase
 {
-	explicit MemoryManagerDynaSOAr(size_t instantiation_size = 2048ULL*1024ULL*1024ULL) : MemoryManagerBase(instantiation_size)
+	explicit MemoryManagerDynaSOAr(size_t instantiation_size) : MemoryManagerBase(instantiation_size)
 	{
 		// Create new allocator.
 		allocator_handle = new AllocatorHandle<AllocatorT>();

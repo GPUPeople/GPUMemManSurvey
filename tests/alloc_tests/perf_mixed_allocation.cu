@@ -225,7 +225,7 @@ int main(int argc, char* argv[])
 	}
 			
 	std::cout << "--- " << mem_name << "---\n";
-	MemoryManager memory_manager;
+	MemoryManager memory_manager(8192ULL * 1024ULL * 1024ULL);
 
 	std::vector<unsigned int> allocation_sizes(num_allocations);
 	unsigned int* d_allocation_sizes{nullptr};

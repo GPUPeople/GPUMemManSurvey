@@ -50,7 +50,7 @@ using ScatterAllocator = MC::Allocator<
 
 struct MemoryManagerScatterAlloc : public MemoryManagerBase
 {
-	explicit MemoryManagerScatterAlloc(size_t instantiation_size = 2048ULL*1024ULL*1024ULL) : 
+	explicit MemoryManagerScatterAlloc(size_t instantiation_size) : 
 		MemoryManagerBase(instantiation_size), 
 		sa{ new ScatterAllocator(instantiation_size)}, sah{sa->getAllocatorHandle()}{}
 

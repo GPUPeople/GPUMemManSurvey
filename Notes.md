@@ -41,11 +41,11 @@
     * So it will simply start overwriting data from the front
 * Has no de-allocation and no re-use
 ### Circular
-Text
+* Not yet working in simple testcase
 ### Circular Fused
 Text
 ### Circular Multi
-Text
+* Not yet working in simple testcase
 ### Circular Fused
 Text
 

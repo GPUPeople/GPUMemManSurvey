@@ -9,7 +9,7 @@
 template <typename OuroborosType=OuroPQ>
 struct MemoryManagerOuroboros : public MemoryManagerBase
 {
-	explicit MemoryManagerOuroboros(size_t instantiation_size = 2048ULL*1024ULL*1024ULL) : MemoryManagerBase(instantiation_size), memory_manager{new OuroborosType()}
+	explicit MemoryManagerOuroboros(size_t instantiation_size) : MemoryManagerBase(instantiation_size), memory_manager{new OuroborosType()}
 	{
 		memory_manager->initialize();
 		d_memory_manager = memory_manager->getDeviceMemoryManager();

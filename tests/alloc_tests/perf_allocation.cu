@@ -251,7 +251,7 @@ int main(int argc, char* argv[])
 	cudaGetDeviceProperties(&prop, device);
 
 	std::cout << "--- " << mem_name << "---\n";
-	MemoryManager memory_manager;
+	MemoryManager memory_manager(8192ULL * 1024ULL * 1024ULL);
 
 	int** d_memory{nullptr};
 	CHECK_ERROR(cudaMalloc(&d_memory, sizeof(int*) * num_allocations));
@@ -276,6 +276,7 @@ int main(int argc, char* argv[])
 
 	for(auto i = 0; i < num_iterations; ++i)
 	{
+		std::cout << "#";
 		if(onDeviceMeasure)
 		{
 			d_testAllocation <<<gridSize, blockSize>>>(memory_manager, d_memory, num_allocations, allocation_size_byte, per_thread_timing_allocation.getDevicePtr());
@@ -321,6 +322,7 @@ int main(int argc, char* argv[])
 			}
 		}
 	}
+	std::cout << std::endl;
 
 	if(onDeviceMeasure)
 	{
