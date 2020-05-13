@@ -21,8 +21,6 @@
 * Have two variants of that now, the one from GitHub in mallocMC (currently in use) and the base version found in the RegEff Code
   * Probably should get the Original some time xD
 * Currently it only works correctly in sync-mode
-* Problem for `mixed_allocation` testcase for `100.000` allocations with range `4096-8192`
-  * `10.000` works without a problem
 
 ## Halloc
 ---
