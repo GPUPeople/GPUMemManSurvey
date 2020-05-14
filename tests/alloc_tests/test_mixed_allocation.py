@@ -205,15 +205,93 @@ def main():
 				else:
 					result_alloc = list(reader)
 		
+		####################################################################################################
+		# Alloc - Mean - Std-dev
+		####################################################################################################
 		plotBars(result_alloc, 
 			plotscale,
 			False, 
 			'Bytes', 
 			'ms', 
-			"Allocation performance for " + str(num_allocations) + " allocations (mean)", 
+			"Allocation performance for mixed " + str(num_allocations) + " allocations (mean)", 
 			str("results/plots/mixed_performance/") + time_string + "_alloc." + filetype,
 			"stddev")
+		plotBars(result_alloc, 
+			plotscale,
+			True, 
+			'Bytes', 
+			'ms', 
+			"Allocation performance for mixed " + str(num_allocations) + " allocations (mean + stddev)", 
+			str("results/plots/mixed_performance/") + time_string + "_alloc_stddev." + filetype,
+			"stddev")
 
+		####################################################################################################
+		# Free - Mean - Std-dev
+		####################################################################################################
+		plotBars(result_free, 
+			plotscale,
+			False, 
+			'Bytes', 
+			'ms', 
+			"Free performance for mixed " + str(num_allocations) + " allocations (mean)", 
+			str("results/plots/mixed_performance/") + time_string + "_free." + filetype,
+			"stddev")
+		plotBars(result_free, 
+			plotscale,
+			True, 
+			'Bytes', 
+			'ms', 
+			"Free performance for mixed " + str(num_allocations) + " allocations (mean + stddev)", 
+			str("results/plots/mixed_performance/") + time_string + "_free_stddev." + filetype,
+			"stddev")
+		
+		####################################################################################################
+		# Alloc - Mean - Min/Max
+		####################################################################################################
+		plotBars(result_alloc, 
+			plotscale,
+			True, 
+			'Bytes', 
+			'ms', 
+			"Allocation performance for mixed " + str(num_allocations) + " allocations (mean + min/max)", 
+			str("results/plots/mixed_performance/") + time_string + "_alloc_min_max." + filetype,
+			"minmax")
+
+		####################################################################################################
+		# Free - Mean - Min/Max
+		####################################################################################################
+		plotBars(result_free, 
+			plotscale,
+			True, 
+			'Bytes', 
+			'ms', 
+			"Free performance for mixed " + str(num_allocations) + " allocations (mean + min/max)", 
+			str("results/plots/mixed_performance/") + time_string + "_free_min_max." + filetype,
+			"minmax")
+
+		####################################################################################################
+		# Alloc - Median
+		####################################################################################################
+		plotBars(result_alloc, 
+			plotscale,
+			False, 
+			'Bytes', 
+			'ms', 
+			"Allocation performance for mixed " + str(num_allocations) + " allocations (median)", 
+			str("results/plots/mixed_performance/") + time_string + "_alloc_median." + filetype,
+			"median")
+
+		####################################################################################################
+		# Free - Median
+		####################################################################################################
+		plotBars(result_free, 
+			plotscale,
+			False, 
+			'Bytes', 
+			'ms', 
+			"Free performance for mixed " + str(num_allocations) + " allocations (median)", 
+			str("results/plots/mixed_performance/") + time_string + "_free_median." + filetype,
+			"median")
 
 
 if __name__ == "__main__":

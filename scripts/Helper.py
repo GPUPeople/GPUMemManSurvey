@@ -136,22 +136,18 @@ def plotMean(results, plotscale, plotrange, xlabel, ylabel, title, filename, var
 
 # Plot results as a bar plot with std-dev
 def plotBars(results, plotscale, plotrange, xlabel, ylabel, title, filename, variant):
-    num_approaches = len(results) / 5
+    num_approaches = int(len(results) / 5)
     width = 0.9 / num_approaches
     index = np.arange(len(results[0][1:]))
     placement = []
     alignlabel = ''
+    approach_half = int(math.floor(num_approaches/2))
     if num_approaches % 2 == 0:
-        print("Even number of cases!")
-        placement = range(0 - num_approaches/2, 0 + num_approaches/2, 1)
+        placement = [number - approach_half for number in range(0, num_approaches)]
         alignlabel = 'edge'
     else:
-        print("Odd number of cases!")
-        approach_half = math.floor(num_approaches/2)
-        placement = range(0 - approach_half, 0 + approach_half, 1)
+        placement = [number - approach_half for number in range(0, num_approaches)]
         alignlabel = 'center'
-    print(placement)
-    exit()
     labels = []
     xticks = []
     for i in range(len(results[0][1:])):
@@ -170,22 +166,28 @@ def plotBars(results, plotscale, plotrange, xlabel, ylabel, title, filename, var
         if variant == "stddev":
             y_stddev = np.asarray([float(i) for i in results[i+std_dev_offset][1:]])
             y_min = y_values-y_stddev
+            y_min = [max(val, 0) for val in y_min]
             y_max = y_values+y_stddev
         else:
             y_min = np.asarray([float(i) for i in results[i+min_offset][1:]])
             y_max = np.asarray([float(i) for i in results[i+max_offset][1:]])
         labelname = results[i][0].split(" ")[0]
-        print("Generate plot for " + labelname + " with " + variant)
-        plt.bar(index + (placement[j] * width), y_values, yerr=y_stddev, width=width, color=colours[labelname], align=alignlabel, edgecolor = "black", label=labelname, tick_label=x_values)
+        yerror = np.array([y_min,y_max])
+        outputstring = "Generate plot for " + labelname
+        if plotrange:
+            outputstring += " with " + variant
+        print(outputstring)
+        plt.bar(index + (placement[j] * width), y_values, width=width, color=colours[labelname], align=alignlabel, edgecolor = "black", label=labelname, tick_label=x_values)
+        if plotrange:
+            plt.errorbar(index + (placement[j] * width), y_values, yerror, fmt='r^')
         j += 1
-        # if plotrange:
-        #     plt.fill_between(x_values, y_min, y_max, alpha=0.5, edgecolor=colours[labelname], facecolor=colours[labelname])
     if plotscale == "log":
         plt.yscale("log")
     plt.ylabel(ylabel)
     plt.xlabel(xlabel)
     plt.xticks(xticks)
-    # plt.tick_label(labels, fontsize=14)
+    plt.tick_params(axis='x', which='major', labelsize=6)
+    plt.tick_params(axis='y', which='major', labelsize=12)
     plt.title(title)
     plt.legend()
     plt.savefig(filename, dpi=600)		
