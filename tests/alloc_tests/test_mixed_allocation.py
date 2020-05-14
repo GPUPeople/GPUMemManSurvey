@@ -7,7 +7,7 @@ import time
 from datetime import datetime
 from timedprocess import Command
 from Helper import generateResultsFromFileAllocation
-from Helper import plotMean
+from Helper import plotBars
 import csv
 import argparse
 
@@ -173,6 +173,47 @@ def main():
 	####################################################################################################
 	if generate_results:
 		generateResultsFromFileAllocation("results/mixed_performance", num_allocations, smallest_allocation_size, largest_allocation_size, "Byte-Range", "perf_mixed", 4)
+
+	####################################################################################################
+	####################################################################################################
+	# Generate new plots
+	####################################################################################################
+	####################################################################################################
+	if generate_plots:
+		result_alloc = list(list())
+		result_free = list(list())
+		# Get Timestring
+		now = datetime.now()
+		time_string = now.strftime("%b-%d-%Y_%H-%M-%S")
+
+		if plotscale == "log":
+			time_string += "_log"
+		else:
+			time_string += "_lin"
+
+		for file in os.listdir("results/mixed_performance/aggregate"):
+			filename = str("results/mixed_performance/aggregate/") + os.fsdecode(file)
+			if(os.path.isdir(filename)):
+				continue
+			if str(num_allocations) != filename.split('_')[6] or str(smallest_allocation_size) + "-" + str(largest_allocation_size) != filename.split('_')[7].split(".")[0]:
+				continue
+			# We want the one matching our input
+			with open(filename) as f:
+				reader = csv.reader(f)
+				if "free" in filename:
+					result_free = list(reader)
+				else:
+					result_alloc = list(reader)
+		
+		plotBars(result_alloc, 
+			plotscale,
+			False, 
+			'Bytes', 
+			'ms', 
+			"Allocation performance for " + str(num_allocations) + " allocations (mean)", 
+			str("results/plots/mixed_performance/") + time_string + "_alloc." + filetype,
+			"stddev")
+
 
 
 if __name__ == "__main__":

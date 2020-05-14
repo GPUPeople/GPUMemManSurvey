@@ -5,6 +5,7 @@ from datetime import datetime
 import csv
 import numpy as np
 import matplotlib.pyplot as plt
+import math
 
 colours = {
 	'Halloc' : 'orange' , 
@@ -132,3 +133,137 @@ def plotMean(results, plotscale, plotrange, xlabel, ylabel, title, filename, var
 
     # Clear Figure
     plt.clf()
+
+# Plot results as a bar plot with std-dev
+def plotBars(results, plotscale, plotrange, xlabel, ylabel, title, filename, variant):
+    num_approaches = len(results) / 5
+    width = 0.9 / num_approaches
+    index = np.arange(len(results[0][1:]))
+    placement = []
+    alignlabel = ''
+    if num_approaches % 2 == 0:
+        print("Even number of cases!")
+        placement = range(0 - num_approaches/2, 0 + num_approaches/2, 1)
+        alignlabel = 'edge'
+    else:
+        print("Odd number of cases!")
+        approach_half = math.floor(num_approaches/2)
+        placement = range(0 - approach_half, 0 + approach_half, 1)
+        alignlabel = 'center'
+    print(placement)
+    exit()
+    labels = []
+    xticks = []
+    for i in range(len(results[0][1:])):
+        labels.append(results[0][1+i])
+        xticks.append(index[i])
+    x_values = np.asarray([str(i) for i in results[0][1:]])
+    j = 0
+    for i in range(1, len(results), 5):
+        y_values = None
+        if variant == "median":
+            y_values = np.asarray([float(i) for i in results[i+median_offset][1:]])
+        else:
+            y_values = np.asarray([float(i) for i in results[i][1:]])
+        y_min = None
+        y_max = None
+        if variant == "stddev":
+            y_stddev = np.asarray([float(i) for i in results[i+std_dev_offset][1:]])
+            y_min = y_values-y_stddev
+            y_max = y_values+y_stddev
+        else:
+            y_min = np.asarray([float(i) for i in results[i+min_offset][1:]])
+            y_max = np.asarray([float(i) for i in results[i+max_offset][1:]])
+        labelname = results[i][0].split(" ")[0]
+        print("Generate plot for " + labelname + " with " + variant)
+        plt.bar(index + (placement[j] * width), y_values, yerr=y_stddev, width=width, color=colours[labelname], align=alignlabel, edgecolor = "black", label=labelname, tick_label=x_values)
+        j += 1
+        # if plotrange:
+        #     plt.fill_between(x_values, y_min, y_max, alpha=0.5, edgecolor=colours[labelname], facecolor=colours[labelname])
+    if plotscale == "log":
+        plt.yscale("log")
+    plt.ylabel(ylabel)
+    plt.xlabel(xlabel)
+    plt.xticks(xticks)
+    # plt.tick_label(labels, fontsize=14)
+    plt.title(title)
+    plt.legend()
+    plt.savefig(filename, dpi=600)		
+
+    # Clear Figure
+    plt.clf()
+
+
+
+
+
+
+
+
+# width = 0.125
+# 	maxTiming = 0.0
+# 	placement = (-3, -2, -1, 0, 1, 2)
+# 	colormapping = (0, 6, 5, 4, 2, 1)
+# 	approachmapping = (1, 0, 3, 4, 2, 5)
+
+# 	labels = []
+# 	xticks = []
+# 	for i, t in enumerate(data.testcases):
+# 		labels.append(t.testcase[:7] + "...")
+# 		xticks.append(index[i] + width)
+# 	for i in range(len(data.techniques)):
+# 		sizes = []
+# 		bottom = []
+# 		for t in data.testcases:
+# 			if normalizeValues:
+# 				# Normalize all values by hiSparse
+# 				hisparse_value = t.flops()[SpGEMM_variants_indices.get("ac-SpGEMM")]
+				
+# 				# timing = (t.Value()[i].times / hisparse_value) * 100
+# 				timing = (t.flops()[approachmapping[i]] / hisparse_value) * 100
+
+# 				sizes.append(timing)
+# 			else:
+# 				# Use standard values
+# 				# timing = t.Value()[i].times
+# 				timing = t.flops()[approachmapping[i]] / 1000000000
+# 				sizes.append(timing)
+
+# 			if timing > maxTiming:
+# 				maxTiming = timing
+		
+# 		techniqueLabel = data.techniques[approachmapping[i]]
+# 		if log_used:
+# 			bars = ax.bar(index + (placement[i] * width) + width, sizes, log=1, width=width,color=colors[colormapping[i]],align='edge', edgecolor = "black", label=techniqueLabel)
+# 		else:
+# 			bars = ax.bar(index + (placement[i] * width) + width, sizes, width=width,color=colors[colormapping[i]],align='edge', edgecolor = "black", label=techniqueLabel)
+
+# 	if normalizeValues:
+# 		ax.set_ylabel('%')
+# 	else:
+# 		# ax.set_ylabel('ms')
+# 		ax.set_ylabel('GFLOPS')
+# 	ax.set_xticks(xticks)
+# 	ax.set_xticklabels(labels, fontsize=14)
+# 	ax.axis('tight')
+# 	ax.set_xlim([-0.4, countTestcases + 0.1])
+
+# 	# ax.set_yticks(np.arange(0, maxTiming + 30, 1.0))
+# 	lowerbound = 0
+# 	if log_used:
+# 		lowerbound = 0.1
+# 	upperbound = 25
+# 	if log_used:
+# 		upperbound = math.pow(10,math.ceil(math.log10(upperbound)))
+# 	ax.set_ylim([lowerbound, upperbound])
+# 	ax.yaxis.grid(True)
+# 	[g.set_alpha(0.75) for g in ax.get_ygridlines()]
+	
+# 	pplt.setp(ax.get_xticklabels(), rotation=75)
+# 	ax.legend(bbox_to_anchor=(0.0 ,1, 0.6, .1), loc=2, ncol=2, mode="expand", frameon=True)
+# 	ax.spines['right'].set_color('none')
+# 	ax.spines['top'].set_color('none')
+# 	ax.xaxis.set_ticks_position('bottom')
+# 	ax.yaxis.set_ticks_position('left')
+# 	ax.spines['bottom'].set_linewidth(0.5)
+# 	ax.spines['left'].set_linewidth(0.5)

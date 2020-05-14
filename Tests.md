@@ -2,8 +2,8 @@
 
 | | CUDA | ScatterAlloc | Halloc | XMalloc | Ouroboros | Reg-Eff | FDGMalloc | BulkAlloc|
 |:---:|:---:|:---:| :---:|:---:|:---:|:---:|:---:|:---:|
-|Performance 10K|:heavy_check_mark:|-|-|-|-|-|-|-|
-|Performance 100K|-|-|-|-|-|-|-|-|
+|Performance 10K|:heavy_check_mark:|:heavy_check_mark:|-|-|-|-|-|-|
+|Performance 100K|-|:watch:|-|-|-|-|-|-|
 |Mixed 10K|:heavy_check_mark:|:heavy_check_mark:|-|:heavy_check_mark:|-|-|-|-|
 |Mixed 100K|:heavy_check_mark:|:heavy_check_mark:|-|:interrobang:|-|-|-|-|
 |Scaling 2¹ - 2²⁰|:heavy_check_mark:|:heavy_check_mark:|-|-|-|-|-|-|
@@ -13,7 +13,7 @@
 |Graph Updates|-|-|-|-|-|-|-|-|
 
 ## Notes Performance
-* Text
+* ScatterAlloc stopped at `4932` for `100.000` allocations
 
 ## Notes Scaling
 * Text
