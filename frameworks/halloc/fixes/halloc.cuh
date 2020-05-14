@@ -68,45 +68,25 @@ __device__ inline uint size_id_from_nbytes(uint nbytes) {
 
 /** increments counter for specific size, does so in warp-aggregating-friendly
 		fashion */
-// __device__ __forceinline__ uint size_ctr_inc(uint size_id) {
-// 	//return atomicAdd(&counters_g[size_id], 1);
-// 	bool want_inc = true;
-// 	uint mask, old_counter, lid = lane_id(), leader_lid, group_mask, change;
-// 	//uint change = 1;
-// 	//while(mask = __ballot_sync(0xFFFFFFFF, want_inc)) {
-// 	//	if(want_inc) {
-// 	//mask = __ballot_sync(0xFFFFFFFF, 1);
-// 	while(want_inc) {
-// 		mask = __ballot_sync(0xFFFFFFFF, want_inc);
-// 		leader_lid = warp_leader(mask);
-// 		uint leader_size_id = size_id;
-// 		leader_size_id = warp_bcast(leader_size_id, leader_lid);
-// 		group_mask = __ballot_sync(0xFFFFFFFF, size_id == leader_size_id);
-// 		//group_mask = __ballot_sync(0xFFFFFFFF, 1);
-
-// 		mask &= ~group_mask;
-// 		want_inc = want_inc && size_id != leader_size_id;
-// 		//want_inc = false;
-// 		// }
-// 	}  // while
-// 	if(lid == leader_lid)
-// 		old_counter = atomicAdd(&counters_g[size_id], __popc(group_mask));
-// 	old_counter = warp_bcast(old_counter, leader_lid);
-// 	change =  __popc(group_mask & ((1 << lid) - 1));
-// 	uint cv = old_counter + change;
-// 	return cv;
-// }  // sb_ctr_inc
-
 __device__ __forceinline__ uint size_ctr_inc(uint size_id) {
+	//return atomicAdd(&counters_g[size_id], 1);
 	bool want_inc = true;
 	uint mask, old_counter, lid = lane_id(), leader_lid, group_mask, change;
-	mask = __activemask();
+	//uint change = 1;
 	while(want_inc) {
-		mask = __ballot_sync(mask, want_inc);
+		#if (__CUDA_ARCH__ >= 700)
+		mask = __ballot_sync(__activemask(), want_inc);
+		#else
+		mask = __ballot(want_inc);
+		#endif
 		leader_lid = warp_leader(mask);
 		uint leader_size_id = size_id;
 		leader_size_id = warp_bcast(leader_size_id, leader_lid);
-		group_mask = __ballot_sync(mask, size_id == leader_size_id);
+		#if (__CUDA_ARCH__ >= 700)
+		group_mask = __ballot_sync(__activemask(), size_id == leader_size_id);
+		#else
+		group_mask = __ballot(size_id == leader_size_id);
+		#endif
 
 		mask &= ~group_mask;
 		want_inc = want_inc && size_id != leader_size_id;
@@ -149,20 +129,13 @@ __device__ inline uint ichunk_init
 __device__ __forceinline__ void *hamalloc_small(uint nbytes) {
 	// the head; having multiple heads actually doesn't help
 	//uint ihead = (blockIdx.x / 32) % NHEADS;
-	printf("%d - %d | Hello!\n", threadIdx.x, blockIdx.x);
 	uint ihead = 0;
 	uint size_id = size_id_from_nbytes(nbytes);
 	size_info_t *size_info = &size_infos_g[size_id];
 	uint head_sb = *(volatile uint *)&head_sbs_g[ihead][size_id];
 
-	printf("%d - %d | NBytes: %u - sizeid: %u - headsb: %u\n", threadIdx.x, blockIdx.x, nbytes, size_id, head_sb);
-	// return nullptr;
-
 	uint cv = size_ctr_inc(size_id);
 	void *p = 0;
-
-	printf("%d - %d | NBytes: %u - sizeid: %u - headsb: %u - cv: %u\n", threadIdx.x, blockIdx.x, nbytes, size_id, head_sb, cv);
-	// return nullptr;
 
 	uint ichunk = ichunk_init(cv, size_id, size_info);
 	//ichunk = ichunk * ldca(&size_info->nchunks_in_block) &
@@ -173,13 +146,6 @@ __device__ __forceinline__ void *hamalloc_small(uint nbytes) {
 	// use two-level loop to avoid warplocks
 	//uint ntries = 0;
 	uint itry = 0;
-	
-
-	// ------ we left it here, the masks may be a problem, reverted it to 0xFFFFFFFF for the moment
-	printf("It starts to stink after here!\n");
-	return;
-
-	uint mask = __activemask();
 	do {
 		if(want_alloc) {
 			//if(res_mask & 4)
@@ -188,9 +154,13 @@ __device__ __forceinline__ void *hamalloc_small(uint nbytes) {
 			p = sb_alloc_in(ihead, head_sb, ichunk, itry, size_id, need_roomy_sb);
 			want_alloc = !p;
 			//assert(!want_alloc || need_roomy_sb);
-			uint innermask = __activemask();
-			while(__any_sync(innermask, need_roomy_sb)) {
-				uint need_roomy_mask = __ballot_sync(innermask, need_roomy_sb);
+				#if (__CUDA_ARCH__ >= 700)
+			while(__any_sync(__activemask(), need_roomy_sb)) {
+				uint need_roomy_mask = __ballot_sync(__activemask(), need_roomy_sb);
+				#else
+			while(__any(need_roomy_sb)) {
+				uint need_roomy_mask = __ballot(need_roomy_sb);
+				#endif
 				if(need_roomy_sb) {
 					uint leader_lid = warp_leader(need_roomy_mask);
 					uint leader_size_id = size_id;
@@ -215,7 +185,11 @@ __device__ __forceinline__ void *hamalloc_small(uint nbytes) {
 			//ntries++;
 			//assert(ntries < 256);
 		}
-	} while(__any_sync(mask, want_alloc));
+	#if (__CUDA_ARCH__ >= 700)
+	} while(__any_sync(__activemask(), want_alloc));
+	#else
+	} while(__any(want_alloc));
+	#endif
 	//__threadfence();
 	return p;
 }  // hamalloc_small
@@ -226,14 +200,14 @@ __device__ __forceinline__ void *hamalloc_large(size_t nbytes) {
 }  // hamalloc_large
 
 /** a helper function to define various interfaces to halloc */
-__device__ void *hamalloc_inline(size_t nbytes) {
+__device__ __forceinline__ void *hamalloc_inline(size_t nbytes) {
 	if(nbytes <= MAX_BLOCK_SZ)
 		return hamalloc_small(nbytes);
 	else
 		return hamalloc_large(nbytes);
 } // hamalloc
 
-__device__ void *hamalloc(size_t nbytes) {
+__device__ __noinline__ void *hamalloc(size_t nbytes) {
 	return hamalloc_inline(nbytes);
 }
 
@@ -345,12 +319,6 @@ void ha_init(halloc_opts_t opts) {
 	uint *sb_counters = (uint *)malloc(MAX_NSBS * sizeof(uint));
 	memset(sbs, 0xff, MAX_NSBS * sizeof(uint));
 	char *base_addr = (char *)~0ull;
-
-	#ifdef LINEAR_MEMORY_LAYOUT
-	void *ptr{nullptr};
-	cucheck(cudaMalloc(&ptr, sb_sz * nsbs_alloc));
-	#endif
-
 	for(uint isb = 0; isb < nsbs_alloc; isb++) {
 		sb_counters[isb] = sb_counter_val(0, false, SZ_NONE, SZ_NONE);
 		sbs[isb].size_id = SZ_NONE;
@@ -361,11 +329,7 @@ void ha_init(halloc_opts_t opts) {
 		//sbs[isb].chunk_id = SZ_NONE;
 		//sbs[isb].state = SB_FREE;
 		//sbs[isb].mutex = 0;
-		#ifndef LINEAR_MEMORY_LAYOUT
 		cucheck(cudaMalloc(&sbs[isb].ptr, sb_sz));
-		#else
-		sbs[isb].ptr = reinterpret_cast<void*>(reinterpret_cast<char*>(ptr) + (isb * sb_sz));
-		#endif
 		sb_ptrs[isb] = sbs[isb].ptr;
 		base_addr = (char *)min((uint64)base_addr, (uint64)sbs[isb].ptr);
 	}

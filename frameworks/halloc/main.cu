@@ -22,7 +22,7 @@ __global__ void d_testFunctions(MemoryManager memory_manager)
 
 	memory_manager.free(test_array);
 
-	printf("It worked!\n");
+	// printf("It worked!\n");
 
 	return;
 }
@@ -31,7 +31,7 @@ int main(int argc, char* argv[])
 {
 	std::cout << "Simple Halloc Testcase\n";
 
-	MemoryManagerHalloc memory_manager;
+	MemoryManagerHalloc memory_manager(2048ULL * 1024ULL * 1024ULL);
 
 	d_testFunctions <<<1,64>>>(memory_manager);
 

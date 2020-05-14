@@ -24,7 +24,8 @@
 
 ## Halloc
 ---
-* Currently only works in warp-based manner
+* The masks are quite hard to translate to modern CUDA
+  * Currently it works with Sync Build
 
 ## Reg-Eff
 ---

@@ -52,7 +52,7 @@ def main():
 		if any("x" in s for s in args.t):
 			testcases["XMalloc"] = sync_build_path + str("x_alloc_test")
 		if any("h" in s for s in args.t):
-			testcases["Halloc"] = build_path + str("h_alloc_test")
+			testcases["Halloc"] = sync_build_path + str("h_alloc_test")
 		if any("s" in s for s in args.t):
 			testcases["ScatterAlloc"] = sync_build_path + str("s_alloc_test")
 		if any("o" in s for s in args.t):

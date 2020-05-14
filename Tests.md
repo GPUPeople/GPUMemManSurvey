@@ -2,6 +2,7 @@
 
 | | CUDA | ScatterAlloc | Halloc | XMalloc | Ouroboros | Reg-Eff | FDGMalloc | BulkAlloc|
 |:---:|:---:|:---:| :---:|:---:|:---:|:---:|:---:|:---:|
+| **Build** (Sync :a: - Async :b:) | :ab: | :a: | :a: | :a: | :ab: | :ab:| :a: | :b:|
 |Performance 10K|:heavy_check_mark:|:heavy_check_mark:|-|-|-|-|-|-|
 |Performance 100K|-|:watch:|-|-|-|-|-|-|
 |Mixed 10K|:heavy_check_mark:|:heavy_check_mark:|-|:heavy_check_mark:|-|-|-|-|
