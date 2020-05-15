@@ -25,9 +25,9 @@ Then execute the automated script!
 |:---:|:---:|:---:| :---:|:---:|:---:|:---:|:---:|:---:|
 | **Build** (Sync :a: - Async :b:) | :ab: | :a: | :a: | :a: | :ab: | :a:| :a: | :b:|
 |Performance 10K|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|-|-|-|-|
-|Performance 100K|:heavy_check_mark:|:heavy_check_mark:|:watch:|:heavy_multiplication_x:|-|-|-|-|
-|Mixed 10K|:heavy_check_mark:|:heavy_check_mark:|-|:heavy_check_mark:|-|-|-|-|
-|Mixed 100K|:heavy_check_mark:|:heavy_check_mark:|-|:interrobang:|-|-|-|-|
+|Performance 100K|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_multiplication_x:|-|-|-|-|
+|Mixed 10K|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|-|-|-|-|
+|Mixed 100K|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:interrobang:|-|-|-|-|
 |Scaling 2¹ - 2²⁰|:heavy_check_mark:|:heavy_check_mark:|-|-|-|-|-|-|
 |Fragmentation 1|-|-|-|-|-|-|-|-|
 |Fragmentation 2|-|-|-|-|-|-|-|-|
