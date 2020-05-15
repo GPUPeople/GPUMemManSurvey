@@ -4,7 +4,7 @@
 |:---:|:---:|:---:| :---:|:---:|:---:|:---:|:---:|:---:|
 | **Build** (Sync :a: - Async :b:) | :ab: | :a: | :a: | :a: | :ab: | :ab:| :a: | :b:|
 |Performance 10K|:heavy_check_mark:|:heavy_check_mark:|-|-|-|-|-|-|
-|Performance 100K|-|:watch:|-|-|-|-|-|-|
+|Performance 100K|:heavy_check_mark:|:heavy_check_mark:|-|-|-|-|-|-|
 |Mixed 10K|:heavy_check_mark:|:heavy_check_mark:|-|:heavy_check_mark:|-|-|-|-|
 |Mixed 100K|:heavy_check_mark:|:heavy_check_mark:|-|:interrobang:|-|-|-|-|
 |Scaling 2¹ - 2²⁰|:heavy_check_mark:|:heavy_check_mark:|-|-|-|-|-|-|
@@ -15,6 +15,7 @@
 
 ## Notes Performance
 * ScatterAlloc stopped at `4932` for `100.000` allocations
+* CUDA stopped at `944` for `100.000` allocations
 
 ## Notes Scaling
 * Text
