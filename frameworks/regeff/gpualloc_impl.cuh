@@ -84,14 +84,22 @@ __shared__ uint warpAtomicCounter[32];
 
 __device__ uint getWorker()
 {
-	return __ffs(__ballot_sync(0xFFFFFFFF, 1)) - 1;
+	#if (__CUDA_ARCH__ >= 700)
+	return __ffs(__ballot_sync(__activemask(), 1)) - 1;
+	#else
+	return __ffs(__ballot(1)) - 1;
+	#endif
 }
 
 //------------------------------------------------------------------------
 
 __device__ uint getWorker(uint& mask)
 {
-	mask = __ballot_sync(0xFFFFFFFF, 1);
+	#if (__CUDA_ARCH__ >= 700)
+	mask = __ballot_sync(__activemask(), 1);
+	#else
+	mask = __ballot(1);
+	#endif
 	return __ffs(mask) - 1;
 }
 
@@ -106,7 +114,11 @@ __device__ uint coalesce(uint value, uint& total, uint& workerIdx)
 	int prefix = shfl_prefix_sum(value);
 	// The total memory is inclusive prefix sum of the last thread
 	total = prefix + value;
-	total = __shfl_sync(0xFFFFFFFF, (int)total, 31);
+	#if (__CUDA_ARCH__ >= 700)
+	total = __shfl_sync(__activemask(), (int)total, 31);
+	#else
+	total = __shfl((int)total, 31);
+	#endif
 	return prefix;
 #elif COALESCE_ATOMIC
 	uint warpIdx = GPUTools::warpid();
@@ -139,14 +151,22 @@ __device__ uint coalesce(uint value, uint& total, uint& workerIdx)
 		// Active thread
 		if(activeMask & (1 << i))
 		{
-			uint n = __shfl_sync(0xFFFFFFFF, (int)value, i);
+			#if (__CUDA_ARCH__ >= 700)
+			uint n = __shfl_sync(__activemask(), (int)value, i);
+			#else
+			uint n = __shfl((int)value, i);
+			#endif
 			if(i < laneIdx)
 				prefix += n;
 		}
 	}
 
 	total = prefix + value;
-	total = __shfl_sync(0xFFFFFFFF, (int)total, maxThread);
+	#if (__CUDA_ARCH__ >= 700)
+	total = __shfl_sync(__activemask(), (int)total, maxThread);
+	#else
+	total = __shfl((int)total, maxThread);
+	#endif
 
 	return prefix;
 #endif
@@ -156,7 +176,11 @@ __device__ uint coalesce(uint value, uint& total, uint& workerIdx)
 
 __device__ uint exchange(uint value, uint workerIdx)
 {
-	value = __shfl_sync(0xFFFFFFFF, (int32_t)value, (uint32_t)workerIdx);
+	#if (__CUDA_ARCH__ >= 700)
+	value = __shfl_sync(__activemask(), (int32_t)value, (uint32_t)workerIdx);
+	#else
+	value = __shfl((int32_t)value, (uint32_t)workerIdx);
+	#endif
 	return value;
 }
 
@@ -166,12 +190,21 @@ __device__ void* exchangePtr(void* ptr, uint workerIdx)
 {
 #if defined(_M_X64) || defined(__amd64__)
 	uint64_t ptr64 = (uint64_t)ptr;
-	ptr64 = ((uint64_t)__shfl_sync(0xFFFFFFFF, (int32_t)(ptr64 >> 32),	(uint32_t)workerIdx)) << 32;
-	ptr64 |= ((uint64_t)__shfl_sync(0xFFFFFFFF, (int32_t)ptr,				(uint32_t)workerIdx) & 0x00000000FFFFFFFF);
+	#if (__CUDA_ARCH__ >= 700)
+	ptr64 = ((uint64_t)__shfl_sync(__activemask(), (int32_t)(ptr64 >> 32),	(uint32_t)workerIdx)) << 32;
+	ptr64 |= ((uint64_t)__shfl_sync(__activemask(), (int32_t)ptr,				(uint32_t)workerIdx) & 0x00000000FFFFFFFF);
+	#else
+	ptr64 = ((uint64_t)__shfl((int32_t)(ptr64 >> 32),	(uint32_t)workerIdx)) << 32;
+	ptr64 |= ((uint64_t)__shfl((int32_t)ptr,				(uint32_t)workerIdx) & 0x00000000FFFFFFFF);
+	#endif
 
 	ptr = (void*)ptr64;
 #else
-	ptr = (void*)__shfl_sync(0xFFFFFFFF, (int32_t)ptr, (uint32_t)workerIdx);
+	#if (__CUDA_ARCH__ >= 700)
+	ptr = (void*)__shfl_sync(__activemask(), (int32_t)ptr, (uint32_t)workerIdx);
+	#else
+	ptr = (void*)__shfl((int32_t)ptr, (uint32_t)workerIdx);
+	#endif
 #endif
 
 	return ptr;

@@ -226,7 +226,11 @@ xmcMalloc(unsigned int size)
   bool coalescible = size != 0 && size < MAX_COALESCE_SIZE;
 
   // Count number of threads that will allocate a coalescible number of bytes
-  threadCount = __popc(__ballot_sync(0xFFFFFFFF, coalescible));
+  #if (__CUDA_ARCH__ >= 700)
+  threadCount = __popc(__ballot_sync(__activemask(), coalescible));
+  #else
+  threadCount = __popc(__ballot(coalescible));
+  #endif
 
   if (coalescible && threadCount != 1) {
     unsigned int thread_request_size = getThreadBlockSize(size);

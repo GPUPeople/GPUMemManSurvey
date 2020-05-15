@@ -109,6 +109,7 @@ __global__ void d_testReadFromMemory(int** verification_ptr, int num_allocations
 		if(ptr[i] != tid)
 		{
 			printf("%d | We got a wrong value here! %d vs %d\n", tid, ptr[i], tid);
+			__trap();
 		}
 	}
 }

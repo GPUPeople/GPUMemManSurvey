@@ -63,7 +63,7 @@ enum AllocatorLockType {AllocatorLockType_Free = 0, AllocatorLockType_Set};
 // A structure holding information about dynamic memory heap
 struct AllocInfo
 {
-	unsigned int heapSize;
+	unsigned long long heapSize;
 	unsigned int payload;
 	double maxFrag;
 	double chunkRatio;
@@ -93,7 +93,7 @@ struct AllocInfo
 // Configurations.
 #define ALIGN 16
 #define WARP_SIZE 32
-#define COALESCE_WARP
+// #define COALESCE_WARP
 
 
 #ifdef __CUDACC__
