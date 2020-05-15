@@ -28,7 +28,7 @@ Then execute the automated script!
 |Performance 100K|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_multiplication_x:|-|-|-|-|
 |Mixed 10K|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|-|-|-|-|
 |Mixed 100K|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:interrobang:|-|-|-|-|
-|Scaling 2¹ - 2²⁰|:heavy_check_mark:|:heavy_check_mark:|-|-|-|-|-|-|
+|Scaling 2¹ - 2²⁰|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|-|-|-|-|-|
 |Fragmentation 1|-|-|-|-|-|-|-|-|
 |Fragmentation 2|-|-|-|-|-|-|-|-|
 |Graph Initialization|-|-|-|-|-|-|-|-|
@@ -38,7 +38,7 @@ Then execute the automated script!
 * `XMalloc` fails after about `256` Bytes for `100.000` allocations
 
 ## Notes Scaling
-* Text
+* Since `Halloc` delegates the larger allocations to `CUDA`, it fails a little bit early, since it has to split its memory space, standard is `75% Halloc / 25% CUDA`
 
 ## Notes Mixed
 * `XMalloc`
