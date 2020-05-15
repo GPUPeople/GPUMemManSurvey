@@ -24,8 +24,8 @@ Then execute the automated script!
 | | CUDA | ScatterAlloc | Halloc | XMalloc | Ouroboros | Reg-Eff | FDGMalloc | BulkAlloc|
 |:---:|:---:|:---:| :---:|:---:|:---:|:---:|:---:|:---:|
 | **Build** (Sync :a: - Async :b:) | :ab: | :a: | :a: | :a: | :ab: | :a:| :a: | :b:|
-|Performance 10K|:heavy_check_mark:|:heavy_check_mark:|-|:heavy_check_mark:|-|-|-|-|
-|Performance 100K|:heavy_check_mark:|:heavy_check_mark:|-|-|-|-|-|-|
+|Performance 10K|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|-|-|-|-|
+|Performance 100K|:heavy_check_mark:|:heavy_check_mark:|:watch:|:heavy_multiplication_x:|-|-|-|-|
 |Mixed 10K|:heavy_check_mark:|:heavy_check_mark:|-|:heavy_check_mark:|-|-|-|-|
 |Mixed 100K|:heavy_check_mark:|:heavy_check_mark:|-|:interrobang:|-|-|-|-|
 |Scaling 2¹ - 2²⁰|:heavy_check_mark:|:heavy_check_mark:|-|-|-|-|-|-|
@@ -35,8 +35,7 @@ Then execute the automated script!
 |Graph Updates|-|-|-|-|-|-|-|-|
 
 ## Notes Performance
-* ScatterAlloc stopped at `4932` for `100.000` allocations
-* CUDA stopped at `944` for `100.000` allocations
+* `XMalloc` fails after about `256` Bytes for `100.000` allocations
 
 ## Notes Scaling
 * Text
