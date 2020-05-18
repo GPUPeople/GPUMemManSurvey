@@ -25,7 +25,7 @@ Then execute the automated script!
 |:---:|:---:|:---:| :---:|:---:|:---:|:---:|:---:|:---:|
 | **Build** (Sync :a: - Async :b:) | :ab: | :a: | :a: | :a: | :ab: | :a:| :a: | :b:|
 |Performance 10K|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|-|-|-|-|
-|Performance 100K|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_multiplication_x:|-|-|-|-|
+|Performance 100K|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_multiplication_x:|:watch:|-|-|-|
 |Mixed 10K|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|-|-|-|-|
 |Mixed 100K|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_multiplication_x:|-|-|-|-|
 |Scaling 2¹ - 2²⁰|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_multiplication_x:|-|-|-|-|
@@ -35,6 +35,8 @@ Then execute the automated script!
 |Graph Updates|-|-|-|-|-|-|-|-|
 
 ## Notes Performance
+* `Ouroboros` currently has done
+  * `100.000` with `Ouroboros-P-S`
 * `XMalloc` fails after about `256` Bytes for `100.000` allocations
 
 ## Notes Scaling
