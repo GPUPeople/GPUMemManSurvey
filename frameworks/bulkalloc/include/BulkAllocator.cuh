@@ -3,13 +3,13 @@
 #include "TBuddy.cuh"
 #include "UAlloc.cuh"
 #include "Utility.cuh"
+#include "BulkSemaphore.cuh"
 
 template <unsigned int CHUNK_SIZE>
 class BulkAllocator
 {
 public:
-	static constexpr unsigned int ChunkSize{ CHUNK_SIZE }; // Largest size serviceable by UAlloc
-	static constexpr unsigned int LeafNodeSize{ CHUNK_SIZE << 1 }; // Smallest size serviceable by TBuddy
+	static constexpr unsigned int ChunkSize{ CHUNK_SIZE }; // Largest size serviceable by UAlloc, leaf node size of TBuddy
 
 	__device__ __forceinline__ void* malloc(size_t size)
 	{

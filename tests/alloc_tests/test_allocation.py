@@ -56,9 +56,9 @@ def main():
 		if any("s" in s for s in args.t):
 			testcases["ScatterAlloc"] = sync_build_path + str("s_alloc_test")
 		if any("o" in s for s in args.t):
-			testcases["Ouroboros-P-S"] = build_path + str("o_alloc_test_p")
-			testcases["Ouroboros-P-VA"] = build_path + str("o_alloc_test_vap")
-			testcases["Ouroboros-P-VL"] = build_path + str("o_alloc_test_vlp")
+			# testcases["Ouroboros-P-S"] = build_path + str("o_alloc_test_p")
+			# testcases["Ouroboros-P-VA"] = build_path + str("o_alloc_test_vap")
+			# testcases["Ouroboros-P-VL"] = build_path + str("o_alloc_test_vlp")
 			testcases["Ouroboros-C-S"] = build_path + str("o_alloc_test_c")
 			# testcases["Ouroboros-C-VA"] = build_path + str("o_alloc_test_vac")
 			# testcases["Ouroboros-C-VL"] = build_path + str("o_alloc_test_vlc")
