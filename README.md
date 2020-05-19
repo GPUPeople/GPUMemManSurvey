@@ -35,8 +35,8 @@ Then execute the automated script!
 |Graph Updates|-|-|-|-|-|-|-|-|
 
 ## Notes Performance
-* `Ouroboros` currently has done
-  * `100.000` with `Ouroboros-P-S`
+* `Ouroboros` stopped at
+  * `100.000` with `Ouroboros-C-S` with `4900`
 * `XMalloc` fails after about `256` Bytes for `100.000` allocations
 
 ## Notes Scaling

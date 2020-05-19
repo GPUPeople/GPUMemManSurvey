@@ -63,7 +63,7 @@ def main():
 			# testcases["Ouroboros-C-VA"] = build_path + str("o_alloc_test_vac")
 			# testcases["Ouroboros-C-VL"] = build_path + str("o_alloc_test_vlc")
 		if any("f" in s for s in args.t):
-			testcases["FDGMalloc"] = build_path + str("f_alloc_test")
+			testcases["FDGMalloc"] = sync_build_path + str("f_alloc_test")
 		if any("r" in s for s in args.t):
 			testcases["RegEff-A"] = sync_build_path + str("r_alloc_test_a")
 			testcases["RegEff-AW"] = sync_build_path + str("r_alloc_test_aw")
