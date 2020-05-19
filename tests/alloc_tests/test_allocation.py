@@ -209,6 +209,7 @@ def main():
 		# Alloc - Mean - Std-dev
 		####################################################################################################
 		plotMean(result_alloc, 
+			testcases,
 			plotscale,
 			False, 
 			'Bytes', 
@@ -217,6 +218,7 @@ def main():
 			str("results/plots/performance/") + time_string + "_alloc." + filetype,
 			"stddev")
 		plotMean(result_alloc, 
+			testcases,
 			plotscale,
 			True, 
 			'Bytes', 
@@ -229,6 +231,7 @@ def main():
 		# Free - Mean - Std-dev
 		####################################################################################################
 		plotMean(result_free, 
+			testcases,
 			plotscale,
 			False,
 			'Bytes', 
@@ -237,6 +240,7 @@ def main():
 			str("results/plots/performance/") + time_string + "_free." + filetype,
 			"stddev")
 		plotMean(result_free, 
+			testcases,
 			plotscale,
 			True,
 			'Bytes', 
@@ -249,6 +253,7 @@ def main():
 		# Alloc - Mean - Min/Max
 		####################################################################################################
 		plotMean(result_alloc, 
+			testcases,
 			plotscale,
 			True,
 			'Bytes', 
@@ -261,6 +266,7 @@ def main():
 		# Free - Mean - Min/Max
 		####################################################################################################
 		plotMean(result_free, 
+			testcases,
 			plotscale,
 			True,
 			'Bytes', 
@@ -273,6 +279,7 @@ def main():
 		# Alloc - Median
 		####################################################################################################
 		plotMean(result_alloc, 
+			testcases,
 			plotscale,
 			False,
 			'Bytes', 
@@ -285,6 +292,7 @@ def main():
 		# Free - Median
 		####################################################################################################
 		plotMean(result_free, 
+			testcases,
 			plotscale,
 			False,
 			'Bytes', 

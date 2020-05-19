@@ -101,7 +101,7 @@ max_offset = 3
 median_offset = 4
 
 # Plot mean as a line plot with std-dev
-def plotMean(results, plotscale, plotrange, xlabel, ylabel, title, filename, variant):
+def plotMean(results, testcases, plotscale, plotrange, xlabel, ylabel, title, filename, variant):
     x_values = np.asarray([float(i) for i in results[0][1:]])
     for i in range(1, len(results), 5):
         y_values = None
@@ -119,6 +119,8 @@ def plotMean(results, plotscale, plotrange, xlabel, ylabel, title, filename, var
             y_min = np.asarray([float(i) for i in results[i+min_offset][1:]])
             y_max = np.asarray([float(i) for i in results[i+max_offset][1:]])
         labelname = results[i][0].split(" ")[0]
+        if labelname not in testcases:
+            continue
         print("Generate plot for " + labelname + " with " + variant)
         plt.plot(x_values, y_values, marker='', color=colours[labelname], linewidth=1, label=labelname)
         if plotrange:
@@ -135,16 +137,18 @@ def plotMean(results, plotscale, plotrange, xlabel, ylabel, title, filename, var
     plt.clf()
 
 # Plot results as a bar plot with std-dev
-def plotBars(results, plotscale, plotrange, xlabel, ylabel, title, filename, variant):
+def plotBars(results, testcases, plotscale, plotrange, xlabel, ylabel, title, filename, variant):
     num_approaches = int(len(results) / 5)
     width = 0.9 / num_approaches
     index = np.arange(len(results[0][1:]))
     placement = []
     alignlabel = ''
     approach_half = int(math.floor(num_approaches/2))
+    error_offset = 0
     if num_approaches % 2 == 0:
         placement = [number - approach_half for number in range(0, num_approaches)]
         alignlabel = 'edge'
+        error_offset = width / 2
     else:
         placement = [number - approach_half for number in range(0, num_approaches)]
         alignlabel = 'center'
@@ -172,6 +176,8 @@ def plotBars(results, plotscale, plotrange, xlabel, ylabel, title, filename, var
             y_min = np.asarray([float(i) for i in results[i+min_offset][1:]])
             y_max = np.asarray([float(i) for i in results[i+max_offset][1:]])
         labelname = results[i][0].split(" ")[0]
+        if labelname not in testcases:
+            continue
         yerror = np.array([y_min,y_max])
         outputstring = "Generate plot for " + labelname
         if plotrange:
@@ -179,7 +185,7 @@ def plotBars(results, plotscale, plotrange, xlabel, ylabel, title, filename, var
         print(outputstring)
         plt.bar(index + (placement[j] * width), y_values, width=width, color=colours[labelname], align=alignlabel, edgecolor = "black", label=labelname, tick_label=x_values)
         if plotrange:
-            plt.errorbar(index + (placement[j] * width), y_values, yerror, fmt='r^')
+            plt.errorbar(index + (placement[j] * width) + error_offset, y_values, yerror, fmt='r^')
         j += 1
     if plotscale == "log":
         plt.yscale("log")

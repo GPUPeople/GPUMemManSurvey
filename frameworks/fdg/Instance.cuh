@@ -23,7 +23,7 @@ struct MemoryManagerFDG : public MemoryManagerBase
 
 	virtual __device__ __forceinline__ void free(void* ptr) override
 	{
-		warp->end();
+		//warp->end();
 		//warp->tidyUp();
 	}
 

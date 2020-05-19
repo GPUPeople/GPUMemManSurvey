@@ -209,6 +209,7 @@ def main():
 		# Alloc - Mean - Std-dev
 		####################################################################################################
 		plotBars(result_alloc, 
+			testcases,
 			plotscale,
 			False, 
 			'Bytes', 
@@ -217,6 +218,7 @@ def main():
 			str("results/plots/mixed_performance/") + time_string + "_alloc." + filetype,
 			"stddev")
 		plotBars(result_alloc, 
+			testcases,
 			plotscale,
 			True, 
 			'Bytes', 
@@ -229,6 +231,7 @@ def main():
 		# Free - Mean - Std-dev
 		####################################################################################################
 		plotBars(result_free, 
+			testcases,
 			plotscale,
 			False, 
 			'Bytes', 
@@ -237,6 +240,7 @@ def main():
 			str("results/plots/mixed_performance/") + time_string + "_free." + filetype,
 			"stddev")
 		plotBars(result_free, 
+			testcases,
 			plotscale,
 			True, 
 			'Bytes', 
@@ -249,6 +253,7 @@ def main():
 		# Alloc - Mean - Min/Max
 		####################################################################################################
 		plotBars(result_alloc, 
+			testcases,
 			plotscale,
 			True, 
 			'Bytes', 
@@ -261,6 +266,7 @@ def main():
 		# Free - Mean - Min/Max
 		####################################################################################################
 		plotBars(result_free, 
+			testcases,
 			plotscale,
 			True, 
 			'Bytes', 
@@ -273,6 +279,7 @@ def main():
 		# Alloc - Median
 		####################################################################################################
 		plotBars(result_alloc, 
+			testcases,
 			plotscale,
 			False, 
 			'Bytes', 
@@ -285,6 +292,7 @@ def main():
 		# Free - Median
 		####################################################################################################
 		plotBars(result_free, 
+			testcases,
 			plotscale,
 			False, 
 			'Bytes', 

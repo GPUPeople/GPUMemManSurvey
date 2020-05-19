@@ -29,7 +29,7 @@ int main(int argc, char* argv[])
 {
 	std::cout << "Simple FDG Testcase\n";
 
-	MemoryManagerFDG memory_manager;
+	MemoryManagerFDG memory_manager(8192ULL * 1024ULL * 1024ULL);
 
 	d_testFunctions <<<1,64>>>(memory_manager);
 

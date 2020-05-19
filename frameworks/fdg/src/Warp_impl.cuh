@@ -20,7 +20,11 @@ __device__ bool Warp::isWorkerThread(uint8_t* workerId, uint32_t* count) {
 	const uint8_t id = FDG__THREADIDINWARP;
 
 	// perform voting
-	uint32_t vote = __ballot_sync(0xFFFFFFFF, 1);
+	#if (__CUDA_ARCH__ >= 700)
+	uint32_t vote = __ballot_sync(__activemask(), 1);
+	#else
+	uint32_t vote = __ballot(1);
+	#endif
 	uint32_t wId;
 
 	// find worker thread
@@ -205,12 +209,21 @@ __device__ void* Warp::exchangePointer(void* ptr, const uint8_t workerId, const 
 	#ifndef FDG__USE_SHARED
 		#if defined(_M_X64) || defined(__amd64__)
 			uint64_t ptr64 = (uint64_t)ptr;
-			ptr64 = ((uint64_t)__shfl_sync(0xFFFFFFFF,(int32_t)(ptr64 >> 32),	(uint32_t)workerId, FDG__WARPSIZE)) << 32;
-			ptr64 |= (uint64_t)__shfl_sync(0xFFFFFFFF,(int32_t)ptr,				(uint32_t)workerId, FDG__WARPSIZE);
+			#if (__CUDA_ARCH__ >= 700)
+			ptr64 = ((uint64_t)__shfl_sync(__activemask(),(int32_t)(ptr64 >> 32),	(uint32_t)workerId, FDG__WARPSIZE)) << 32;
+			ptr64 |= (uint64_t)__shfl_sync(__activemask(),(int32_t)ptr,				(uint32_t)workerId, FDG__WARPSIZE);
+			#else
+			ptr64 = ((uint64_t)__shfl((int32_t)(ptr64 >> 32),	(uint32_t)workerId, FDG__WARPSIZE)) << 32;
+			ptr64 |= (uint64_t)__shfl((int32_t)ptr,				(uint32_t)workerId, FDG__WARPSIZE);
+			#endif
 
 			ptr = (void*)ptr64;
 		#else
-			ptr = (void*)__shfl_sync(0xFFFFFFFF, (int32_t)ptr, (uint32_t)workerId, FDG__WARPSIZE);
+			#if (__CUDA_ARCH__ >= 700)
+			ptr = (void*)__shfl_sync(__activemask(), (int32_t)ptr, (uint32_t)workerId, FDG__WARPSIZE);
+			#else
+			ptr = (void*)__shfl((int32_t)ptr, (uint32_t)workerId, FDG__WARPSIZE);
+			#endif
 		#endif
 	#else
 		if(workerId == id)

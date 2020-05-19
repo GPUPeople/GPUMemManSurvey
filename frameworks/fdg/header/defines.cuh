@@ -13,8 +13,8 @@
 
 #define FDG__WARPSIZE 32
 
-#define FDG__MALLOC(__SIZE) malloc(__SIZE)
-#define FDG__FREE(__PTR) free(__PTR)
+#define FDG__MALLOC(__SIZE) ::malloc(__SIZE)
+#define FDG__FREE(__PTR) ::free(__PTR)
 
 #define FDG__THREADID				(threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * (blockDim.x * blockDim.y))
 #define FDG__BLOCKID				(blockIdx.x  + blockIdx.y  * gridDim.x  + blockIdx.z  * (gridDim.x  * gridDim.y ))

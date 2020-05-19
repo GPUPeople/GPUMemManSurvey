@@ -224,6 +224,7 @@ def main():
 			####################################################################################################
 			print("Generate mean/stddev alloc plot for " + str(num_bytes))
 			plotMean(result_alloc, 
+				testcases,
 				plotscale,
 				False,
 				'Threads', 
@@ -232,6 +233,7 @@ def main():
 				str("results/plots/scaling/") + time_string + "_alloc_scale_" + str(num_bytes) + "_mean." + filetype,
 				"stddev")
 			plotMean(result_alloc, 
+				testcases,
 				plotscale,
 				True,
 				'Threads', 
@@ -245,6 +247,7 @@ def main():
 			####################################################################################################
 			print("Generate mean/stddev free plot for " + str(num_bytes))
 			plotMean(result_free, 
+				testcases,
 				plotscale,
 				False,
 				'Threads', 
@@ -253,6 +256,7 @@ def main():
 				str("results/plots/scaling/") + time_string + "_free_scale_" + str(num_bytes) + "_mean." + filetype,
 				"stddev")
 			plotMean(result_free, 
+				testcases,
 				plotscale,
 				True,
 				'Threads', 
@@ -266,6 +270,7 @@ def main():
 			####################################################################################################
 			print("Generate mean/min/max alloc plot for " + str(num_bytes))
 			plotMean(result_alloc, 
+				testcases,
 				plotscale,
 				True,
 				'Threads', 
@@ -279,6 +284,7 @@ def main():
 			####################################################################################################
 			print("Generate mean/min/max free plot for " + str(num_bytes))
 			plotMean(result_free, 
+				testcases,
 				plotscale,
 				True,
 				'Threads', 
@@ -292,6 +298,7 @@ def main():
 			####################################################################################################
 			print("Generate median alloc plot for " + str(num_bytes))
 			plotMean(result_alloc, 
+				testcases,
 				plotscale, 
 				False,
 				'Threads', 
@@ -305,6 +312,7 @@ def main():
 			####################################################################################################
 			print("Generate median free plot for " + str(num_bytes))
 			plotMean(result_free, 
+				testcases,
 				plotscale, 
 				False,
 				'Threads', 
