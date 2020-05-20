@@ -11,6 +11,11 @@ struct MemoryManagerOuroboros : public MemoryManagerBase
 {
 	explicit MemoryManagerOuroboros(size_t instantiation_size) : MemoryManagerBase(instantiation_size), memory_manager{new OuroborosType()}
 	{
+		if(ALLOCATION_SIZE != instantiation_size)
+		{
+			printf("Harcoded Allocation size does not match : %llu vs %llu\n", ALLOCATION_SIZE, instantiation_size);
+			exit(-1);
+		}
 		memory_manager->initialize();
 		d_memory_manager = memory_manager->getDeviceMemoryManager();
 	}

@@ -19,6 +19,11 @@ colours = {
 	'RegEff-C' : 'purple' , 'RegEff-CF' : 'violet' , 'RegEff-CM' : 'indigo' , 'RegEff-CFM' : 'blueviolet'
 }
 
+lineplot_width = 20
+lineplot_height = 10
+barplot_width = 15
+barplot_height = 10
+
 ####################################################################################################
 ####################################################################################################
 # Generate new Results
@@ -102,6 +107,7 @@ median_offset = 4
 
 # Plot mean as a line plot with std-dev
 def plotMean(results, testcases, plotscale, plotrange, xlabel, ylabel, title, filename, variant):
+    plt.figure(figsize=(lineplot_width, lineplot_height))
     x_values = np.asarray([float(i) for i in results[0][1:]])
     for i in range(1, len(results), 5):
         y_values = None
@@ -138,6 +144,7 @@ def plotMean(results, testcases, plotscale, plotrange, xlabel, ylabel, title, fi
 
 # Plot results as a bar plot with std-dev
 def plotBars(results, testcases, plotscale, plotrange, xlabel, ylabel, title, filename, variant):
+    plt.figure(figsize=(barplot_width, barplot_height))
     num_approaches = int(len(results) / 5)
     width = 0.9 / num_approaches
     index = np.arange(len(results[0][1:]))

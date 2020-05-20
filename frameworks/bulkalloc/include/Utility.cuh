@@ -1,8 +1,60 @@
 #pragma once
 
+static constexpr int SLEEP_TIME{10};
+static constexpr int WARP_SIZE{32};
 
 namespace BUtils
 {
+	// ##############################################################################################################################################
+	//
+	template<unsigned int X, int Completed = 0>
+	struct static_clz
+	{
+		static const int value = (X & 0x80000000) ? Completed : static_clz< (X << 1), Completed + 1 >::value;
+	};
+
+	// ##############################################################################################################################################
+	//
+	template<unsigned int X>
+	struct static_clz<X, 32>
+	{
+		static const int value = 32;
+	};
+
+	template <unsigned int n>
+	static constexpr unsigned int static_getNextPow2Pow()
+	{
+		if ((n & (n - 1)) == 0)
+			return 32 - static_clz<n>::value - 1;
+		else
+			return 32 - static_clz<n>::value;
+	}
+
+	// ##############################################################################################################################################
+	//
+	template<unsigned long long X, unsigned long long Completed = 0ULL>
+	struct static_clz_l
+	{
+		static const unsigned long long value = (X & 0x8000000000000000) ? Completed : static_clz_l< (X << 1ULL), Completed + 1ULL >::value;
+	};
+
+	// ##############################################################################################################################################
+	//
+	template<unsigned long long X>
+	struct static_clz_l<X, 64ULL>
+	{
+		static const unsigned long long value = 64ULL;
+	};
+
+	template <unsigned long long n>
+	static constexpr unsigned int static_getNextPow2Pow_l()
+	{
+		if ((n & (n - 1)) == 0)
+			return 64 - static_clz_l<n>::value - 1;
+		else
+			return 64 - static_clz_l<n>::value;
+	}
+
 	template <unsigned int ALIGNMENT>
 	__forceinline__ __device__ bool isAlignedToSize(void* base, void* ptr)
 	{
@@ -78,4 +130,28 @@ namespace BUtils
 	#endif
 	#endif
 	}
+
+	static inline void HandleError(cudaError_t err,
+		const char* string,
+		const char *file,
+		int line) {
+		if (err != cudaSuccess) {
+			printf("%s\n", string);
+			printf("%s in \n\n%s at line %d\n", cudaGetErrorString(err),
+				file, line);
+			exit(EXIT_FAILURE);
+		}
+	}
+	static inline void HandleError(const char *file,
+		int line) {
+		auto err = cudaGetLastError();
+		if (err != cudaSuccess) {
+			printf("%s in %s at line %d\n", cudaGetErrorString(err),
+				file, line);
+			exit(EXIT_FAILURE);
+		}
+	}
 }
+
+#define CHECK_ERROR( err ) (BUtils::HandleError( err, "", __FILE__, __LINE__ ))
+#define CHECK_ERROR_S( err , string) (BUtils::HandleError( err, string, __FILE__, __LINE__ ))

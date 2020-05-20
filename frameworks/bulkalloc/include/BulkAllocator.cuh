@@ -5,11 +5,18 @@
 #include "Utility.cuh"
 #include "BulkSemaphore.cuh"
 
-template <unsigned int CHUNK_SIZE>
+template <unsigned long long ALLOCATION_SIZE, unsigned int CHUNK_SIZE>
 class BulkAllocator
 {
 public:
+	static constexpr unsigned long long AllocationSize{ ALLOCATION_SIZE }; // 
 	static constexpr unsigned int ChunkSize{ CHUNK_SIZE }; // Largest size serviceable by UAlloc, leaf node size of TBuddy
+
+	BulkAllocator(size_t instantiation_size)
+	{
+		CHECK_ERROR(cudaMalloc(&base, instantiation_size));
+		tbuddy.print();
+	}
 
 	__device__ __forceinline__ void* malloc(size_t size)
 	{
@@ -29,7 +36,7 @@ public:
 
 private:
 	// Members
-	TBuddy<ChunkSize> tbuddy;
+	TBuddy<AllocationSize, ChunkSize> tbuddy;
 	UAlloc<ChunkSize> ualloc;
 	char* base;
 };

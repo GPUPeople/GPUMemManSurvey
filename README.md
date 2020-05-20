@@ -35,8 +35,7 @@ Then execute the automated script!
 |Graph Updates|-|-|-|-|-|-|-|-|
 
 ## Notes Performance
-* `Ouroboros` stopped at
-  * `100.000` with `Ouroboros-C-S` with `4900`
+* `Ouroboros` has issues for page-based standard and VA for 1 million allocations?
 * `XMalloc` fails after about `256` Bytes for `100.000` allocations
 
 ## Notes Scaling

@@ -28,7 +28,7 @@ int main(int argc, char* argv[])
 
 	MemoryManagerBulkAlloc memory_manager(8192ULL * 1024ULL * 1024ULL);
 
-	d_testFunctions <<<1,1>>>(memory_manager);
+	// d_testFunctions <<<1,1>>>(memory_manager);
 
 	cudaDeviceSynchronize();
 
