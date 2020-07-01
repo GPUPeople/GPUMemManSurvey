@@ -1,0 +1,12 @@
+[submodule "externals/cub"]
+	path = externals/cub
+	url = https://github.com/NVlabs/cub.git
+[submodule "frameworks/halloc/repository"]
+	path = frameworks/halloc/repository
+	url = https://github.com/canonizer/halloc.git
+[submodule "frameworks/ouroboros/repository"]
+	path = frameworks/ouroboros/repository
+	url = git@github.com:GPUPeople/Ouroboros.git
+[submodule "frameworks/scatteralloc/repository"]
+	path = frameworks/scatteralloc/repository
+	url = https://github.com/ax3l/scatteralloc.git
