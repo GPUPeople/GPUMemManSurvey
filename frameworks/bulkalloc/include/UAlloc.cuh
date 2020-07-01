@@ -1,9 +1,23 @@
 #pragma once
 
-template <unsigned int CHUNK_SIZE>
-class UAlloc
+
+template <unsigned int CHUNK_SIZE, unsigned int BIN_SIZE>
+struct SMArena
 {
-public:
+	static constexpr unsigned int ChunkSize{CHUNK_SIZE};
+	static constexpr unsigned int BinSize{BIN_SIZE};
+
+
+};
+
+template <unsigned int CHUNK_SIZE, unsigned int BIN_SIZE, unsigned int NUM_SMS>
+struct UAlloc
+{
+	static constexpr unsigned int ChunkSize{CHUNK_SIZE};
+	static constexpr unsigned int BinSize{BIN_SIZE};
+	static constexpr unsigned int ChunkOrder{(ChunkSize / BinSize) - 1};
+	static constexpr unsigned int NumSMs{NUM_SMS};
+
 	__device__ __forceinline__ void* malloc(size_t size)
 	{
 		printf("UAlloc malloc!\n");
@@ -16,6 +30,5 @@ public:
 		::free(ptr);
 	}
 
-private:
-
+	SMArena<ChunkSize, BinSize> arenas[NumSMs];
 };

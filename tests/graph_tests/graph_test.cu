@@ -24,18 +24,71 @@ using json = nlohmann::json;
 // ########################
 #ifdef TEST_CUDA
 #include "cuda/Instance.cuh"
+using MemoryManager = MemoryManagerCUDA;
+const std::string mem_name("CUDA");
 #elif TEST_HALLOC
 #include "halloc/Instance.cuh"
+using MemoryManager = MemoryManagerHalloc;
+const std::string mem_name("HALLOC");
 #elif TEST_XMALLOC
 #include "xmalloc/Instance.cuh"
+using MemoryManager = MemoryManagerXMalloc;
+const std::string mem_name("XMALLOC");
 #elif TEST_SCATTERALLOC
 #include "scatteralloc/Instance.cuh"
-#elif TEST_OUROBOROS
-#include "ouroboros/Instance.cuh"
+using MemoryManager = MemoryManagerScatterAlloc;
+const std::string mem_name("ScatterAlloc");
 #elif TEST_FDG
 #include "fdg/Instance.cuh"
+using MemoryManager = MemoryManagerFDG;
+const std::string mem_name("FDGMalloc");
+#elif TEST_OUROBOROS
+#include "ouroboros/Instance.cuh"
+	#ifdef TEST_PAGES
+	#ifdef TEST_VIRTUALIZED_ARRAY
+	using MemoryManager = MemoryManagerOuroboros<OuroVAPQ>;
+	const std::string mem_name("Ouroboros-P-VA");
+	#elif TEST_VIRTUALIZED_LIST
+	using MemoryManager = MemoryManagerOuroboros<OuroVLPQ>;
+	const std::string mem_name("Ouroboros-P-VL");
+	#else
+	using MemoryManager = MemoryManagerOuroboros<OuroPQ>;
+	const std::string mem_name("Ouroboros-P-S");
+	#endif
+	#endif
+	#ifdef TEST_CHUNKS
+	#ifdef TEST_VIRTUALIZED_ARRAY
+	using MemoryManager = MemoryManagerOuroboros<OuroVACQ>;
+	const std::string mem_name("Ouroboros-C-VA");
+	#elif TEST_VIRTUALIZED_LIST
+	using MemoryManager = MemoryManagerOuroboros<OuroVLCQ>;
+	const std::string mem_name("Ouroboros-C-VL");
+	#else
+	using MemoryManager = MemoryManagerOuroboros<OuroCQ>;
+	const std::string mem_name("Ouroboros-C-S");
+	#endif
+	#endif
 #elif TEST_REGEFF
 #include "regeff/Instance.cuh"
+	#ifdef TEST_ATOMIC
+	using MemoryManager = MemoryManagerRegEff<RegEffVariants::AtomicMalloc>;
+	const std::string mem_name("RegEff-A");
+	#elif TEST_ATOMIC_WRAP
+	using MemoryManager = MemoryManagerRegEff<RegEffVariants::AWMalloc>;
+	const std::string mem_name("RegEff-AW");
+	#elif TEST_CIRCULAR
+	using MemoryManager = MemoryManagerRegEff<RegEffVariants::CMalloc>;
+	const std::string mem_name("RegEff-C");
+	#elif TEST_CIRCULAR_FUSED
+	using MemoryManager = MemoryManagerRegEff<RegEffVariants::CFMalloc>;
+	const std::string mem_name("RegEff-CF");
+	#elif TEST_CIRCULAR_MULTI
+	using MemoryManager = MemoryManagerRegEff<RegEffVariants::CMMalloc>;
+	const std::string mem_name("RegEff-CM");
+	#elif TEST_CIRCULAR_FUSED_MULTI
+	using MemoryManager = MemoryManagerRegEff<RegEffVariants::CFMMalloc>;
+	const std::string mem_name("RegEff-CFM");
+	#endif
 #endif
 
 using DataType = float;
@@ -156,71 +209,9 @@ int main(int argc, char* argv[])
         // #######################################################
         // #######################################################
         // #######################################################
-        #ifdef TEST_CUDA
-        std::cout << "--- CUDA ---\n";
-        using MemoryManagerType = MemoryManagerCUDA;
-        #elif TEST_HALLOC
-        std::cout << "--- Halloc ---\n";
-        using MemoryManagerType = MemoryManagerHalloc;
-        #elif TEST_XMALLOC
-        std::cout << "--- XMalloc ---\n";
-        using MemoryManagerType = MemoryManagerXMalloc;
-        #elif TEST_SCATTERALLOC
-        std::cout << "--- ScatterAlloc ---\n";
-        using MemoryManagerType = MemoryManagerScatterAlloc;
-        #elif TEST_OUROBOROS
-        std::cout << "--- Ouroboros ---";
-        #ifdef TEST_PAGES
-        #ifdef TEST_VIRTUALIZED_ARRAY
-        std::cout << " Page --- Virtualized Array ---\n";
-        using MemoryManagerType = MemoryManagerOuroboros<OuroVAPQ>;
-        #elif TEST_VIRTUALIZED_LIST
-        std::cout << " Page --- Virtualized List ---\n";
-        using MemoryManagerType = MemoryManagerOuroboros<OuroVLPQ>;
-        #else
-        std::cout << " Page --- Standard ---\n";
-        using MemoryManagerType = MemoryManagerOuroboros<OuroPQ>;
-        #endif
-        #endif
-        #ifdef TEST_CHUNKS
-        #ifdef TEST_VIRTUALIZED_ARRAY
-        std::cout << " Chunk --- Virtualized Array ---\n";
-        using MemoryManagerType = MemoryManagerOuroboros<OuroVACQ>;
-        #elif TEST_VIRTUALIZED_LIST
-        std::cout << " Chunk --- Virtualized List ---\n";
-        using MemoryManagerType = MemoryManagerOuroboros<OuroVLCQ>;
-        #else
-        std::cout << " Chunk --- Standard ---\n";
-        using MemoryManagerType = MemoryManagerOuroboros<OuroCQ>;
-        #endif
-        #endif
-        #elif TEST_FDG
-        std::cout << "--- FDGMalloc ---\n";
-        using MemoryManagerType = MemoryManagerFDG;
-        #elif TEST_REGEFF
-        std::cout << "--- RegEff ---";
-        #ifdef TEST_ATOMIC
-        std::cout << " Atomic\n";
-        using MemoryManagerType = MemoryManagerRegEff<RegEffVariants::AtomicMalloc>;
-        #elif TEST_ATOMIC_WRAP
-        std::cout << " Atomic Wrap\n";
-        using MemoryManagerType = MemoryManagerRegEff<RegEffVariants::AWMalloc>;
-        #elif TEST_CIRCULAR
-        std::cout << " Circular\n";
-        using MemoryManagerType = MemoryManagerRegEff<RegEffVariants::CMalloc>;
-        #elif TEST_CIRCULAR_FUSED
-        std::cout << " Circular Fused\n";
-        using MemoryManagerType = MemoryManagerRegEff<RegEffVariants::CFMalloc>;
-        #elif TEST_CIRCULAR_MULTI
-        std::cout << " Circular Multi\n";
-        using MemoryManagerType = MemoryManagerRegEff<RegEffVariants::CMMalloc>;
-        #elif TEST_CIRCULAR_FUSED_MULTI
-        std::cout << " Circular Fused Multi\n";
-        using MemoryManagerType = MemoryManagerRegEff<RegEffVariants::CFMMalloc>;
-        #endif        
-        #endif
+        std::cout << "--- " << mem_name << "---\n";
         
-        testrun<MemoryManagerType, DataType>(csr_mat, config, results);
+        testrun<MemoryManager, DataType>(csr_mat, config, results);
     }
     
     return 0;

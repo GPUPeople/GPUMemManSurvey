@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <math.h>
 #include <cstring>
+#include <string>
 
 template<typename T>
 struct COO;

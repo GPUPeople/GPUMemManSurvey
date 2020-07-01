@@ -1,9 +1,10 @@
 #pragma once
 
 #include "Utility.cuh"
-#include "BulkSemaphore.cuh"
+#include "BulkSemaphore_impl.cuh"
 
-enum class Node{
+enum class NodeStatus : int
+{
 	Busy,
 	Partial,
 	Available
@@ -16,47 +17,58 @@ struct StaticBinaryTree
 	static constexpr unsigned int NumLeaves{1 << (NumLevels - 1)};
 	static constexpr unsigned int NumNodes{(2 * NumLeaves) - 1};
 
+	__device__ __forceinline__ void initialize();
+
+	__device__ __forceinline__ int accessOrderOffset(int order) { return (1 << order) - 1; }
+
+	__device__ __forceinline__ void* allocate(int order);
+
+	// ###########################################################################################################
+	//
+	// Members
+	//
+	BulkSemaphore per_order_semaphore[NumLevels];
+	NodeStatus nodes[NumNodes];
+
+	// ###########################################################################################################
+	//
 	void print()
 	{
 		std::cout
 		<< NumLeaves << " | "
-		<< NumNodes << std::endl;
+		<< NumNodes << " | " 
+		<< std::endl;
 	}
-
-	BulkSemaphore per_order_semaphore[NumLevels];
-	Node nodes[NumNodes];
 };
 
-template <unsigned long long ALLOCATION_SIZE, unsigned int CHUNK_SIZE>
+template <unsigned long long ALLOCATION_SIZE, unsigned int NODE_SIZE>
 struct TBuddy
 {
 	static constexpr unsigned long long AllocationSize{ALLOCATION_SIZE};
 	static constexpr unsigned int AllocationSizePow{BUtils::static_getNextPow2Pow_l<AllocationSize>()};
-	static constexpr unsigned int ChunkSize{CHUNK_SIZE};
-	static constexpr unsigned int ChunkSizePow{BUtils::static_getNextPow2Pow<ChunkSize>()};
-	static constexpr unsigned int NumLevels{AllocationSizePow - ChunkSizePow + 1};
+	static constexpr unsigned int NodeSize{NODE_SIZE};
+	static constexpr unsigned int NodeSizePow{BUtils::static_getNextPow2Pow<NodeSize>()};
+	static constexpr unsigned int NumLevels{AllocationSizePow - NodeSizePow + 1};
 
 	void print()
 	{
 		std::cout
 		<< AllocationSize << " | "
 		<< AllocationSizePow << " | "
-		<< ChunkSize << " | "
-		<< ChunkSizePow << " | "
-		<< NumLevels << " | " << std::endl;
+		<< NodeSize << " | "
+		<< NodeSizePow << " | "
+		<< NumLevels << " | " 
+		<< std::endl;
 		availability_nodes.print();
 	}
 
-	__device__ __forceinline__ void* malloc(size_t size)
-	{
-		printf("TBuddy malloc!\n");
-		return nullptr;
-	}
+	__device__ __forceinline__ void* malloc(size_t size);
 
-	__device__ __forceinline__ void free(void* ptr)
-	{
-		printf("TBuddy free!\n");
-	}
+	__device__ __forceinline__ void free(void* ptr, memory_t* base);
 
+	// ###########################################################################################################
+	//
+	// Members
+	//
 	StaticBinaryTree<NumLevels> availability_nodes;
 };

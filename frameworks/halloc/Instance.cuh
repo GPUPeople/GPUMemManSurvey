@@ -1,7 +1,7 @@
 #pragma once
 
 #include "TestInstance.cuh"
-#include "repository/src/halloc.cuh"
+#include "repository/src/halloc.cu"
 
 struct MemoryManagerHalloc : public MemoryManagerBase
 {

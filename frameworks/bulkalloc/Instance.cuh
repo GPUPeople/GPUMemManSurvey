@@ -5,7 +5,7 @@
 struct MemoryManagerBulkAlloc : public MemoryManagerBase
 {
 	static constexpr unsigned long long AllocationSize{8192ULL * 1024ULL * 1024ULL};
-	static constexpr unsigned int ChunkSize{8192U};
+	static constexpr unsigned int ChunkSize{512 * 1024}; // 512 kib
 	explicit MemoryManagerBulkAlloc(size_t instantiation_size) : MemoryManagerBase(instantiation_size), allocator(new BulkAllocator<AllocationSize, ChunkSize>(instantiation_size))
 	{
 		cudaDeviceSetLimit(cudaLimitMallocHeapSize, 1024ULL * 1024ULL * 1024ULL);

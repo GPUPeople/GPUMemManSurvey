@@ -2,6 +2,7 @@
 
 static constexpr int SLEEP_TIME{10};
 static constexpr int WARP_SIZE{32};
+using memory_t = int8_t;
 
 namespace BUtils
 {
@@ -20,6 +21,28 @@ namespace BUtils
 	{
 		static const int value = 32;
 	};
+
+	static __device__ __forceinline__ int getNextPow2Pow(unsigned int n)
+	{
+		if ((n & (n - 1)) == 0)
+			return 32 - __clz(n) - 1;
+		else
+			return 32 - __clz(n);
+	}
+
+	static __device__ __forceinline__ int getNextPow2Pow(size_t n)
+	{
+		if ((n & (n - 1)) == 0)
+			return 64 - __clzll(n) - 1;
+		else
+			return 64 - __clzll(n);
+	}
+
+	template <typename T>
+	static __device__ __forceinline__ T getNextPow2(T n)
+	{
+		return 1 << (getNextPow2Pow(n));
+	}
 
 	template <unsigned int n>
 	static constexpr unsigned int static_getNextPow2Pow()
