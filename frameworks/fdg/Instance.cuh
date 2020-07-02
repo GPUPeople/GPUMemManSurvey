@@ -17,7 +17,7 @@ struct MemoryManagerFDG : public MemoryManagerBase
 
 	virtual __device__ __forceinline__ void* malloc(size_t size) override
 	{
-		warp = FDG::Warp::start();
+		FDG::Warp* warp = FDG::Warp::start();
 		return warp->alloc(size);
 	}
 
@@ -27,7 +27,6 @@ struct MemoryManagerFDG : public MemoryManagerBase
 		//warp->tidyUp();
 	}
 
-	FDG::Warp* warp{nullptr};
 	static bool initialized;
 };
 

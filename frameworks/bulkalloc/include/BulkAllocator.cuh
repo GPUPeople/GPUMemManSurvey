@@ -11,7 +11,7 @@ class BulkAllocator
 public:
 	static constexpr unsigned long long AllocationSize{ ALLOCATION_SIZE }; // 
 	static constexpr unsigned int ChunkSize{ 512U * 1024U }; // 
-	static constexpr unsigned int BinSize{ 4U * 1024U }; // Largest size serviceable by UAlloc is BinSize / 2, leaf node size of TBuddy
+	static constexpr unsigned int BinSize{ 4U * 1024U }; // Largest size serviceable by UAlloc is (BinSize / 2), leaf node size of TBuddy
 	static constexpr unsigned int BinsPerChunk{ ChunkSize / BinSize };
 	static constexpr unsigned int NumSMs{NUM_SMs};
 

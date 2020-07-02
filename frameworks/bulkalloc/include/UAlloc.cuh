@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Mutex.cuh"
 
 template <unsigned int CHUNK_SIZE, unsigned int BIN_SIZE>
 struct SMArena
@@ -8,6 +9,21 @@ struct SMArena
 	static constexpr unsigned int BinSize{BIN_SIZE};
 
 
+};
+
+template <unsigned int CHUNK_SIZE>
+struct Chunk
+{
+	static constexpr unsigned int ChunkSize{CHUNK_SIZE};
+};
+
+template <unsigned int CHUNK_SIZE>
+struct ChunkList
+{
+	static constexpr unsigned int ChunkSize{CHUNK_SIZE};
+
+	Mutex mutex;
+	Chunk<ChunkSize>* chunk_list;
 };
 
 template <unsigned int CHUNK_SIZE, unsigned int BIN_SIZE, unsigned int NUM_SMS>

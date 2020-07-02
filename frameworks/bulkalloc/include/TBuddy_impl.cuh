@@ -46,6 +46,7 @@ __device__ __forceinline__ void* TBuddy<ALLOCATION_SIZE, NODE_SIZE>::malloc(size
 	// The smallest size we get in here is NodeSize
 	int order = size >> NodeSizePow;
 	auto ret_ptr = availability_nodes.allocate(order);
+	// return ret_ptr;
 	return ::malloc(size);
 }
 

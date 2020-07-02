@@ -2,6 +2,7 @@
 
 #include "Utility.cuh"
 #include "BulkSemaphore_impl.cuh"
+#include "Mutex.cuh"
 
 enum class NodeStatus : int
 {
@@ -29,6 +30,7 @@ struct StaticBinaryTree
 	//
 	BulkSemaphore per_order_semaphore[NumLevels];
 	NodeStatus nodes[NumNodes];
+	Mutex per_node_locks[NumNodes];
 
 	// ###########################################################################################################
 	//

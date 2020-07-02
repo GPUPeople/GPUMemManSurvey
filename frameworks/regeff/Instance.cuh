@@ -65,7 +65,7 @@ struct MemoryManagerRegEff : public MemoryManagerBase
 			int m_numSM{0};
 			cudaDeviceGetAttribute(&m_numSM, cudaDevAttrMultiProcessorCount, device);
 			cudaMemcpyToSymbol(g_numSM, &m_numSM, sizeof(unsigned int));
-			printf("Device: %d - NumSms: %d\n", device, m_numSM);
+			// printf("Device: %d - NumSms: %d\n", device, m_numSM);
 
 			unsigned int** m_multiOffset{nullptr};
 			cudaMalloc(&m_multiOffset, m_numSM * sizeof(unsigned int*));
