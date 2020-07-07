@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import math
 
 colours = {
+	'ActualSize' : 'black',
 	'Halloc' : 'orange' , 
     'XMalloc' : 'silver',
 	'Ouroboros-P-VA' : 'lightcoral' , 'Ouroboros-P-VL' : 'darkred' , 'Ouroboros-P-S' : 'red' ,
@@ -20,6 +21,7 @@ colours = {
 }
 
 linestyles = {
+	'ActualSize' : 'solid',
 	'Halloc' : 'solid' , 
     'XMalloc' : 'solid',
 	'Ouroboros-P-VA' : 'dotted' , 'Ouroboros-P-VL' : 'dashed' , 'Ouroboros-P-S' : 'solid' ,
@@ -244,9 +246,9 @@ def generateResultsFromFileFragmentation(folderpath, param1, param2, param3, dim
 				result_frag[-1].insert(0, dimension_name)
 				actual_size = [i * param1 for i in range(param2, param3 + 4, 4)]
 				result_frag.append(list(actual_size))
-				result_frag[-1].insert(0, "Actual Size - range")
+				result_frag[-1].insert(0, "ActualSize - range")
 				result_frag.append(list(actual_size))
-				result_frag[-1].insert(0, "Actual Size - static range after " + str(iter) + " iterations")
+				result_frag[-1].insert(0, "ActualSize - static range after " + str(iter) + " iterations")
 				written_header_frag = True
 			result_frag.append(list(dataframe.iloc[:, 1]))
 			result_frag[-1].insert(0, approach_name + " - range")
@@ -268,13 +270,14 @@ def generateResultsFromFileFragmentation(folderpath, param1, param2, param3, dim
 	print("####################")
 
 # Plot mean as a line plot with std-dev
-def plotFrag(results, testcases, plotscale, plotrange, xlabel, ylabel, title, filename, ):
+def plotFrag(results, testcases, plotscale, plotrange, xlabel, ylabel, title, filename):
 	plt.figure(figsize=(lineplot_width, lineplot_height))
 	x_values = np.asarray([float(i) for i in results[0][1:]])
-	for i in range(1, len(results), 2):
+	for i in range(1, len(results)):
 		y_values = np.asarray([float(i) for i in results[i][1:]])
 		labelname = results[i][0].split(" ")[0]
-		if labelname not in testcases:
+		print(labelname)
+		if labelname not in testcases and labelname != "ActualSize":
 			continue
 		print("Generate plot for " + labelname)
 		plt.plot(x_values, y_values, marker='', color=colours[labelname], linewidth=1, label=labelname, linestyle=linestyles[labelname])
@@ -291,3 +294,47 @@ def plotFrag(results, testcases, plotscale, plotrange, xlabel, ylabel, title, fi
 
 	# Clear Figure
 	plt.clf()
+
+def generateResultsFromFileOOM(folderpath, param1, param2, param3, dimension_name, approach_pos, alloc_size):
+	print("Generate Results for identifier " + str(param1) + "_" + str(param2) + "-" + str(param3))
+	# Gather results
+	result_frag = list(list())
+
+	# Go over files, read data and generate new
+	written_header_frag = False
+	for file in os.listdir(folderpath):
+		filename = folderpath + str("/") + os.fsdecode(file)
+		if(os.path.isdir(filename)):
+			continue
+		if str(param1) != filename.split('_')[approach_pos+1] or str(param2) + "-" + str(param3) != filename.split('_')[approach_pos+2].split(".")[0]:
+			continue
+		print("Processing -> " + str(filename))
+		approach_name = filename.split('_')[approach_pos]
+		with open(filename, newline='') as csv_file:
+			csvreader = csv.reader(csv_file, delimiter=',', quotechar='|')
+			if not written_header_frag:
+				actual_size = [i for i in range(param2, param3 + 4, 4)]
+				result_frag.append(list(actual_size))
+				result_frag[-1].insert(0, dimension_name)
+				actual_size = [(int)(alloc_size / (i * param1)) for i in range(param2, param3 + 4, 4)]
+				result_frag.append(list(actual_size))
+				result_frag[-1].insert(0, "ActualSize")
+				written_header_frag = True
+			approach_rounds = [len(row) for row in csvreader]
+			approach_rounds = approach_rounds[1:]
+			result_frag.append(list(approach_rounds))
+			result_frag[-1].insert(0, approach_name)
+
+	# Get Timestring
+	now = datetime.now()
+	time_string = now.strftime("%Y-%m-%d_%H-%M-%S")
+
+	# Generate output file
+	print("------------------")
+	print("Generating -> " + time_string + str("_oom_") + str(param1) + "_" + str(param2) + "-" + str(param3) + str(".csv"))
+	frag_name = folderpath + str("/aggregate/") + time_string +  str("_oom_") + str(param1) + "_" + str(param2) + "-" + str(param3) + str(".csv")
+	with(open(frag_name, "w")) as f:
+		writer = csv.writer(f, delimiter=',')
+		for row in result_frag:
+			writer.writerow(row)
+	print("####################")

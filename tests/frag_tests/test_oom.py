@@ -6,9 +6,8 @@ import shutil
 import time
 from datetime import datetime
 from timedprocess import Command
-from Helper import generateResultsFromFileAllocation
 from Helper import generateResultsFromFileFragmentation
-from Helper import plotMean
+from Helper import generateResultsFromFileOOM
 from Helper import plotFrag
 import csv
 import argparse
@@ -17,7 +16,7 @@ import numpy as np
 def main():
 	# Run all files from a directory
 	print("##############################################################################")
-	print("Callable as: python test_fragmentation.py")
+	print("Callable as: python test_oom.py")
 	print("##############################################################################")
 	
 	# Specify which test configuration to use
@@ -25,7 +24,7 @@ def main():
 	num_allocations = 10000
 	smallest_allocation_size = 4
 	largest_allocation_size = 1024
-	num_iterations = 1
+	alloc_size = 2048*1024*1024
 	free_memory = 1
 	generate_results = True
 	generate_plots = True
@@ -40,11 +39,11 @@ def main():
 	parser.add_argument('-t', type=str, help='Specify which frameworks to test, separated by +, e.g. o+s+h+c+f+r+x ---> c : cuda | s : scatteralloc | h : halloc | o : ouroboros | f : fdgmalloc | r : register-efficient | x : xmalloc')
 	parser.add_argument('-num', type=int, help='How many allocations to perform')
 	parser.add_argument('-range', type=str, help='Sepcify Allocation Range, e.g. 4-1024')
-	parser.add_argument('-iter', type=int, help='How many iterations?')
+	parser.add_argument('-allocsize', type=int, help='How large is the manageable memory in GiB?')
 	parser.add_argument('-runtest', action='store_true', default=False, help='Run testcases')
 	parser.add_argument('-genres', action='store_true', default=False, help='Generate results')
 	parser.add_argument('-genplot', action='store_true', default=False, help='Generate results file and plot')
-	parser.add_argument('-timeout', type=int, help='Timeout Value in Seconds, process will be killed after as many seconds')
+	parser.add_argument('-timeout', type=int, help='Timeout Value in Seconds, per round, process will be killed after as many seconds')
 	parser.add_argument('-plotscale', type=str, help='log/linear')
 	parser.add_argument('-filetype', type=str, help='png or pdf')
 
@@ -88,8 +87,8 @@ def main():
 		largest_allocation_size = int(selected_range[1])
 	
 	# Parse num iterations
-	if(args.iter):
-		num_iterations = args.iter
+	if(args.allocsize):
+		alloc_size = (int)(args.allocsize * 1024 * 1024 * 1024)
 
 	# Run Testcases
 	run_testcases = args.runtest
@@ -117,31 +116,31 @@ def main():
 	####################################################################################################
 	if run_testcases:
 		for name, executable in testcases.items():
-			csv_path = "results/frag_" + name + "_" + str(num_allocations) + "_" + str(smallest_allocation_size) + "-" + str(largest_allocation_size) + ".csv"
+			csv_path = "results/oom_" + name + "_" + str(num_allocations) + "_" + str(smallest_allocation_size) + "-" + str(largest_allocation_size) + ".csv"
 			if(os.path.isfile(csv_path)):
 				print("This file already exists, do you really want to OVERWRITE?")
 				inputfromconsole = input()
 				if not (inputfromconsole == "yes" or inputfromconsole == "y"):
 					continue
 			with open(csv_path, "w", newline='') as csv_file:
-				csv_file.write("AllocationSize (in Byte)")
-				for i in range(num_iterations):
-					csv_file.write(",range, static range")
+				csv_file.write("AllocationSize (in Byte), rounds")
 			allocation_size = smallest_allocation_size
 			while allocation_size <= largest_allocation_size:
 				with open(csv_path, "a", newline='') as csv_file:
-					csv_file.write("\n" + str(allocation_size) + ",")
-				run_config = str(num_allocations) + " " + str(allocation_size) + " " + str(num_iterations) + " 0 0 0 " + str(free_memory) + " " + csv_path
+					csv_file.write("\n" + str(allocation_size))
+				num_iterations = alloc_size / (allocation_size * num_iterations)
+				print("Iterations: " + num_iterations)
+				run_config = str(num_allocations) + " " + str(allocation_size) + " " + str(num_iterations) + " 0 0 1 " + str(free_memory) + " " + csv_path
 				executecommand = "{0} {1}".format(executable, run_config)
 				print("#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#")
 				print("Running " + name + " with command -> " + executecommand)
 				print("#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#")
 				print(executecommand)
-				_, process_killed = Command(executecommand).run(timeout=time_out_val)
+				_, process_killed = Command(executecommand).run(timeout=time_out_val * num_iterations)
 				if process_killed :
 					print("We killed the process!")
 					with open(csv_path, "a", newline='') as csv_file:
-						csv_file.write("0,0,-------------------> Ran longer than " + str(time_out_val))
+						csv_file.write("0,0,-------------------> Ran longer than " + str(time_out_val * num_iterations))
 				else:
 					print("Success!")
 				allocation_size += 4
@@ -152,7 +151,7 @@ def main():
 	####################################################################################################
 	####################################################################################################
 	if generate_results:
-		generateResultsFromFileFragmentation("results", num_allocations, smallest_allocation_size, largest_allocation_size, "Bytes", 1, num_iterations)
+		generateResultsFromFileOOM("results", num_allocations, smallest_allocation_size, largest_allocation_size, "Bytes", 1, alloc_size)
 
 	####################################################################################################
 	####################################################################################################
@@ -160,7 +159,7 @@ def main():
 	####################################################################################################
 	####################################################################################################
 	if generate_plots:
-		result_frag = list()
+		result_oom = list()
 		# Get Timestring
 		now = datetime.now()
 		time_string = now.strftime("%b-%d-%Y_%H-%M-%S")
@@ -174,36 +173,25 @@ def main():
 			filename = str("results/aggregate/") + os.fsdecode(file)
 			if(os.path.isdir(filename)):
 				continue
-			if filename.split("_")[2] != "frag" or str(num_allocations) != filename.split('_')[3] or str(smallest_allocation_size) + "-" + str(largest_allocation_size) != filename.split('_')[4].split(".")[0]:
+			if filename.split("_")[2] != "oom" or str(num_allocations) != filename.split('_')[3] or str(smallest_allocation_size) + "-" + str(largest_allocation_size) != filename.split('_')[4].split(".")[0]:
 				continue
 			# We want the one matching our input
 			with open(filename) as f:
 				reader = csv.reader(f)
-				result_frag = list(reader)
+				result_oom = list(reader)
 
 		####################################################################################################
 		# Lineplot
 		####################################################################################################
-		plotFrag(result_frag, 
+		plotFrag(result_oom, 
 			testcases,
 			plotscale,
 			False, 
 			'Bytes', 
-			'Byte - Range', 
-			"Fragmentation: Byte-Range for " + str(num_allocations) + " allocations", 
-			str("results/plots/") + time_string + "_frag." + filetype)
+			'Number of Rounds', 
+			"Out-Of-Memory: Number of rounds before OOM", 
+			str("results/plots/") + time_string + "_oom." + filetype)
 
-		####################################################################################################
-		# Lineplot with range
-		####################################################################################################
-		plotFrag(result_frag, 
-			testcases,
-			plotscale,
-			True, 
-			'Bytes', 
-			'Byte - Range',
-			"Fragmentation: Byte-Range for " + str(num_allocations) + " allocations", 
-			str("results/plots/") + time_string + "_frag_range." + filetype)
 
 	print("Done")
 

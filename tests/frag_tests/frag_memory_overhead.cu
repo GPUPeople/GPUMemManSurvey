@@ -187,13 +187,11 @@ int main(int argc, char* argv[])
 			d_testAllocation <decltype(memory_manager), false> <<<gridSize, blockSize>>>(memory_manager, d_memory, num_allocations, allocation_size_byte);
 			CHECK_ERROR(cudaDeviceSynchronize());
 			results_frag << "," << i;
+			std::cout << "Round " << i + 1 << " done" << std::endl;
 		}
 		else
 		{
-			if(warp_based)
-				d_testAllocation <decltype(memory_manager), true> <<<gridSize * 32, blockSize>>>(memory_manager, d_memory, num_allocations, allocation_size_byte);
-			else
-				d_testAllocation <decltype(memory_manager), false> <<<gridSize, blockSize>>>(memory_manager, d_memory, num_allocations, allocation_size_byte);
+			d_testAllocation <decltype(memory_manager), false> <<<gridSize, blockSize>>>(memory_manager, d_memory, num_allocations, allocation_size_byte);
 			CHECK_ERROR(cudaDeviceSynchronize());
 
 			// Look at address range
@@ -220,10 +218,7 @@ int main(int argc, char* argv[])
 
 			if(free_memory)
 			{
-				if(warp_based)
-					d_testFree <decltype(memory_manager), true> <<<gridSize * 32, blockSize>>>(memory_manager, d_memory, num_allocations);
-				else
-					d_testFree <decltype(memory_manager), false> <<<gridSize, blockSize>>>(memory_manager, d_memory, num_allocations);
+				d_testFree <decltype(memory_manager), false> <<<gridSize, blockSize>>>(memory_manager, d_memory, num_allocations);
 				CHECK_ERROR(cudaDeviceSynchronize());
 			}
 		}
