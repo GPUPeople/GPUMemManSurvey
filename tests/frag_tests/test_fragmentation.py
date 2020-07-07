@@ -1,18 +1,18 @@
-import os
 import sys
+sys.path.append('../../scripts')
+
+import os
 import shutil
 import time
 from datetime import datetime
 from timedprocess import Command
-import pandas
-import numpy as np
+from Helper import generateResultsFromFileAllocation
+from Helper import generateResultsFromFileFragmentation
+from Helper import plotMean
+from Helper import plotFrag
 import csv
-import matplotlib.pyplot as plt
-plt.style.use('seaborn-whitegrid')
-
-colours = {'Actual Size' : 'Black', 'Halloc' : 'Orange' , 'Ouroboros' : 'Red' , 'CUDA' : 'green' , 'ScatterAlloc' : 'blue'}
-
 import argparse
+import numpy as np
 
 def main():
 	# Run all files from a directory
@@ -31,46 +31,52 @@ def main():
 	generate_plots = True
 	clean_temporary_files = True
 	test_warp_based = False
-	build_path = "../build/"
+	filetype = "pdf"
+	time_out_val = 100
+	build_path = "build/"
+	sync_build_path = "sync_build/"
 
 	parser = argparse.ArgumentParser(description='Test fragmentation for various frameworks')
-	parser.add_argument('-t', type=str, help='Specify which frameworks to test, separated by +, e.g. o+s+h+c')
+	parser.add_argument('-t', type=str, help='Specify which frameworks to test, separated by +, e.g. o+s+h+c+f+r+x ---> c : cuda | s : scatteralloc | h : halloc | o : ouroboros | f : fdgmalloc | r : register-efficient | x : xmalloc')
 	parser.add_argument('-num', type=int, help='How many allocations to perform')
 	parser.add_argument('-range', type=str, help='Sepcify Allocation Range, e.g. 4-1024')
 	parser.add_argument('-iter', type=int, help='How many iterations?')
+	parser.add_argument('-runtest', action='store_true', default=False, help='Run testcases')
+	parser.add_argument('-genres', action='store_true', default=False, help='Generate results')
 	parser.add_argument('-genplot', action='store_true', default=False, help='Generate results file and plot')
-	parser.add_argument('-genres', action='store_true', default=False, help='Run testcases and generate results')
-	parser.add_argument('-cleantemp', action='store_true', default=False, help='Clean up temporary files')
 	parser.add_argument('-warp', action='store_true', default=False, help='Start testcases warp-based')
+	parser.add_argument('-timeout', type=int, help='Timeout Value in Seconds, process will be killed after as many seconds')
+	parser.add_argument('-plotscale', type=str, help='log/linear')
+	parser.add_argument('-filetype', type=str, help='png or pdf')
 
 	args = parser.parse_args()
 
 	# Parse approaches
 	if(args.t):
 		if any("c" in s for s in args.t):
-			testcases["CUDA"] = build_path + str("c_alloc_test")
+			testcases["CUDA"] = build_path + str("c_frag_test")
 		if any("x" in s for s in args.t):
-			testcases["XMalloc"] = build_path + str("x_alloc_test")
+			testcases["XMalloc"] = sync_build_path + str("x_frag_test")
 		if any("h" in s for s in args.t):
-			testcases["Halloc"] = build_path + str("h_alloc_test")
+			testcases["Halloc"] = sync_build_path + str("h_frag_test")
 		if any("s" in s for s in args.t):
-			testcases["ScatterAlloc"] = sync_build_path + str("s_alloc_test")
+			testcases["ScatterAlloc"] = sync_build_path + str("s_frag_test")
 		if any("o" in s for s in args.t):
-			testcases["Ouroboros-P-S"] = build_path + str("o_alloc_test_p")
-			testcases["Ouroboros-C-S"] = build_path + str("o_alloc_test_c")
-			testcases["Ouroboros-P-VA"] = build_path + str("o_alloc_test_vap")
-			testcases["Ouroboros-C-VA"] = build_path + str("o_alloc_test_vac")
-			testcases["Ouroboros-P-VL"] = build_path + str("o_alloc_test_vlp")
-			testcases["Ouroboros-C-VL"] = build_path + str("o_alloc_test_vlc")
+			testcases["Ouroboros-P-S"] = build_path + str("o_frag_test_p")
+			testcases["Ouroboros-P-VA"] = build_path + str("o_frag_test_vap")
+			# testcases["Ouroboros-P-VL"] = build_path + str("o_frag_test_vlp")
+			testcases["Ouroboros-C-S"] = build_path + str("o_frag_test_c")
+			# testcases["Ouroboros-C-VA"] = build_path + str("o_frag_test_vac")
+			# testcases["Ouroboros-C-VL"] = build_path + str("o_frag_test_vlc")
 		if any("f" in s for s in args.t):
-			testcases["FDGMalloc"] = build_path + str("f_alloc_test")
+			testcases["FDGMalloc"] = sync_build_path + str("f_frag_test")
 		if any("r" in s for s in args.t):
-			testcases["RegEff-A"] = build_path + str("r_alloc_test_a")
-			testcases["RegEff-AW"] = build_path + str("r_alloc_test_aw")
-			# testcases["RegEff-C"] = build_path + str("r_alloc_test_c")
-			testcases["RegEff-CF"] = build_path + str("r_alloc_test_cf")
-			# testcases["RegEff-CM"] = build_path + str("r_alloc_test_cm")
-			testcases["RegEff-CFM"] = build_path + str("r_alloc_test_cfm")
+			testcases["RegEff-A"] = sync_build_path + str("r_frag_test_a")
+			testcases["RegEff-AW"] = sync_build_path + str("r_frag_test_aw")
+			testcases["RegEff-C"] = sync_build_path + str("r_frag_test_c")
+			testcases["RegEff-CF"] = sync_build_path + str("r_frag_test_cf")
+			testcases["RegEff-CM"] = sync_build_path + str("r_frag_test_cm")
+			testcases["RegEff-CFM"] = sync_build_path + str("r_frag_test_cfm")
 	
 	# Parse num allocation
 	if(args.num):
@@ -86,8 +92,11 @@ def main():
 	if(args.iter):
 		num_iterations = args.iter
 
-	# Generate results
+	# Warp-based
 	test_warp_based = args.warp
+	
+	# Run Testcases
+	run_testcases = args.runtest
 	
 	# Generate results
 	generate_results = args.genres
@@ -95,11 +104,54 @@ def main():
 	# Generate plots
 	generate_plots = args.genplot
 
-	# Generate plots
-	clean_temporary_files = args.cleantemp
+	# Plot Axis scaling
+	plotscale = args.plotscale
 
 	# Timeout (in seconds)
-	time_out_val = 5
+	if(args.timeout):
+		time_out_val = args.timeout
+
+	if(args.filetype):
+		filetype = args.filetype
+
+	####################################################################################################
+	####################################################################################################
+	# Run testcases
+	####################################################################################################
+	####################################################################################################
+	if run_testcases:
+		for name, executable in testcases.items():
+			csv_path = "results/frag_" + name + "_" + str(num_allocations) + "_" + str(smallest_allocation_size) + "-" + str(largest_allocation_size) + ".csv"
+			if(os.path.isfile(csv_path)):
+				print("This file already exists, do you really want to OVERWRITE?")
+				inputfromconsole = input()
+				if not (inputfromconsole == "yes" or inputfromconsole == "y"):
+					continue
+			with open(csv_path, "w", newline='') as csv_file:
+				csv_file.write("AllocationSize (in Byte)")
+				for i in range(num_iterations):
+					csv_file.write(",range, static range")
+			allocation_size = smallest_allocation_size
+			while allocation_size <= largest_allocation_size:
+				warp_based = 0
+				with open(csv_path, "a", newline='') as csv_file:
+					csv_file.write("\n" + str(allocation_size) + ",")
+				if test_warp_based:
+					warp_based = 1
+				run_config = str(num_allocations) + " " + str(allocation_size) + " " + str(num_iterations) + " " + str(warp_based) + " 0 " + str(free_memory) + " " + csv_path
+				executecommand = "{0} {1}".format(executable, run_config)
+				print("#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#")
+				print("Running " + name + " with command -> " + executecommand)
+				print("#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#")
+				print(executecommand)
+				_, process_killed = Command(executecommand).run(timeout=time_out_val)
+				if process_killed :
+					print("We killed the process!")
+					with open(csv_path, "a", newline='') as csv_file:
+						csv_file.write("0,0,-------------------> Ran longer than " + str(time_out_val))
+				else:
+					print("Success!")
+				allocation_size += 4
 
 	####################################################################################################
 	####################################################################################################
@@ -107,17 +159,7 @@ def main():
 	####################################################################################################
 	####################################################################################################
 	if generate_results:
-		for _, executable in testcases.items():
-			smallest_allocation_size = 4
-			while smallest_allocation_size <= largest_allocation_size:
-				warp_based = 0
-				if test_warp_based:
-					warp_based = 1
-				run_config = str(num_allocations) + " " + str(smallest_allocation_size) + " " + str(num_iterations) + " " + str(warp_based) + " 0 " + str(free_memory)
-				executecommand = "{0} {1}".format(executable, run_config)
-				print(executecommand)
-				Command(executecommand).run(timeout=time_out_val)
-				smallest_allocation_size += 4
+		generateResultsFromFileFragmentation("results", num_allocations, smallest_allocation_size, largest_allocation_size, "Bytes", 1, num_iterations)
 
 	####################################################################################################
 	####################################################################################################
@@ -125,58 +167,50 @@ def main():
 	####################################################################################################
 	####################################################################################################
 	if generate_plots:
-		approach_result_frag = list(list())
-		approach_result_frag.append(np.arange(smallest_allocation_size, largest_allocation_size, 4).tolist())
-		approach_result_frag[0].insert(0, "Bytes")
-		approach_result_frag.append(np.arange(smallest_allocation_size * num_allocations, largest_allocation_size * num_allocations, 4 * num_allocations).tolist())
-		approach_result_frag[1].insert(0, "Actual Size")
-
-		# Go over files, read data and generate new 
-		for file in os.listdir("../results"):
-			filename = str("../results/") + os.fsdecode(file)
-			if(os.path.isdir(filename)):
-				continue
-			with open(filename, newline='') as csv_file:
-				dataframe = pandas.read_csv(csv_file)
-				approach_result_frag.append(list(dataframe.iloc[:, 2]))
-				approach_result_frag[-1].insert(0, os.fsdecode(file).split('_')[2])
-
+		result_frag = list()
 		# Get Timestring
 		now = datetime.now()
 		time_string = now.strftime("%b-%d-%Y_%H-%M-%S")
 
-		# Generate output file
-		alloc_name = str("../results/fragmentation/") + time_string + str(num_allocations) + str(".csv")
-		with(open(alloc_name, "w")) as f:
-			writer = csv.writer(f, delimiter=',')
-			for row in approach_result_frag:
-				writer.writerow(row)
+		if plotscale == "log":
+			time_string += "_log"
+		else:
+			time_string += "_lin"
 
-		# Generate output plot
-		df = pandas.DataFrame({str(approach_result_frag[0][0]) : approach_result_frag[0][1:]})
-		for i in range(1, len(approach_result_frag)):
-			df[str(approach_result_frag[i][0])] = approach_result_frag[i][1:]
-
-		for i in range(1, len(approach_result_frag)):
-			plt.plot(str(approach_result_frag[0][0]), str(approach_result_frag[i][0]), data=df, marker='', color=colours[str(approach_result_frag[i][0])], linewidth=1, label=str(approach_result_frag[i][0]))
-		plt.yscale("log")
-		plt.ylabel('Bytes')
-		plt.xlabel('Bytes')
-		plt.title("Allocation Byte Range for " + str(num_allocations) + " allocations")
-		plt.legend()
-		plt.savefig(str("../results/fragmentation/") + time_string + "_frag.pdf", dpi=600)
-
-	####################################################################################################
-	####################################################################################################
-	# Clean temporary files
-	####################################################################################################
-	####################################################################################################
-	if clean_temporary_files:
-		for file in os.listdir("../results"):
-			filename = str("../results/") + os.fsdecode(file)
+		for file in os.listdir("results/aggregate"):
+			filename = str("results/aggregate/") + os.fsdecode(file)
 			if(os.path.isdir(filename)):
 				continue
-			os.remove(filename)
+			if filename.split("_")[2] != "frag" or str(num_allocations) != filename.split('_')[3] or str(smallest_allocation_size) + "-" + str(largest_allocation_size) != filename.split('_')[4].split(".")[0]:
+				continue
+			# We want the one matching our input
+			with open(filename) as f:
+				reader = csv.reader(f)
+				result_frag = list(reader)
+
+		####################################################################################################
+		# Lineplot
+		####################################################################################################
+		plotFrag(result_frag, 
+			testcases,
+			plotscale,
+			False, 
+			'Bytes', 
+			'Byte - Range', 
+			"Fragmentation: Byte-Range for " + str(num_allocations) + " allocations", 
+			str("results/plots/") + time_string + "_frag." + filetype)
+
+		####################################################################################################
+		# Lineplot with range
+		####################################################################################################
+		plotFrag(result_frag, 
+			testcases,
+			plotscale,
+			True, 
+			'Bytes', 
+			'Byte - Range',
+			"Fragmentation: Byte-Range for " + str(num_allocations) + " allocations", 
+			str("results/plots/") + time_string + "_frag_range." + filetype)
 
 	print("Done")
 

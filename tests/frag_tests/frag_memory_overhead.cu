@@ -125,6 +125,8 @@ int main(int argc, char* argv[])
 	bool warp_based{false};
 	bool print_output{true};
 	bool free_memory{true};
+	bool test_oom{false};
+	std::string csv_path{"../results/tmp/"};
 	if(argc >= 2)
 	{
 		num_allocations = atoi(argv[1]);
@@ -141,7 +143,17 @@ int main(int argc, char* argv[])
 					{
 						print_output = static_cast<bool>(atoi(argv[5]));
 						if(argc >= 7)
-							free_memory = static_cast<bool>(atoi(argv[6]));
+						{
+							test_oom = static_cast<bool>(atoi(argv[6]));
+							if(argc >= 8)
+							{
+								free_memory = static_cast<bool>(atoi(argv[7])) and test_oom;
+								if(argc >= 9)
+								{
+									csv_path = std::string(argv[8]);
+								}
+							}
+						}
 					}
 				}
 			}
@@ -163,49 +175,57 @@ int main(int argc, char* argv[])
 	CHECK_ERROR(cudaMalloc(&d_memory, sizeof(int*) * num_allocations));
 
 	std::ofstream results_frag;
-	results_frag.open((std::string("../results/frag_") + prop.name  + "_" + mem_name + "_" + std::to_string(num_allocations) + ".csv").c_str(), std::ios_base::app);
-	results_frag << "\n" << allocation_size_byte << ",";
+	results_frag.open(csv_path.c_str(), std::ios_base::app);
 
 	int blockSize {256};
 	int gridSize {Utils::divup<int>(num_allocations, blockSize)};
 
 	for(auto i = 0; i < num_iterations; ++i)
 	{
-		if(warp_based)
-			d_testAllocation <decltype(memory_manager), true> <<<gridSize * 32, blockSize>>>(memory_manager, d_memory, num_allocations, allocation_size_byte);
-		else
+		if(test_oom)
+		{
 			d_testAllocation <decltype(memory_manager), false> <<<gridSize, blockSize>>>(memory_manager, d_memory, num_allocations, allocation_size_byte);
-		CHECK_ERROR(cudaDeviceSynchronize());
-
-		// Look at address range
-		static int* static_min_ptr{reinterpret_cast<int*>(0xFFFFFFFFFFFFFFFFULL)};
-		static int* static_max_ptr{nullptr};
-		std::vector<int*> verification_pointers(num_allocations);
-		CHECK_ERROR(cudaMemcpy(verification_pointers.data(), d_memory, sizeof(int*) * verification_pointers.size(), cudaMemcpyDeviceToHost));
-		auto min_ptr = *min_element(verification_pointers.begin(), verification_pointers.end());
-		auto max_ptr = *max_element(verification_pointers.begin(), verification_pointers.end());
-		static_min_ptr = std::min(static_min_ptr, min_ptr);
-		static_max_ptr = std::max(static_max_ptr, max_ptr);
-		printf("%llu | %llu | %llu MB | %llu | %llu | %llu B\n", 
-		reinterpret_cast<unsigned long long>(min_ptr), 
-		reinterpret_cast<unsigned long long>(max_ptr), 
-		(reinterpret_cast<unsigned long long>(max_ptr) - reinterpret_cast<unsigned long long>(min_ptr)) / (1024*1024),
-		reinterpret_cast<unsigned long long>(static_min_ptr), 
-		reinterpret_cast<unsigned long long>(static_max_ptr), 
-		(reinterpret_cast<unsigned long long>(static_max_ptr) - reinterpret_cast<unsigned long long>(static_min_ptr)));
-		results_frag << (reinterpret_cast<unsigned long long>(max_ptr) - reinterpret_cast<unsigned long long>(min_ptr)) 
-			<< "," 
-			<<(reinterpret_cast<unsigned long long>(static_max_ptr) - reinterpret_cast<unsigned long long>(static_min_ptr));
-		if(num_iterations != 1)
-			results_frag << ",";
-
-		if(free_memory)
+			CHECK_ERROR(cudaDeviceSynchronize());
+			results_frag << "," << i;
+		}
+		else
 		{
 			if(warp_based)
-				d_testFree <decltype(memory_manager), true> <<<gridSize * 32, blockSize>>>(memory_manager, d_memory, num_allocations);
+				d_testAllocation <decltype(memory_manager), true> <<<gridSize * 32, blockSize>>>(memory_manager, d_memory, num_allocations, allocation_size_byte);
 			else
-				d_testFree <decltype(memory_manager), false> <<<gridSize, blockSize>>>(memory_manager, d_memory, num_allocations);
+				d_testAllocation <decltype(memory_manager), false> <<<gridSize, blockSize>>>(memory_manager, d_memory, num_allocations, allocation_size_byte);
 			CHECK_ERROR(cudaDeviceSynchronize());
+
+			// Look at address range
+			static int* static_min_ptr{reinterpret_cast<int*>(0xFFFFFFFFFFFFFFFFULL)};
+			static int* static_max_ptr{nullptr};
+			std::vector<int*> verification_pointers(num_allocations);
+			CHECK_ERROR(cudaMemcpy(verification_pointers.data(), d_memory, sizeof(int*) * verification_pointers.size(), cudaMemcpyDeviceToHost));
+			auto min_ptr = *min_element(verification_pointers.begin(), verification_pointers.end());
+			auto max_ptr = *max_element(verification_pointers.begin(), verification_pointers.end());
+			static_min_ptr = std::min(static_min_ptr, min_ptr);
+			static_max_ptr = std::max(static_max_ptr, max_ptr);
+			printf("%llu | %llu | %llu MB | %llu | %llu | %llu B\n", 
+			reinterpret_cast<unsigned long long>(min_ptr), 
+			reinterpret_cast<unsigned long long>(max_ptr), 
+			(reinterpret_cast<unsigned long long>(max_ptr) - reinterpret_cast<unsigned long long>(min_ptr)) / (1024*1024),
+			reinterpret_cast<unsigned long long>(static_min_ptr), 
+			reinterpret_cast<unsigned long long>(static_max_ptr), 
+			(reinterpret_cast<unsigned long long>(static_max_ptr) - reinterpret_cast<unsigned long long>(static_min_ptr)));
+			results_frag << (reinterpret_cast<unsigned long long>(max_ptr) - reinterpret_cast<unsigned long long>(min_ptr)) 
+				<< "," 
+				<<(reinterpret_cast<unsigned long long>(static_max_ptr) - reinterpret_cast<unsigned long long>(static_min_ptr));
+			if(num_iterations != 1)
+				results_frag << ",";
+
+			if(free_memory)
+			{
+				if(warp_based)
+					d_testFree <decltype(memory_manager), true> <<<gridSize * 32, blockSize>>>(memory_manager, d_memory, num_allocations);
+				else
+					d_testFree <decltype(memory_manager), false> <<<gridSize, blockSize>>>(memory_manager, d_memory, num_allocations);
+				CHECK_ERROR(cudaDeviceSynchronize());
+			}
 		}
 	}
 	
