@@ -61,7 +61,7 @@ Evaluating different memory managers for dynamic GPU memory
 ## Notes Mixed
 
 ## Notes Fragmentation
-* Cuda is still missing range 260 - 1904
+* Cuda is still missing range 820 - 1904
 * ScatterAlloc is still missing range 2048 - 8192
 
 ## Notes Dynamic Graph
