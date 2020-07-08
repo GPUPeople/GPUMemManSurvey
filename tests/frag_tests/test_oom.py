@@ -130,7 +130,7 @@ def main():
 					csv_file.write("\n" + str(allocation_size))
 				num_iterations = alloc_size / (allocation_size * num_iterations)
 				print("Iterations: " + num_iterations)
-				run_config = str(num_allocations) + " " + str(allocation_size) + " " + str(num_iterations) + " 0 0 1 " + str(free_memory) + " " + csv_path
+				run_config = str(num_allocations) + " " + str(allocation_size) + " " + str(num_iterations) + " 1 " + csv_path + " " + str(alloc_size)
 				executecommand = "{0} {1}".format(executable, run_config)
 				print("#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#")
 				print("Running " + name + " with command -> " + executecommand)

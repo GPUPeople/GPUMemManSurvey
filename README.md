@@ -36,7 +36,7 @@ Evaluating different memory managers for dynamic GPU memory
 |:---:|:---:|:---:| :---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 |**CUDA**|:ab:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:watch:|-|-|-|-|-|
 |**ScatterAlloc**|:a:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:watch:|-|-|-|-|-|
-|**Halloc**|:a:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:question:|:watch:|-|-|-|-|-|
+|**Halloc**|:a:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:question:|:heavy_check_mark:|-|-|-|-|-|
 |**XMalloc**|:a:|:heavy_check_mark:|:boom:|:heavy_check_mark:|:boom:|:boom:|-|-|-|-|-|-|
 |**Our - P - S**|:ab:|:heavy_check_mark:|:heavy_check_mark:|-|-|-|-|-|-|-|-|-|
 |**Our - P - VA**|:ab:|:heavy_check_mark:|:heavy_check_mark:|-|-|-|-|-|-|-|-|-|
@@ -61,6 +61,8 @@ Evaluating different memory managers for dynamic GPU memory
 ## Notes Mixed
 
 ## Notes Fragmentation
+* Cuda is still missing range 260 - 1904
+* ScatterAlloc is still missing range 2048 - 8192
 
 ## Notes Dynamic Graph
 

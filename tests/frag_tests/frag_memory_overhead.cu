@@ -116,6 +116,38 @@ __global__ void d_testFree(MemoryManagerType mm, int** verification_ptr, int num
 	mm.free(verification_ptr[tid]);
 }
 
+__global__ void d_testWriteToMemory(int** verification_ptr, int num_allocations, int allocation_size)
+{
+	int tid = threadIdx.x + blockIdx.x * blockDim.x;
+	if(tid >= num_allocations)
+		return;
+	
+	auto ptr = verification_ptr[tid];
+
+	for(auto i = 0; i < (allocation_size / sizeof(int)); ++i)
+	{
+		ptr[i] = tid;
+	}
+}
+
+__global__ void d_testReadFromMemory(int** verification_ptr, int num_allocations, int allocation_size)
+{
+	int tid = threadIdx.x + blockIdx.x * blockDim.x;
+	if(tid >= num_allocations)
+		return;
+	
+	auto ptr = verification_ptr[tid];
+
+	for(auto i = 0; i < (allocation_size / sizeof(int)); ++i)
+	{
+		if(ptr[i] != tid)
+		{
+			printf("%d | We got a wrong value here! %d vs %d\n", tid, ptr[i], tid);
+			__trap();
+		}
+	}
+}
+
 int main(int argc, char* argv[])
 {
 	// Usage: num_allocations size_of_allocation_in_byte print_output
@@ -124,8 +156,8 @@ int main(int argc, char* argv[])
 	int num_iterations {25};
 	bool warp_based{false};
 	bool print_output{true};
-	bool free_memory{true};
 	bool test_oom{false};
+	int allocSizeinGB{8};
 	std::string csv_path{"../results/tmp/"};
 	if(argc >= 2)
 	{
@@ -138,21 +170,13 @@ int main(int argc, char* argv[])
 				num_iterations = atoi(argv[3]);
 				if(argc >= 5)
 				{
-					warp_based = static_cast<bool>(atoi(argv[4]));
+					test_oom = static_cast<bool>(atoi(argv[4]));
 					if(argc >= 6)
 					{
-						print_output = static_cast<bool>(atoi(argv[5]));
+						csv_path = std::string(argv[5]);
 						if(argc >= 7)
 						{
-							test_oom = static_cast<bool>(atoi(argv[6]));
-							if(argc >= 8)
-							{
-								free_memory = static_cast<bool>(atoi(argv[7])) and test_oom;
-								if(argc >= 9)
-								{
-									csv_path = std::string(argv[8]);
-								}
-							}
+							allocSizeinGB = atoi(argv[6]);
 						}
 					}
 				}
@@ -169,7 +193,7 @@ int main(int argc, char* argv[])
 	cudaDeviceProp prop;
 	cudaGetDeviceProperties(&prop, device);
 	
-	MemoryManager memory_manager(8192ULL * 1024ULL * 1024ULL);
+	MemoryManager memory_manager(allocSizeinGB * 1024ULL * 1024ULL * 1024ULL);
 
 	int** d_memory{nullptr};
 	CHECK_ERROR(cudaMalloc(&d_memory, sizeof(int*) * num_allocations));
@@ -194,6 +218,14 @@ int main(int argc, char* argv[])
 			d_testAllocation <decltype(memory_manager), false> <<<gridSize, blockSize>>>(memory_manager, d_memory, num_allocations, allocation_size_byte);
 			CHECK_ERROR(cudaDeviceSynchronize());
 
+			d_testWriteToMemory<<<gridSize, blockSize>>>(d_memory, num_allocations, allocation_size_byte);
+
+			CHECK_ERROR(cudaDeviceSynchronize());
+	
+			d_testReadFromMemory<<<gridSize, blockSize>>>(d_memory, num_allocations, allocation_size_byte);
+	
+			CHECK_ERROR(cudaDeviceSynchronize());
+
 			// Look at address range
 			static int* static_min_ptr{reinterpret_cast<int*>(0xFFFFFFFFFFFFFFFFULL)};
 			static int* static_max_ptr{nullptr};
@@ -216,11 +248,8 @@ int main(int argc, char* argv[])
 			if(num_iterations != 1)
 				results_frag << ",";
 
-			if(free_memory)
-			{
-				d_testFree <decltype(memory_manager), false> <<<gridSize, blockSize>>>(memory_manager, d_memory, num_allocations);
-				CHECK_ERROR(cudaDeviceSynchronize());
-			}
+			d_testFree <decltype(memory_manager), false> <<<gridSize, blockSize>>>(memory_manager, d_memory, num_allocations);
+			CHECK_ERROR(cudaDeviceSynchronize());
 		}
 	}
 	

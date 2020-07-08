@@ -25,6 +25,7 @@ def main():
 	num_allocations = 10000
 	smallest_allocation_size = 4
 	largest_allocation_size = 1024
+	alloc_size = 2048*1024*1024
 	num_iterations = 1
 	free_memory = 1
 	generate_results = True
@@ -47,6 +48,7 @@ def main():
 	parser.add_argument('-timeout', type=int, help='Timeout Value in Seconds, process will be killed after as many seconds')
 	parser.add_argument('-plotscale', type=str, help='log/linear')
 	parser.add_argument('-filetype', type=str, help='png or pdf')
+	parser.add_argument('-allocsize', type=int, help='How large is the manageable memory in GiB?')
 
 	args = parser.parse_args()
 
@@ -110,6 +112,9 @@ def main():
 	if(args.filetype):
 		filetype = args.filetype
 
+	if(args.allocsize):
+		alloc_size = args.allocsize 
+
 	####################################################################################################
 	####################################################################################################
 	# Run testcases
@@ -131,7 +136,7 @@ def main():
 			while allocation_size <= largest_allocation_size:
 				with open(csv_path, "a", newline='') as csv_file:
 					csv_file.write("\n" + str(allocation_size) + ",")
-				run_config = str(num_allocations) + " " + str(allocation_size) + " " + str(num_iterations) + " 0 0 0 " + str(free_memory) + " " + csv_path
+				run_config = str(num_allocations) + " " + str(allocation_size) + " " + str(num_iterations) + " 0 " + csv_path + " " + str(alloc_size)
 				executecommand = "{0} {1}".format(executable, run_config)
 				print("#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#")
 				print("Running " + name + " with command -> " + executecommand)
