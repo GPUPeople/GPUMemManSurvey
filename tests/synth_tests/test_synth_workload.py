@@ -17,7 +17,7 @@ import numpy as np
 def main():
 	# Run all files from a directory
 	print("##############################################################################")
-	print("Callable as: python test_fragmentation.py")
+	print("Callable as: python test_synth_workload.py")
 	print("##############################################################################")
 	
 	# Specify which test configuration to use
@@ -38,7 +38,7 @@ def main():
 	sync_build_path = "sync_build/"
 
 	parser = argparse.ArgumentParser(description='Test fragmentation for various frameworks')
-	parser.add_argument('-t', type=str, help='Specify which frameworks to test, separated by +, e.g. o+s+h+c+f+r+x ---> c : cuda | s : scatteralloc | h : halloc | o : ouroboros | f : fdgmalloc | r : register-efficient | x : xmalloc')
+	parser.add_argument('-t', type=str, help='Specify which frameworks to test, separated by +, e.g. o+s+h+c+f+r+x+b ---> c : cuda | s : scatteralloc | h : halloc | o : ouroboros | f : fdgmalloc | r : register-efficient | x : xmalloc')
 	parser.add_argument('-num', type=int, help='How many allocations to perform')
 	parser.add_argument('-range', type=str, help='Sepcify Allocation Range, e.g. 4-1024')
 	parser.add_argument('-iter', type=int, help='How many iterations?')
@@ -55,29 +55,31 @@ def main():
 	# Parse approaches
 	if(args.t):
 		if any("c" in s for s in args.t):
-			testcases["CUDA"] = build_path + str("c_frag_test")
+			testcases["CUDA"] = build_path + str("c_synth_test")
 		if any("x" in s for s in args.t):
-			testcases["XMalloc"] = sync_build_path + str("x_frag_test")
+			testcases["XMalloc"] = sync_build_path + str("x_synth_test")
 		if any("h" in s for s in args.t):
-			testcases["Halloc"] = sync_build_path + str("h_frag_test")
+			testcases["Halloc"] = sync_build_path + str("h_synth_test")
 		if any("s" in s for s in args.t):
-			testcases["ScatterAlloc"] = sync_build_path + str("s_frag_test")
+			testcases["ScatterAlloc"] = sync_build_path + str("s_synth_test")
 		if any("o" in s for s in args.t):
-			testcases["Ouroboros-P-S"] = build_path + str("o_frag_test_p")
-			testcases["Ouroboros-P-VA"] = build_path + str("o_frag_test_vap")
-			# testcases["Ouroboros-P-VL"] = build_path + str("o_frag_test_vlp")
-			testcases["Ouroboros-C-S"] = build_path + str("o_frag_test_c")
-			# testcases["Ouroboros-C-VA"] = build_path + str("o_frag_test_vac")
-			# testcases["Ouroboros-C-VL"] = build_path + str("o_frag_test_vlc")
+			testcases["Ouroboros-P-S"] = build_path + str("o_synth_test_p")
+			testcases["Ouroboros-P-VA"] = build_path + str("o_synth_test_vap")
+			# testcases["Ouroboros-P-VL"] = build_path + str("o_synth_test_vlp")
+			testcases["Ouroboros-C-S"] = build_path + str("o_synth_test_c")
+			# testcases["Ouroboros-C-VA"] = build_path + str("o_synth_test_vac")
+			# testcases["Ouroboros-C-VL"] = build_path + str("o_synth_test_vlc")
 		if any("f" in s for s in args.t):
-			testcases["FDGMalloc"] = sync_build_path + str("f_frag_test")
+			testcases["FDGMalloc"] = sync_build_path + str("f_synth_test")
 		if any("r" in s for s in args.t):
-			testcases["RegEff-A"] = sync_build_path + str("r_frag_test_a")
-			testcases["RegEff-AW"] = sync_build_path + str("r_frag_test_aw")
-			testcases["RegEff-C"] = sync_build_path + str("r_frag_test_c")
-			testcases["RegEff-CF"] = sync_build_path + str("r_frag_test_cf")
-			testcases["RegEff-CM"] = sync_build_path + str("r_frag_test_cm")
-			testcases["RegEff-CFM"] = sync_build_path + str("r_frag_test_cfm")
+			testcases["RegEff-A"] = sync_build_path + str("r_synth_test_a")
+			testcases["RegEff-AW"] = sync_build_path + str("r_synth_test_aw")
+			testcases["RegEff-C"] = sync_build_path + str("r_synth_test_c")
+			testcases["RegEff-CF"] = sync_build_path + str("r_synth_test_cf")
+			testcases["RegEff-CM"] = sync_build_path + str("r_synth_test_cm")
+			testcases["RegEff-CFM"] = sync_build_path + str("r_synth_test_cfm")
+		if any("b" in s for s in args.t):
+			testcases["Baseline"] = sync_build_path + str("b_synth_test")
 	
 	# Parse num allocation
 	if(args.num):
@@ -135,7 +137,7 @@ def main():
 			allocation_size = smallest_allocation_size
 			while allocation_size <= largest_allocation_size:
 				with open(csv_path, "a", newline='') as csv_file:
-					csv_file.write("\n" + str(allocation_size))
+					csv_file.write("\n" + str(allocation_size) + ",")
 				run_config = str(num_allocations) + " " + str(allocation_size) + " " + str(num_iterations) + " 0 " + csv_path + " " + str(alloc_size)
 				executecommand = "{0} {1}".format(executable, run_config)
 				print("#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#")
@@ -146,7 +148,7 @@ def main():
 				if process_killed :
 					print("We killed the process!")
 					with open(csv_path, "a", newline='') as csv_file:
-						csv_file.write(",0,0,-------------------> Ran longer than " + str(time_out_val))
+						csv_file.write("0,0,-------------------> Ran longer than " + str(time_out_val))
 				else:
 					print("Success!")
 				allocation_size += 4

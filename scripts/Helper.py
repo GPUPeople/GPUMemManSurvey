@@ -338,3 +338,47 @@ def generateResultsFromFileOOM(folderpath, param1, param2, param3, dimension_nam
 		for row in result_frag:
 			writer.writerow(row)
 	print("####################")
+
+def generateResultsFromFileInit(folderpath, param1, dimension_name, approach_pos):
+	print("Generate Results for identifier " + str(param1))
+	# Gather results
+	result_init = list(list())
+
+	# Go over files, read data and generate new
+	written_header_init = False
+	for file in os.listdir(folderpath):
+		filename = folderpath + str("/") + os.fsdecode(file)
+		if(os.path.isdir(filename)):
+			continue
+		if str(param1) != filename.split('_')[approach_pos+1]:
+			continue
+		print("Processing -> " + str(filename))
+		approach_name = filename.split('_')[approach_pos]
+		with open(filename, newline='') as csv_file:
+			csvreader = csv.reader(csv_file, delimiter=',', quotechar='|')
+			if not written_header_init:
+				actual_size = [i for i in range(param2, param3 + 4, 4)]
+				result_init.append(list(actual_size))
+				result_init[-1].insert(0, dimension_name)
+				actual_size = [(int)(alloc_size / (i * param1)) for i in range(param2, param3 + 4, 4)]
+				result_init.append(list(actual_size))
+				result_init[-1].insert(0, "ActualSize")
+				written_header_init = True
+			approach_rounds = [len(row) for row in csvreader]
+			approach_rounds = approach_rounds[1:]
+			result_init.append(list(approach_rounds))
+			result_init[-1].insert(0, approach_name)
+
+	# Get Timestring
+	now = datetime.now()
+	time_string = now.strftime("%Y-%m-%d_%H-%M-%S")
+
+	# Generate output file
+	print("------------------")
+	print("Generating -> " + time_string + str("_init_") + str(param1) + str(".csv"))
+	init_name = folderpath + str("/aggregate/") + time_string +  str("_init_") + str(param1) + str(".csv")
+	with(open(init_name, "w")) as f:
+		writer = csv.writer(f, delimiter=',')
+		for row in result_init:
+			writer.writerow(row)
+	print("####################")

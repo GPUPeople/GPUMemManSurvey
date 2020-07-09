@@ -149,7 +149,7 @@ if(TEST_OUROBOROS)
 	)
 	target_compile_definitions(o_graph_test_vac PUBLIC TEST_OUROBOROS)
 	target_compile_definitions(o_graph_test_vac PUBLIC TEST_CHUNKS)
-	target_compile_definitions(o_graph_test_vap PUBLIC TEST_VIRTUALIZED_ARRAY)
+	target_compile_definitions(o_graph_test_vac PUBLIC TEST_VIRTUALIZED_ARRAY)
 	target_include_directories(o_graph_test_vac PUBLIC ${BASE_PATH}frameworks/ouroboros/repository/include)
 
 	add_executable(o_graph_test_vlp

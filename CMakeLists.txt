@@ -126,7 +126,7 @@ if(TEST_OUROBOROS)
 	)
 	target_compile_definitions(o_main_vac PUBLIC TEST_OUROBOROS)
 	target_compile_definitions(o_main_vac PUBLIC TEST_CHUNKS)
-	target_compile_definitions(o_main_vap PUBLIC TEST_VIRTUALIZED_ARRAY)
+	target_compile_definitions(o_main_vac PUBLIC TEST_VIRTUALIZED_ARRAY)
 	target_include_directories(o_main_vac PUBLIC ${BASE_PATH}frameworks/ouroboros/repository/include)
 
 	add_executable(o_main_vlp

@@ -242,11 +242,9 @@ int main(int argc, char* argv[])
 			reinterpret_cast<unsigned long long>(static_min_ptr), 
 			reinterpret_cast<unsigned long long>(static_max_ptr), 
 			(reinterpret_cast<unsigned long long>(static_max_ptr) - reinterpret_cast<unsigned long long>(static_min_ptr)));
-			results_frag << (reinterpret_cast<unsigned long long>(max_ptr) - reinterpret_cast<unsigned long long>(min_ptr)) 
+			results_frag << "," << (reinterpret_cast<unsigned long long>(max_ptr) - reinterpret_cast<unsigned long long>(min_ptr)) 
 				<< "," 
 				<<(reinterpret_cast<unsigned long long>(static_max_ptr) - reinterpret_cast<unsigned long long>(static_min_ptr));
-			if(num_iterations != 1)
-				results_frag << ",";
 
 			d_testFree <decltype(memory_manager), false> <<<gridSize, blockSize>>>(memory_manager, d_memory, num_allocations);
 			CHECK_ERROR(cudaDeviceSynchronize());
