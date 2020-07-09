@@ -32,26 +32,26 @@ Evaluating different memory managers for dynamic GPU memory
 
 # Test table TITAN V
 
-| | Sync :a: - Async :b: | Perf. 10K | Perf. 100K | Mixed 10K | Mixed 100K | Scaling 2¹ - 2²⁰| Frag. 1|Frag. 2|Graph Init.|Graph Updates|
-|:---:|:---:|:---:| :---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-|**CUDA**|:ab:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:watch:|-|-|-|-|-|
-|**ScatterAlloc**|:a:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:watch:|-|-|-|-|-|
-|**Halloc**|:a:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:question:|:heavy_check_mark:|-|-|-|-|-|
-|**XMalloc**|:a:|:heavy_check_mark:|:boom:|:heavy_check_mark:|:boom:|:boom:|-|-|-|-|-|-|
-|**Our - P - S**|:ab:|:heavy_check_mark:|:heavy_check_mark:|-|-|-|-|-|-|-|-|-|
-|**Our - P - VA**|:ab:|:heavy_check_mark:|:heavy_check_mark:|-|-|-|-|-|-|-|-|-|
-|**Our - P - VL**|:ab:|:heavy_check_mark:|:heavy_check_mark:|-|-|-|-|-|-|-|-|-|
-|**Our - C - S**|:ab:|:heavy_check_mark:|:heavy_check_mark:|-|-|-|-|-|-|-|-|-|
-|**Our - C - VA**|:ab:|-| -|-|-|-|-|-|-|-|-|-|
-|**Our - C - VL**|:ab:|-| -|-|-|-|-|-|-|-|-|-|
-|**Reg-Eff - A**|:a:|:heavy_check_mark:| -|-|-|-|-|-|-|-|-|-|
-|**Reg-Eff - AW**|:a:|:heavy_check_mark:| -|-|-|-|-|-|-|-|-|-|
-|**Reg-Eff - C**|:a:|:heavy_check_mark:| -|-|-|-|-|-|-|-|-|-|
-|**Reg-Eff - CF**|:a:|:heavy_check_mark:| -|-|-|-|-|-|-|-|-|-|
-|**Reg-Eff - CM**|:a:|:heavy_check_mark:| -|-|-|-|-|-|-|-|-|-|
-|**Reg-Eff - CFM**|:a:|:heavy_check_mark:| -|-|-|-|-|-|-|-|-|-|
-|**FDGMalloc**|:a:|-| -|-|-|-|-|-|-|-|-|-|
-|**BulkAlloc**|:b:|-| -|-|-|-|-|-|-|-|-|-|
+| | Sync :a: - Async :b: | Perf. 10K | Perf. 100K | Mixed 10K | Mixed 100K | Scaling 2¹ - 2²⁰| Frag. 1|Frag. 2|Graph Init.|Graph Updates|Synthetic|
+|:---:|:---:|:---:| :---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+|**CUDA**|:ab:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|-|-|-|-|-|-|
+|**ScatterAlloc**|:a:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:watch:|-|-|-|-|-|-|
+|**Halloc**|:a:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:question:|:heavy_check_mark:|-|-|-|-|-|-|
+|**XMalloc**|:a:|:heavy_check_mark:|:boom:|:heavy_check_mark:|:boom:|:boom:|-|-|-|-|-|-|-|
+|**Our - P - S**|:ab:|:heavy_check_mark:|:heavy_check_mark:|-|-|-|-|-|-|-|-|-|-|
+|**Our - P - VA**|:ab:|:heavy_check_mark:|:heavy_check_mark:|-|-|-|-|-|-|-|-|-|-|
+|**Our - P - VL**|:ab:|:heavy_check_mark:|:heavy_check_mark:|-|-|-|-|-|-|-|-|-|-|
+|**Our - C - S**|:ab:|:heavy_check_mark:|:heavy_check_mark:|-|-|-|-|-|-|-|-|-|-|
+|**Our - C - VA**|:ab:|-| -|-|-|-|-|-|-|-|-|-|-|
+|**Our - C - VL**|:ab:|-| -|-|-|-|-|-|-|-|-|-|-|
+|**Reg-Eff - A**|:a:|:heavy_check_mark:| -|-|-|-|-|-|-|-|-|-|-|
+|**Reg-Eff - AW**|:a:|:heavy_check_mark:| -|-|-|-|-|-|-|-|-|-|-|
+|**Reg-Eff - C**|:a:|:heavy_check_mark:| -|-|-|-|-|-|-|-|-|-|-|
+|**Reg-Eff - CF**|:a:|:heavy_check_mark:| -|-|-|-|-|-|-|-|-|-|-|
+|**Reg-Eff - CM**|:a:|:heavy_check_mark:| -|-|-|-|-|-|-|-|-|-|-|
+|**Reg-Eff - CFM**|:a:|:heavy_check_mark:| -|-|-|-|-|-|-|-|-|-|-|
+|**FDGMalloc**|:a:|-| -|-|-|-|-|-|-|-|-|-|-|
+|**BulkAlloc**|:b:|-| -|-|-|-|-|-|-|-|-|-|-|
 
 
 ## Notes Performance
@@ -61,8 +61,8 @@ Evaluating different memory managers for dynamic GPU memory
 ## Notes Mixed
 
 ## Notes Fragmentation
-* Cuda is still missing range 820 - 1904
-* ScatterAlloc is still missing range 2048 - 8192
+* ScatterAlloc is still missing range 2312 - 8192
+  * Shows an interesting patter for the larger allocations (i.e 2052 and higher), starts with large range, which increases even more, and then falls back to smaller size and stays the same, even pointers the same, for the last 75 iterations or so
 
 ## Notes Dynamic Graph
 
