@@ -7,8 +7,7 @@ import time
 from datetime import datetime
 from timedprocess import Command
 from Helper import generateResultsFromFileInit
-from Helper import plotMean
-from Helper import plotFrag
+from Helper import plotInit
 import csv
 import argparse
 import numpy as np
@@ -126,7 +125,7 @@ def main():
 	####################################################################################################
 	####################################################################################################
 	if generate_results:
-		generateResultsFromFileFragmentation("results", alloc_size, "Bytes", 1)
+		generateResultsFromFileInit("results", alloc_size, "Bytes", 1)
 
 	####################################################################################################
 	####################################################################################################
@@ -134,7 +133,7 @@ def main():
 	####################################################################################################
 	####################################################################################################
 	if generate_plots:
-		result_frag = list()
+		result_init = list()
 		# Get Timestring
 		now = datetime.now()
 		time_string = now.strftime("%b-%d-%Y_%H-%M-%S")
@@ -148,36 +147,36 @@ def main():
 			filename = str("results/aggregate/") + os.fsdecode(file)
 			if(os.path.isdir(filename)):
 				continue
-			if filename.split("_")[2] != "frag" or str(num_allocations) != filename.split('_')[3] or str(smallest_allocation_size) + "-" + str(largest_allocation_size) != filename.split('_')[4].split(".")[0]:
+			if filename.split("_")[2] != "init" or str(alloc_size) != filename.split('_')[3].split(".")[0]:
 				continue
 			# We want the one matching our input
 			with open(filename) as f:
 				reader = csv.reader(f)
-				result_frag = list(reader)
+				result_init = list(reader)
 
 		####################################################################################################
 		# Lineplot
 		####################################################################################################
-		plotFrag(result_frag, 
+		plotInit(result_init, 
 			testcases,
 			plotscale,
-			False, 
-			'Bytes', 
-			'Byte - Range', 
-			"Fragmentation: Byte-Range for " + str(num_allocations) + " allocations", 
-			str("results/plots/") + time_string + "_frag." + filetype)
+			2,
+			'Approaches', 
+			'ms', 
+			"Initialization Timing for " + str(alloc_size) + " GiB initial allocation (GPU)", 
+			str("results/plots/") + time_string + "_init_cpu." + filetype)
 
 		####################################################################################################
 		# Lineplot with range
 		####################################################################################################
-		plotFrag(result_frag, 
+		plotInit(result_init, 
 			testcases,
 			plotscale,
-			True, 
-			'Bytes', 
-			'Byte - Range',
-			"Fragmentation: Byte-Range for " + str(num_allocations) + " allocations", 
-			str("results/plots/") + time_string + "_frag_range." + filetype)
+			3,
+			'Approaches', 
+			'ms',
+			"Initialization Timing for " + str(alloc_size) + " GiB initial allocation (CPU)", 
+			str("results/plots/") + time_string + "_init_gpu." + filetype)
 
 	print("Done")
 

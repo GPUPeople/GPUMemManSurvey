@@ -66,4 +66,7 @@ Evaluating different memory managers for dynamic GPU memory
 
 ## Notes Dynamic Graph
 
+## Notes Synthetic
+* Could also test how write performance to that memory region is, not only the allocation speed
+
 
