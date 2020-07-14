@@ -135,7 +135,7 @@ def main():
 			allocation_size = smallest_allocation_size
 			while allocation_size <= largest_allocation_size:
 				with open(csv_path, "a", newline='') as csv_file:
-					csv_file.write("\n" + str(allocation_size))
+					csv_file.write("\n" + str(allocation_size) + ",")
 				run_config = str(num_allocations) + " " + str(allocation_size) + " " + str(num_iterations) + " 0 " + csv_path + " " + str(alloc_size)
 				executecommand = "{0} {1}".format(executable, run_config)
 				print("#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#")
