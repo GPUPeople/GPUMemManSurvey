@@ -65,7 +65,7 @@ def main():
 		if any("o" in s for s in args.t):
 			testcases["Ouroboros-P-S"] = build_path + str("o_frag_test_p")
 			testcases["Ouroboros-P-VA"] = build_path + str("o_frag_test_vap")
-			# testcases["Ouroboros-P-VL"] = build_path + str("o_frag_test_vlp")
+			testcases["Ouroboros-P-VL"] = build_path + str("o_frag_test_vlp")
 			testcases["Ouroboros-C-S"] = build_path + str("o_frag_test_c")
 			# testcases["Ouroboros-C-VA"] = build_path + str("o_frag_test_vac")
 			# testcases["Ouroboros-C-VL"] = build_path + str("o_frag_test_vlc")
