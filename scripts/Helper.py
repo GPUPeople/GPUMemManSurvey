@@ -380,59 +380,30 @@ def generateResultsFromFileInit(folderpath, param1, dimension_name, approach_pos
 # Plot results as a bar plot with std-dev
 def plotInit(results, testcases, plotscale, offset, xlabel, ylabel, title, filename):
 	plt.figure(figsize=(barplot_width, barplot_height))
+	results = results[1:]
+	results.sort(key=lambda x: x[0])
 	num_approaches = len(results)
-	width = 0.9 / num_approaches
-	index = np.arange(len(results[0][1:]))
-	placement = []
-	alignlabel = ''
-	approach_half = int(math.floor(num_approaches/2))
-	if num_approaches % 2 == 0:
-		placement = [number - approach_half for number in range(0, num_approaches)]
-		alignlabel = 'edge'
-	else:
-		placement = [number - approach_half for number in range(0, num_approaches)]
-		alignlabel = 'center'
+	width = 0.9
+	index = np.arange(num_approaches)
 	labels = []
 	xticks = []
 	for i in range(len(results[0][1:])):
 		labels.append(results[0][1+i])
 		xticks.append(index[i])
-	# x_values = np.asarray([str(i) for i in results[0][1:]])
-	# j = 0
-	# for i in range(1, len(results)):
-	# 	y_values = None
-	# 	if variant == "median":
-	# 		y_values = np.asarray([float(i) for i in results[i+median_offset][1:]])
-	# 	else:
-	# 		y_values = np.asarray([float(i) for i in results[i][1:]])
-	# 	y_min = None
-	# 	y_max = None
-	# 	if variant == "stddev":
-	# 		y_stddev = np.asarray([float(i) for i in results[i+std_dev_offset][1:]])
-	# 		y_min = y_values-y_stddev
-	# 		y_min = [max(val, 0) for val in y_min]
-	# 		y_max = y_values+y_stddev
-	# 	else:
-	# 		y_min = np.asarray([float(i) for i in results[i+min_offset][1:]])
-	# 		y_max = np.asarray([float(i) for i in results[i+max_offset][1:]])
-	# 	labelname = results[i][0].split(" ")[0]
-	# 	if labelname not in testcases:
-	# 		continue
-	# 	yerror = np.array([y_min,y_max])
-	# 	outputstring = "Generate plot for " + labelname
-	# 	print(outputstring)
-	# 	plt.bar(index + (placement[j] * width), y_values, width=width, color=colours[labelname], align=alignlabel, edgecolor = "black", label=labelname, tick_label=x_values)
-	# 	j += 1
+	x_values = np.asarray([str(i[0]) for i in results])
+	y_values = np.asarray([float(i[offset]) for i in results])
+	y_pos = np.arange(len(x_values))
+	colour = [colours[i] for i in x_values]
+	plt.bar(y_pos, y_values, width=width, color=colour, align='center', edgecolor = "black")
 	if plotscale == "log":
 		plt.yscale("log")
 	plt.ylabel(ylabel)
 	plt.xlabel(xlabel)
-	plt.xticks(xticks)
+	plt.xticks(y_pos, x_values)
 	plt.tick_params(axis='x', which='major', labelsize=6)
 	plt.tick_params(axis='y', which='major', labelsize=12)
 	plt.title(title)
-	plt.legend()
-	plt.savefig(filename, dpi=600)		
+	plt.savefig(filename, dpi=600)
 
 	# Clear Figure
 	plt.clf()
