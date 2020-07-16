@@ -55,6 +55,7 @@ Evaluating different memory managers for dynamic GPU memory
 
 
 ## Notes Performance
+* Reg-Eff-C stopped at `4092`
 
 ## Notes Scaling
 
