@@ -164,7 +164,7 @@ def main():
 			'Approaches', 
 			'ms', 
 			"Initialization Timing for " + str(alloc_size) + " GiB initial allocation (GPU)", 
-			str("results/plots/") + time_string + "_init_cpu." + filetype)
+			str("results/plots/") + time_string + "_init_gpu." + filetype)
 
 		####################################################################################################
 		# Lineplot with range
@@ -176,7 +176,7 @@ def main():
 			'Approaches', 
 			'ms',
 			"Initialization Timing for " + str(alloc_size) + " GiB initial allocation (CPU)", 
-			str("results/plots/") + time_string + "_init_gpu." + filetype)
+			str("results/plots/") + time_string + "_init_cpu." + filetype)
 
 	print("Done")
 
