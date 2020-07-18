@@ -136,7 +136,7 @@ def main():
 			csv_path_alloc = "results/performance/perf_alloc_" + name + "_" + str(num_allocations) + "_" + str(smallest_allocation_size) + "-" + str(largest_allocation_size) + ".csv"
 			csv_path_free = "results/performance/perf_free_" + name + "_" + str(num_allocations) + "_" + str(smallest_allocation_size) + "-" + str(largest_allocation_size) + ".csv"
 			if(os.path.isfile(csv_path_alloc)):
-				print("This file already exists, do you really want to OVERWRITE?")
+				print("This file <" + csv_path_alloc + "> already exists, do you really want to OVERWRITE?")
 				inputfromconsole = input()
 				if not (inputfromconsole == "yes" or inputfromconsole == "y"):
 					continue
