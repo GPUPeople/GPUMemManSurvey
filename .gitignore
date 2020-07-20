@@ -4,3 +4,4 @@ sync_build/
 scripts/__pycache__
 .vscode/
 tests/alloc_tests/results/plots/
+data/

@@ -32,25 +32,25 @@ Evaluating different memory managers for dynamic GPU memory
 
 # Test table TITAN V
 
-| | Sync :a: - Async :b: |Init| Perf. 10K | Perf. 100K | Mixed 10K | Mixed 100K | Scaling 2¹ - 2²⁰| Frag. 1|Frag. 2|Graph Init.|Graph Updates|Synthetic|
+| | Sync:a:/Async:b: |Init| Perf. 10K | Perf. 100K | Mixed 10K | Mixed 100K | Scaling 2¹ - 2²⁰| Frag. 1|Frag. 2|Graph Init.|Graph Up.|Synth.|
 |:---:|:---:|:---:| :---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 |**CUDA**|:ab:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|-|-|-|-|
-|**ScatterAlloc**|:a:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|-|-|-|-|
-|**Halloc**|:a:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:question:|:heavy_check_mark:|-|-|-|-|
 |**XMalloc**|:a:|:heavy_check_mark:|:heavy_check_mark:|:boom:|:heavy_check_mark:|:boom:|:boom:|-|-|-|-|-|
+|**ScatterAlloc**|:a:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|-|-|-|-|
+|**FDGMalloc**|:a:|-| -|-|-|-|-|-|-|-|-|-|
+|**Halloc**|:a:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:question:|:heavy_check_mark:|-|-|-|-|
+|**Reg-Eff - A**|:a:|:heavy_check_mark:|:heavy_check_mark:| :heavy_check_mark:|-|-|-|:heavy_check_mark:|-|-|-|-|
+|**Reg-Eff - AW**|:a:|:heavy_check_mark:|:heavy_check_mark:| :heavy_check_mark:|-|-|-|:heavy_check_mark:|-|-|-|-|
+|**Reg-Eff - C**|:a:|:heavy_check_mark:|:heavy_check_mark:| :heavy_check_mark:|-|-|-|:watch:|-|-|-|-|
+|**Reg-Eff - CF**|:a:|:heavy_check_mark:|:heavy_check_mark:| :watch:|-|-|-|:watch:|-|-|-|-|
+|**Reg-Eff - CM**|:a:|:heavy_check_mark:|:heavy_check_mark:| :watch:|-|-|-|:watch:|-|-|-|-|
+|**Reg-Eff - CFM**|:a:|:heavy_check_mark:|:heavy_check_mark:| :watch:|-|-|-|:watch:|-|-|-|-|
 |**Our - P - S**|:ab:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|-|-|-|:heavy_check_mark:|-|-|-|-|
 |**Our - P - VA**|:ab:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|-|-|-|:heavy_check_mark:|-|-|-|-|
 |**Our - P - VL**|:ab:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|-|-|-|:heavy_check_mark:|-|-|-|-|
 |**Our - C - S**|:ab:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|-|-|-|:heavy_check_mark:|-|-|-|-|
 |**Our - C - VA**|:ab:|:heavy_check_mark:|-| -|-|-|-|-|-|-|-|-|
 |**Our - C - VL**|:ab:|:heavy_check_mark:|-| -|-|-|-|-|-|-|-|-|
-|**Reg-Eff - A**|:a:|:heavy_check_mark:|:heavy_check_mark:| :heavy_check_mark:|-|-|-|:watch:|-|-|-|-|
-|**Reg-Eff - AW**|:a:|:heavy_check_mark:|:heavy_check_mark:| :heavy_check_mark:|-|-|-|:watch:|-|-|-|-|
-|**Reg-Eff - C**|:a:|:heavy_check_mark:|:heavy_check_mark:| :heavy_check_mark:|-|-|-|:watch:|-|-|-|-|
-|**Reg-Eff - CF**|:a:|:heavy_check_mark:|:heavy_check_mark:| :watch:|-|-|-|:watch:|-|-|-|-|
-|**Reg-Eff - CM**|:a:|:heavy_check_mark:|:heavy_check_mark:| :watch:|-|-|-|:watch:|-|-|-|-|
-|**Reg-Eff - CFM**|:a:|:heavy_check_mark:|:heavy_check_mark:| :watch:|-|-|-|:watch:|-|-|-|-|
-|**FDGMalloc**|:a:|-| -|-|-|-|-|-|-|-|-|-|
 |**BulkAlloc**|:b:|-| -|-|-|-|-|-|-|-|-|-|
 
 

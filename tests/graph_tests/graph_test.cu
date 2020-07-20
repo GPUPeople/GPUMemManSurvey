@@ -16,6 +16,7 @@
 #include "device/EdgeDeletion.cuh"
 #include "Definitions.h"
 #include "Verification.h"
+#include "PerformanceMeasure.cuh"
 
 // Json Reader
 #include "json.h"
@@ -92,23 +93,9 @@ const std::string mem_name("FDGMalloc");
 #endif
 
 using DataType = float;
-template <typename T>
-std::string typeext();
-
-template <>
-std::string typeext<float>()
-{
-	return std::string("");
-}
-
-template <>
-std::string typeext<double>()
-{
-	return std::string("d_");
-}
 
 template <typename MemoryManagerType, typename DataType>
-void testrun(CSR<DataType>& input_graph, const json& config, std::ofstream& results);
+void testrun(CSR<DataType>& input_graph, const json& config, const std::string& init_csv, const std::string& insert_csv, const std::string& delete_csv);
 
 int main(int argc, char* argv[])
 {
@@ -118,16 +105,31 @@ int main(int argc, char* argv[])
 		return -1;
     }
 
-    std::string config_file;
-    unsigned int testcase_index{0xFFFFFFFFU};
+	std::string config_file;
+	std::string graph_file;
+	std::string init_file;
+	std::string insert_file;
+	std::string delete_file;
     if(argc >= 2)
 	{
-        config_file = std::string(argv[1]);
-        if(argc >= 3)
-        {
-            testcase_index = atoi(argv[2]);
-        }
-    }
+		config_file = std::string(argv[1]);
+		if(argc >= 3)
+		{
+			graph_file = std::string(argv[2]);
+			if(argc >= 4)
+			{
+				init_file = std::string(argv[3]);
+				if(argc >= 5)
+				{
+					insert_file = std::string(argv[4]);
+					if(argc >= 6)
+					{
+						delete_file = std::string(argv[5]);
+					}
+				}
+			}
+		}
+	}
 
     printf("%sDynamic Graph Example\n%s", CLHighlight::break_line_blue_s, CLHighlight::break_line_blue_e);
 
@@ -147,78 +149,61 @@ int main(int argc, char* argv[])
 	cudaSetDevice(device);
 	cudaDeviceProp prop;
     cudaGetDeviceProperties(&prop, device);
-    const auto write_csv{config.find("write_csv").value().get<bool>()};
-    const auto csv_filename{config.find("csv_filename").value().get<std::string>()};
-    std::ofstream results;
-    if(write_csv)
-	{
-        results.open((csv_filename + prop.name + "---" + time_string + ".csv").c_str(), std::ios_base::app);
-    }
 
-    auto graphs = *config.find("graphs");
-    int index{0};
-    for(auto const& elem : graphs)
+	std::string filename = graph_file;
+	CSR<DataType> csr_mat;
+	std::string csr_name = filename + ".csr";
+	try
 	{
-        // If we get passed just a single testcase, only execute this specific graph
-        if(index++ != testcase_index && testcase_index != 0xFFFFFFFFU)
-            continue;
-        
-        const auto path{config.find("path").value().get<std::string>()};
-        std::string filename = path + elem.find("filename").value().get<std::string>();
-        CSR<DataType> csr_mat;
-        std::string csr_name = filename + typeext<DataType>() + ".csr";
-        try
+		std::cout << "trying to load csr file \"" << csr_name << "\"\n";
+		csr_mat = loadCSR<DataType>(csr_name.c_str());
+		std::cout << "succesfully loaded: \"" << csr_name << "\"\n";
+	}
+	catch (std::exception& ex)
+	{
+		std::cout << "could not load csr file:\n\t" << ex.what() << "\n";
+		try
 		{
-			std::cout << "trying to load csr file \"" << csr_name << "\"\n";
-			csr_mat = loadCSR<DataType>(csr_name.c_str());
-			std::cout << "succesfully loaded: \"" << csr_name << "\"\n";
+			std::cout << "trying to load mtx file \"" << filename << "\"\n";
+			auto coo_mat = loadMTX<DataType>(filename.c_str());
+			convert(csr_mat, coo_mat);
+			csr_mat.filename = csr_name;
+			std::cout << "succesfully loaded and converted: \"" << csr_name << "\"\n";
 		}
 		catch (std::exception& ex)
 		{
-			std::cout << "could not load csr file:\n\t" << ex.what() << "\n";
-			try
-			{
-				std::cout << "trying to load mtx file \"" << filename << "\"\n";
-				auto coo_mat = loadMTX<DataType>(filename.c_str());
-                convert(csr_mat, coo_mat);
-                csr_mat.filename = csr_name;
-				std::cout << "succesfully loaded and converted: \"" << csr_name << "\"\n";
-			}
-			catch (std::exception& ex)
-			{
-				std::cout << ex.what() << std::endl;
-				return -1;
-			}
-			try
-			{
-				std::cout << "write csr file for future use\n";
-				storeCSR(csr_mat, csr_name.c_str());
-			}
-			catch (std::exception& ex)
-			{
-				std::cout << ex.what() << std::endl;
-			}
-        }
-        std::cout << "Testing: " << elem.find("filename").value().get<std::string>();
-        std::cout << " with " << csr_mat.rows << " vertices and " << csr_mat.nnz << " edges\n";
+			std::cout << ex.what() << std::endl;
+			return -1;
+		}
+		try
+		{
+			std::cout << "write csr file for future use\n";
+			storeCSR(csr_mat, csr_name.c_str());
+		}
+		catch (std::exception& ex)
+		{
+			std::cout << ex.what() << std::endl;
+		}
+	}
+	std::cout << "Testing: " << graph_file;
+	std::cout << " with " << csr_mat.rows << " vertices and " << csr_mat.nnz << " edges\n";
 
-        // #######################################################
-        // #######################################################
-        // #######################################################
-        // Testcase
-        // #######################################################
-        // #######################################################
-        // #######################################################
-        std::cout << "--- " << mem_name << "---\n";
-        
-        testrun<MemoryManager, DataType>(csr_mat, config, results);
-    }
-    
-    return 0;
+	// #######################################################
+	// #######################################################
+	// #######################################################
+	// Testcase
+	// #######################################################
+	// #######################################################
+	// #######################################################
+	std::cout << "--- " << mem_name << "---\n";
+	
+	testrun<MemoryManager, DataType>(csr_mat, config, init_file, insert_file, delete_file);
+
+	return 0;
 }
 
 template <typename MemoryManagerType, typename DataType>
-void testrun(CSR<DataType>& input_graph, const json& config, std::ofstream& results)
+void testrun(CSR<DataType>& input_graph, const json& config, const std::string& init_csv, const std::string& insert_csv, const std::string& delete_csv)
 {
     // Parameters
 	const auto iterations{config.find("iterations").value().get<int>()};
@@ -226,12 +211,23 @@ void testrun(CSR<DataType>& input_graph, const json& config, std::ofstream& resu
 	const auto batch_size{config.find("batch_size").value().get<int>()};
 	const auto realistic_deletion{config.find("realistic_deletion").value().get<bool>()};
     const auto verify_enabled{ config.find("verify").value().get<bool>() };
-    const auto allocMB{ config.find("manageable_memory_mb").value().get<size_t>() }  ;
+    const auto allocMB{ config.find("manageable_memory_mb").value().get<size_t>() };
     size_t allocationSize{allocMB * 1024ULL * 1024ULL};
     const auto range{config.find("range").value().get<unsigned int>()};
     unsigned int offset{0};
-    const auto write_csv{config.find("write_csv").value().get<bool>()};
-    const bool printResults{true};
+	const bool printResults{true};
+	const auto test_init{config.find("test_init").value().get<bool>()};
+	
+	std::ofstream results_init, results_insert, results_delete;
+	if(test_init)
+	{
+		results_init.open(init_csv.c_str(), std::ios_base::app);
+	}
+	else
+	{
+		results_insert.open(insert_csv.c_str(), std::ios_base::app);
+		results_delete.open(delete_csv.c_str(), std::ios_base::app);
+	}
 
     PerfMeasure init_measure, insert_measure, delete_measure;
     
@@ -257,7 +253,7 @@ void testrun(CSR<DataType>& input_graph, const json& config, std::ofstream& resu
 			verification.verify(test_graph, header.c_str(), OutputCodes::VERIFY_INITIALIZATION);
         }
 
-        for(auto update_round = 0; update_round < update_iterations; ++update_round, offset += range)
+        for(auto update_round = 0; update_round < update_iterations && !test_init; ++update_round, offset += range)
         {
             EdgeUpdateBatch<VertexData, EdgeData> insertion_updates(dynamic_graph.number_vertices);
             insertion_updates.generateEdgeUpdates(dynamic_graph.number_vertices, batch_size, (round * update_iterations) + update_round, range, offset);
@@ -310,43 +306,19 @@ void testrun(CSR<DataType>& input_graph, const json& config, std::ofstream& resu
     }
     auto init_result = init_measure.generateResult();
     auto insert_result = insert_measure.generateResult();
-    auto delete_result = delete_measure.generateResult();
-    
-    if(write_csv)
-    {
-        // Write results to CSV
-        const auto stats = input_graph.rowStatistics();
-        results << "Name;#vertices;#edges;minAdj;maxAdj;meanAdj;stddev\n";
-        results 
-            << input_graph.filename << ";"
-            << input_graph.rows << ";"
-            << input_graph.nnz << ";"
-            << stats.min << ";"
-            << stats.max << ";"
-            << stats.mean << ";"
-            << stats.std_dev << "\n";
-        
-        // Performance
-        results << "\nInit-Timing (iter);mean;std_dev;median\n";
-        results 
-            << init_result.num_ << ";"
-            << init_result.mean_ << ";"
-            << init_result.std_dev_ << ";"
-            << init_result.median_ << "\n";
-        results << "\nInsert-Timing (iter);mean;std_dev;median\n";
-        results 
-            << insert_result.num_ << ";"
-            << insert_result.mean_ << ";"
-            << insert_result.std_dev_ << ";"
-            << insert_result.median_ << "\n";
-        results << "\nDelete-Timing (iter);mean;std_dev;median\n";
-        results 
-            << delete_result.num_ << ";"
-            << delete_result.mean_ << ";"
-            << delete_result.std_dev_ << ";"
-            << delete_result.median_ << "\n";
-    }
-    
+	auto delete_result = delete_measure.generateResult();
+	std::cout << "Before write with " << test_init;
+	if(test_init)
+	{
+		std::cout << "Write results to: " << init_csv << std::endl;
+		results_init << init_result.mean_ << "," << init_result.std_dev_ << "," << init_result.min_ << "," << init_result.max_ << "," << init_result.median_ << "," << init_result.num_;
+	}
+	else
+	{
+		results_insert << insert_result.mean_ << "," << insert_result.std_dev_ << "," << insert_result.min_ << "," << insert_result.max_ << "," << insert_result.median_ << "," << insert_result.num_;
+		results_delete << delete_result.mean_ << "," << delete_result.std_dev_ << "," << delete_result.min_ << "," << delete_result.max_ << "," << delete_result.median_ << "," << delete_result.num_;
+	}
+
     if(printResults)
     {
         int width{10};
