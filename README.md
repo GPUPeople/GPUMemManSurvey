@@ -44,24 +44,28 @@ Evaluating different memory managers for dynamic GPU memory
 |**Our - C - S**|:ab:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|-|-|-|:heavy_check_mark:|-|-|-|-|
 |**Our - C - VA**|:ab:|:heavy_check_mark:|-| -|-|-|-|-|-|-|-|-|
 |**Our - C - VL**|:ab:|:heavy_check_mark:|-| -|-|-|-|-|-|-|-|-|
-|**Reg-Eff - A**|:a:|:heavy_check_mark:|:heavy_check_mark:| :watch:|-|-|-|-|-|-|-|-|
-|**Reg-Eff - AW**|:a:|:heavy_check_mark:|:heavy_check_mark:| :watch:|-|-|-|-|-|-|-|-|
-|**Reg-Eff - C**|:a:|:heavy_check_mark:|:heavy_check_mark:| :watch:|-|-|-|-|-|-|-|-|
-|**Reg-Eff - CF**|:a:|:heavy_check_mark:|:heavy_check_mark:| :watch:|-|-|-|-|-|-|-|-|
-|**Reg-Eff - CM**|:a:|:heavy_check_mark:|:heavy_check_mark:| :watch:|-|-|-|-|-|-|-|-|
-|**Reg-Eff - CFM**|:a:|:heavy_check_mark:|:heavy_check_mark:| :watch:|-|-|-|-|-|-|-|-|
+|**Reg-Eff - A**|:a:|:heavy_check_mark:|:heavy_check_mark:| :heavy_check_mark:|-|-|-|:watch:|-|-|-|-|
+|**Reg-Eff - AW**|:a:|:heavy_check_mark:|:heavy_check_mark:| :heavy_check_mark:|-|-|-|:watch:|-|-|-|-|
+|**Reg-Eff - C**|:a:|:heavy_check_mark:|:heavy_check_mark:| :heavy_check_mark:|-|-|-|:watch:|-|-|-|-|
+|**Reg-Eff - CF**|:a:|:heavy_check_mark:|:heavy_check_mark:| :watch:|-|-|-|:watch:|-|-|-|-|
+|**Reg-Eff - CM**|:a:|:heavy_check_mark:|:heavy_check_mark:| :watch:|-|-|-|:watch:|-|-|-|-|
+|**Reg-Eff - CFM**|:a:|:heavy_check_mark:|:heavy_check_mark:| :watch:|-|-|-|:watch:|-|-|-|-|
 |**FDGMalloc**|:a:|-| -|-|-|-|-|-|-|-|-|-|
 |**BulkAlloc**|:b:|-| -|-|-|-|-|-|-|-|-|-|
 
 
 ## Notes Performance
-* Reg-Eff-C stopped at `4092`
+* `100.000`
+  * Reg-Eff-CF failed at `8192`
+  * Reg-Eff-CFM fails a few times after `7376`
+  * Reg-Eff-CM fails a few times after `6768`
 
 ## Notes Scaling
 
 ## Notes Mixed
 
 ## Notes Fragmentation
+* Stopped for `Reg-Eff-C` at `4088`
 
 ## Notes Dynamic Graph
 
