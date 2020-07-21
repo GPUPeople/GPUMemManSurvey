@@ -54,6 +54,11 @@ if(TEST_CUDA)
 	)
 	target_compile_definitions(c_init_test PUBLIC TEST_CUDA)
 
+	add_executable(c_reg_test
+		test_registers.cu
+	)
+	target_compile_definitions(c_reg_test PUBLIC TEST_CUDA)
+
 endif()
 
 ##########################################################################
@@ -76,6 +81,12 @@ if(TEST_HALLOC AND NOT CUDA_BUILD_CC70_ASYNC)
 	)
 	target_compile_definitions(h_init_test PUBLIC TEST_HALLOC)
 	target_include_directories(h_init_test PUBLIC ${BASE_PATH}frameworks/halloc/repository/src)
+
+	add_executable(h_reg_test
+	test_registers.cu
+	)
+	target_compile_definitions(h_reg_test PUBLIC TEST_HALLOC)
+	target_include_directories(h_reg_test PUBLIC ${BASE_PATH}frameworks/halloc/repository/src)
 
 endif ()
 
@@ -100,6 +111,12 @@ if(TEST_XMALLOC)
 	target_compile_definitions(x_init_test PUBLIC TEST_XMALLOC)
 	target_include_directories(x_init_test PUBLIC ${BASE_PATH}frameworks/xmalloc)
 
+	add_executable(x_reg_test
+	test_registers.cu
+	)
+	target_compile_definitions(x_reg_test PUBLIC TEST_XMALLOC)
+	target_include_directories(x_reg_test PUBLIC ${BASE_PATH}frameworks/xmalloc)
+
 endif ()
 
 ##########################################################################
@@ -122,6 +139,12 @@ if(TEST_SCATTERALLOC)
 	)
 	target_compile_definitions(s_init_test PUBLIC TEST_SCATTERALLOC)
 	target_include_directories(s_init_test PUBLIC ${BASE_PATH}frameworks/scatteralloc/repository/src/include/mallocMC)
+
+	add_executable(s_reg_test
+	test_registers.cu
+	)
+	target_compile_definitions(s_reg_test PUBLIC TEST_SCATTERALLOC)
+	target_include_directories(s_reg_test PUBLIC ${BASE_PATH}frameworks/scatteralloc/repository/src/include/mallocMC)
 
 endif ()
 
@@ -228,6 +251,55 @@ if(TEST_OUROBOROS)
 	target_compile_definitions(o_init_test_vlc PUBLIC TEST_VIRTUALIZED_LIST)
 	target_include_directories(o_init_test_vlc PUBLIC ${BASE_PATH}frameworks/ouroboros/repository/include)
 
+##########################################################################
+
+	add_executable(o_reg_test_p
+	test_registers.cu
+	)
+	target_compile_definitions(o_reg_test_p PUBLIC TEST_OUROBOROS)
+	target_compile_definitions(o_reg_test_p PUBLIC TEST_PAGES)
+	target_include_directories(o_reg_test_p PUBLIC ${BASE_PATH}frameworks/ouroboros/repository/include)
+
+	add_executable(o_reg_test_c
+	test_registers.cu
+	)
+	target_compile_definitions(o_reg_test_c PUBLIC TEST_OUROBOROS)
+	target_compile_definitions(o_reg_test_c PUBLIC TEST_CHUNKS)
+	target_include_directories(o_reg_test_c PUBLIC ${BASE_PATH}frameworks/ouroboros/repository/include)
+
+	add_executable(o_reg_test_vap
+	test_registers.cu
+	)
+	target_compile_definitions(o_reg_test_vap PUBLIC TEST_OUROBOROS)
+	target_compile_definitions(o_reg_test_vap PUBLIC TEST_PAGES)
+	target_compile_definitions(o_reg_test_vap PUBLIC TEST_VIRTUALIZED_ARRAY)
+	target_include_directories(o_reg_test_vap PUBLIC ${BASE_PATH}frameworks/ouroboros/repository/include)
+
+	add_executable(o_reg_test_vac
+	test_registers.cu
+	)
+	target_compile_definitions(o_reg_test_vac PUBLIC TEST_OUROBOROS)
+	target_compile_definitions(o_reg_test_vac PUBLIC TEST_CHUNKS)
+	target_compile_definitions(o_reg_test_vac PUBLIC TEST_VIRTUALIZED_ARRAY)
+	target_include_directories(o_reg_test_vac PUBLIC ${BASE_PATH}frameworks/ouroboros/repository/include)
+
+	add_executable(o_reg_test_vlp
+	test_registers.cu
+	)
+	target_compile_definitions(o_reg_test_vlp PUBLIC TEST_OUROBOROS)
+	target_compile_definitions(o_reg_test_vlp PUBLIC TEST_PAGES)
+	target_compile_definitions(o_reg_test_vlp PUBLIC TEST_VIRTUALIZED_LIST)
+	target_include_directories(o_reg_test_vlp PUBLIC ${BASE_PATH}frameworks/ouroboros/repository/include)
+
+	add_executable(o_reg_test_vlc
+	test_registers.cu
+	)
+	target_compile_definitions(o_reg_test_vlc PUBLIC TEST_OUROBOROS)
+	target_compile_definitions(o_reg_test_vlc PUBLIC TEST_CHUNKS)
+	target_compile_definitions(o_reg_test_vlc PUBLIC TEST_VIRTUALIZED_LIST)
+	target_include_directories(o_reg_test_vlc PUBLIC ${BASE_PATH}frameworks/ouroboros/repository/include)
+
+
 endif ()
 
 ##########################################################################
@@ -248,6 +320,11 @@ if(TEST_FDG)
 	synth_init.cu
 	)
 	target_compile_definitions(f_init_test PUBLIC TEST_FDG)
+
+	add_executable(f_reg_test
+	test_registers.cu
+	)
+	target_compile_definitions(f_reg_test PUBLIC TEST_FDG)
 
 endif()
 
@@ -333,5 +410,43 @@ if(TEST_REG)
 	)
 	target_compile_definitions(r_init_test_cfm PUBLIC TEST_REGEFF)
 	target_compile_definitions(r_init_test_cfm PUBLIC TEST_CIRCULAR_FUSED_MULTI)
+
+	##########################################################################
+
+	add_executable(r_reg_test_a
+	test_registers.cu
+	)
+	target_compile_definitions(r_reg_test_a PUBLIC TEST_REGEFF)
+	target_compile_definitions(r_reg_test_a PUBLIC TEST_ATOMIC)
+
+	add_executable(r_reg_test_aw
+	test_registers.cu
+	)
+	target_compile_definitions(r_reg_test_aw PUBLIC TEST_REGEFF)
+	target_compile_definitions(r_reg_test_aw PUBLIC TEST_ATOMIC_WRAP)
+
+	add_executable(r_reg_test_c
+	test_registers.cu
+	)
+	target_compile_definitions(r_reg_test_c PUBLIC TEST_REGEFF)
+	target_compile_definitions(r_reg_test_c PUBLIC TEST_CIRCULAR)
+
+	add_executable(r_reg_test_cf
+	test_registers.cu
+	)
+	target_compile_definitions(r_reg_test_cf PUBLIC TEST_REGEFF)
+	target_compile_definitions(r_reg_test_cf PUBLIC TEST_CIRCULAR_FUSED)
+
+	add_executable(r_reg_test_cm
+	test_registers.cu
+	)
+	target_compile_definitions(r_reg_test_cm PUBLIC TEST_REGEFF)
+	target_compile_definitions(r_reg_test_cm PUBLIC TEST_CIRCULAR_MULTI)
+
+	add_executable(r_reg_test_cfm
+	test_registers.cu
+	)
+	target_compile_definitions(r_reg_test_cfm PUBLIC TEST_REGEFF)
+	target_compile_definitions(r_reg_test_cfm PUBLIC TEST_CIRCULAR_FUSED_MULTI)
 
 endif()

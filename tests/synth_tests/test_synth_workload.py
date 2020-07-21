@@ -124,34 +124,27 @@ def main():
 	####################################################################################################
 	if run_testcases:
 		for name, executable in testcases.items():
-			csv_path = "results/frag_" + name + "_" + str(num_allocations) + "_" + str(smallest_allocation_size) + "-" + str(largest_allocation_size) + ".csv"
+			csv_path = "results/synth_" + name + "_" + str(num_allocations) + "_" + str(smallest_allocation_size) + "-" + str(largest_allocation_size) + ".csv"
 			if(os.path.isfile(csv_path)):
 				print("This file already exists, do you really want to OVERWRITE?")
 				inputfromconsole = input()
 				if not (inputfromconsole == "yes" or inputfromconsole == "y"):
 					continue
 			with open(csv_path, "w", newline='') as csv_file:
-				csv_file.write("AllocationSize (in Byte)")
-				for i in range(num_iterations):
-					csv_file.write(",range, static range")
-			allocation_size = smallest_allocation_size
-			while allocation_size <= largest_allocation_size:
+				csv_file.write("mean, std-dev, min, max, median\n")
+			run_config = str(num_allocations) + " " + str(smallest_allocation_size) + " " + str(largest_allocation_size) + " " + str(num_iterations) + " 0 " + csv_path + " " + str(alloc_size)
+			executecommand = "{0} {1}".format(executable, run_config)
+			print("#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#")
+			print("Running " + name + " with command -> " + executecommand)
+			print("#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#")
+			print(executecommand)
+			_, process_killed = Command(executecommand).run(timeout=time_out_val)
+			if process_killed :
+				print("We killed the process!")
 				with open(csv_path, "a", newline='') as csv_file:
-					csv_file.write("\n" + str(allocation_size) + ",")
-				run_config = str(num_allocations) + " " + str(allocation_size) + " " + str(num_iterations) + " 0 " + csv_path + " " + str(alloc_size)
-				executecommand = "{0} {1}".format(executable, run_config)
-				print("#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#")
-				print("Running " + name + " with command -> " + executecommand)
-				print("#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#")
-				print(executecommand)
-				_, process_killed = Command(executecommand).run(timeout=time_out_val)
-				if process_killed :
-					print("We killed the process!")
-					with open(csv_path, "a", newline='') as csv_file:
-						csv_file.write("0,0,-------------------> Ran longer than " + str(time_out_val))
-				else:
-					print("Success!")
-				allocation_size += 4
+					csv_file.write("0,0,-------------------> Ran longer than " + str(time_out_val))
+			else:
+				print("Success!")
 
 	# ####################################################################################################
 	# ####################################################################################################

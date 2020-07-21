@@ -377,7 +377,6 @@ def generateResultsFromFileInit(folderpath, param1, dimension_name, approach_pos
 			writer.writerow(row)
 	print("####################")
 
-# Plot results as a bar plot with std-dev
 def plotInit(results, testcases, plotscale, offset, xlabel, ylabel, title, filename):
 	plt.figure(figsize=(barplot_width, barplot_height))
 	results = results[1:]
@@ -403,6 +402,102 @@ def plotInit(results, testcases, plotscale, offset, xlabel, ylabel, title, filen
 	plt.tick_params(axis='x', which='major', labelsize=6)
 	plt.tick_params(axis='y', which='major', labelsize=12)
 	plt.title(title)
+	plt.savefig(filename, dpi=600)
+
+	# Clear Figure
+	plt.clf()
+
+def generateResultsFromFileRegisters(folderpath, dimension_name, approach_pos):
+	# Gather results
+	result_init = list(list())
+
+	# Go over files, read data and generate new
+	written_header_init = False
+	for file in os.listdir(folderpath):
+		filename = folderpath + str("/") + os.fsdecode(file)
+		if(os.path.isdir(filename)):
+			continue
+		if str("reg") != filename.split('_')[0].split("/")[1]:
+			continue
+		print("Processing -> " + str(filename))
+		approach_name = filename.split('_')[approach_pos].split(".")[0]
+		with open(filename, newline='') as csv_file:
+			csvreader = csv.reader(csv_file, delimiter=',', quotechar='|')
+			if not written_header_init:
+				result_init.append(["Approach", "Alloc Size", "Timing (ms) GPU", "Timing (ms) CPU"])
+				written_header_init = True
+			csvreader = list(csvreader)
+			result_init.append(list(csvreader[1]))
+			result_init[-1].insert(0, approach_name)
+
+	# Get Timestring
+	now = datetime.now()
+	time_string = now.strftime("%Y-%m-%d_%H-%M-%S")
+
+	# Generate output file
+	print("------------------")
+	print("Generating -> " + time_string + str("_reg") + str(".csv"))
+	init_name = folderpath + str("/aggregate/") + time_string +  str("_reg") + str(".csv")
+	with(open(init_name, "w")) as f:
+		writer = csv.writer(f, delimiter=',')
+		for row in result_init:
+			writer.writerow(row)
+	print("####################")
+
+
+def plotRegisters(results, testcases, plotscale, xlabel, ylabel, title, filename, grouping):
+	plt.figure(figsize=(barplot_width, barplot_height))
+	results = results[1:]
+	results.sort(key=lambda x: x[0])
+	num_approaches = len(results)
+	if grouping == 'per_approach':
+		width = 0.9 / 2
+		index = np.arange(num_approaches)
+		labels = []
+		xticks = []
+		for i in range(len(results[0][1:])):
+			labels.append(results[0][1+i])
+			xticks.append(index[i])
+		x_values = np.asarray([str(i[0]) for i in results])
+		y_values_malloc = np.asarray([float(i[1]) for i in results])
+		y_values_free = np.asarray([float(i[2]) for i in results])
+		y_pos = np.arange(len(x_values))
+		colour = [colours[i] for i in x_values]
+
+		plt.bar(y_pos - width, y_values_malloc, width=width, color=colour, align='edge', edgecolor = "black", label='malloc')
+		plt.bar(y_pos, y_values_free, width=width, color=colour, align='edge', edgecolor = "black", label='free')
+		
+		plt.ylabel(ylabel)
+		plt.xlabel(xlabel)
+		plt.xticks(y_pos, x_values)
+	else:
+		placement = []
+		alignlabel = ''
+		approach_half = int(math.floor(num_approaches/2))
+		if num_approaches % 2 == 0:
+			placement = [number - approach_half for number in range(0, num_approaches)]
+			alignlabel = 'edge'
+		else:
+			placement = [number - approach_half for number in range(0, num_approaches)]
+			alignlabel = 'center'
+		width = 0.9 / num_approaches
+		index = np.arange(2)
+		x_values = np.asarray([str('malloc'), str('free')])
+		for approach_num in range(num_approaches):
+			y_values = np.asarray([float(i) for i in results[approach_num][1:]])
+			y_pos = np.arange(len(x_values))
+			labelname = results[approach_num][0]
+			plt.bar(index + (placement[approach_num] * width), y_values, width=width, color=colours[labelname], align=alignlabel, edgecolor = "black", label=labelname)
+		plt.ylabel(ylabel)
+		plt.xlabel(xlabel)
+		plt.xticks(y_pos, x_values)
+
+	if plotscale == "log":
+		plt.yscale("log")
+	plt.tick_params(axis='x', which='major', labelsize=6)
+	plt.tick_params(axis='y', which='major', labelsize=12)
+	plt.title(title)
+	plt.legend()
 	plt.savefig(filename, dpi=600)
 
 	# Clear Figure
