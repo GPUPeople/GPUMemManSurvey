@@ -175,6 +175,19 @@ namespace Helper
 
 	struct AllocationHelper
 	{
+		static __host__ int __host_clz(unsigned int x)
+		{
+			int n = 32;
+			unsigned y;
+
+			y = x >>16; if (y != 0) { n = n -16; x = y; }
+			y = x >> 8; if (y != 0) { n = n - 8; x = y; }
+			y = x >> 4; if (y != 0) { n = n - 4; x = y; }
+			y = x >> 2; if (y != 0) { n = n - 2; x = y; }
+			y = x >> 1; if (y != 0) return n - 2;
+			return n - x;
+		}
+
 		template <typename T>
 		static __device__ __host__ __forceinline__ int getNextPow2(T n)
 		{
@@ -184,10 +197,17 @@ namespace Helper
 		template <typename T>
 		static __device__ __host__ __forceinline__ int getNextPow2Pow(T n)
 		{
+			#ifdef __CUDA_ARCH__
 			if ((n & (n - 1)) == 0)
 				return 32 - __clz(n) - 1;
 			else
 				return 32 - __clz(n);
+			#else
+			if ((n & (n - 1)) == 0)
+				return 32 - __host_clz(n) - 1;
+			else
+				return 32 - __host_clz(n);
+			#endif
 		}
 
 		template <typename T, int minPageSize>

@@ -34,7 +34,7 @@ Evaluating different memory managers for dynamic GPU memory
 
 | | Sync:a:/Async:b: |Init| Perf. 10K | Perf. 100K | Mixed 10K | Mixed 100K | Scaling 2¹ - 2²⁰| Frag. 1|Frag. 2|Graph Init.|Graph Up.|Synth.|
 |:---:|:---:|:---:| :---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-|**CUDA**|:ab:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|-|-|-|-|
+|**CUDA**|:ab:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|-|:watch:|-|-|
 |**XMalloc**|:a:|:heavy_check_mark:|:heavy_check_mark:|:boom:|:heavy_check_mark:|:boom:|:boom:|-|-|-|-|-|
 |**ScatterAlloc**|:a:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|-|-|-|-|
 |**FDGMalloc**|:a:|-| -|-|-|-|-|-|-|-|-|-|
@@ -68,6 +68,7 @@ Evaluating different memory managers for dynamic GPU memory
 * Missing still for `Reg-Eff-CF`, `Reg-Eff-CM` and `Reg-Eff-CFM`
 
 ## Notes Dynamic Graph
+* Graph Stats captured :heavy_check_mark:
 
 ## Notes Synthetic
 * Could also test how write performance to that memory region is, not only the allocation speed

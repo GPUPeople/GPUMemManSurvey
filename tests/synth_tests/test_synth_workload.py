@@ -65,7 +65,7 @@ def main():
 		if any("o" in s for s in args.t):
 			testcases["Ouroboros-P-S"] = build_path + str("o_synth_test_p")
 			testcases["Ouroboros-P-VA"] = build_path + str("o_synth_test_vap")
-			# testcases["Ouroboros-P-VL"] = build_path + str("o_synth_test_vlp")
+			testcases["Ouroboros-P-VL"] = build_path + str("o_synth_test_vlp")
 			testcases["Ouroboros-C-S"] = build_path + str("o_synth_test_c")
 			# testcases["Ouroboros-C-VA"] = build_path + str("o_synth_test_vac")
 			# testcases["Ouroboros-C-VL"] = build_path + str("o_synth_test_vlc")
@@ -153,64 +153,64 @@ def main():
 					print("Success!")
 				allocation_size += 4
 
-	####################################################################################################
-	####################################################################################################
-	# Generate new Results
-	####################################################################################################
-	####################################################################################################
-	if generate_results:
-		generateResultsFromFileFragmentation("results", num_allocations, smallest_allocation_size, largest_allocation_size, "Bytes", 1, num_iterations)
+	# ####################################################################################################
+	# ####################################################################################################
+	# # Generate new Results
+	# ####################################################################################################
+	# ####################################################################################################
+	# if generate_results:
+	# 	generateResultsFromFileFragmentation("results", num_allocations, smallest_allocation_size, largest_allocation_size, "Bytes", 1, num_iterations)
 
-	####################################################################################################
-	####################################################################################################
-	# Generate new plots
-	####################################################################################################
-	####################################################################################################
-	if generate_plots:
-		result_frag = list()
-		# Get Timestring
-		now = datetime.now()
-		time_string = now.strftime("%b-%d-%Y_%H-%M-%S")
+	# ####################################################################################################
+	# ####################################################################################################
+	# # Generate new plots
+	# ####################################################################################################
+	# ####################################################################################################
+	# if generate_plots:
+	# 	result_frag = list()
+	# 	# Get Timestring
+	# 	now = datetime.now()
+	# 	time_string = now.strftime("%b-%d-%Y_%H-%M-%S")
 
-		if plotscale == "log":
-			time_string += "_log"
-		else:
-			time_string += "_lin"
+	# 	if plotscale == "log":
+	# 		time_string += "_log"
+	# 	else:
+	# 		time_string += "_lin"
 
-		for file in os.listdir("results/aggregate"):
-			filename = str("results/aggregate/") + os.fsdecode(file)
-			if(os.path.isdir(filename)):
-				continue
-			if filename.split("_")[2] != "frag" or str(num_allocations) != filename.split('_')[3] or str(smallest_allocation_size) + "-" + str(largest_allocation_size) != filename.split('_')[4].split(".")[0]:
-				continue
-			# We want the one matching our input
-			with open(filename) as f:
-				reader = csv.reader(f)
-				result_frag = list(reader)
+	# 	for file in os.listdir("results/aggregate"):
+	# 		filename = str("results/aggregate/") + os.fsdecode(file)
+	# 		if(os.path.isdir(filename)):
+	# 			continue
+	# 		if filename.split("_")[2] != "frag" or str(num_allocations) != filename.split('_')[3] or str(smallest_allocation_size) + "-" + str(largest_allocation_size) != filename.split('_')[4].split(".")[0]:
+	# 			continue
+	# 		# We want the one matching our input
+	# 		with open(filename) as f:
+	# 			reader = csv.reader(f)
+	# 			result_frag = list(reader)
 
-		####################################################################################################
-		# Lineplot
-		####################################################################################################
-		plotFrag(result_frag, 
-			testcases,
-			plotscale,
-			False, 
-			'Bytes', 
-			'Byte - Range', 
-			"Fragmentation: Byte-Range for " + str(num_allocations) + " allocations", 
-			str("results/plots/") + time_string + "_frag." + filetype)
+	# 	####################################################################################################
+	# 	# Lineplot
+	# 	####################################################################################################
+	# 	plotFrag(result_frag, 
+	# 		testcases,
+	# 		plotscale,
+	# 		False, 
+	# 		'Bytes', 
+	# 		'Byte - Range', 
+	# 		"Fragmentation: Byte-Range for " + str(num_allocations) + " allocations", 
+	# 		str("results/plots/") + time_string + "_frag." + filetype)
 
-		####################################################################################################
-		# Lineplot with range
-		####################################################################################################
-		plotFrag(result_frag, 
-			testcases,
-			plotscale,
-			True, 
-			'Bytes', 
-			'Byte - Range',
-			"Fragmentation: Byte-Range for " + str(num_allocations) + " allocations", 
-			str("results/plots/") + time_string + "_frag_range." + filetype)
+	# 	####################################################################################################
+	# 	# Lineplot with range
+	# 	####################################################################################################
+	# 	plotFrag(result_frag, 
+	# 		testcases,
+	# 		plotscale,
+	# 		True, 
+	# 		'Bytes', 
+	# 		'Byte - Range',
+	# 		"Fragmentation: Byte-Range for " + str(num_allocations) + " allocations", 
+	# 		str("results/plots/") + time_string + "_frag_range." + filetype)
 
 	print("Done")
 

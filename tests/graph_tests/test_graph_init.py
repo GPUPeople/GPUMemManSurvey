@@ -11,28 +11,28 @@ from Helper import plotMean
 import csv
 import argparse
 
-# graphs = {
-# 	"144.mtx",  
-# 	"333SP.mtx",
-# 	"adaptive.mtx",
-# 	"caidaRouterLevel.mtx",
-# 	"coAuthorsCiteseer.mtx",
-# 	"delaunay_n20.mtx",
-# 	"europe_osm.mtx",
-# 	"fe_body.mtx",
-# 	"germany_osm.mtx",
-# 	"hugebubbles-00010.mtx",
-# 	"hugetric-00000.mtx",
-# 	"in2010.mtx",
-# 	"luxembourg_osm.mtx",
-# 	"rgg_n_2_20_s0.mtx",
-# 	"sc2010.mtx",
-# 	"vsp_mod2_pgp2_slptsk.mtx"
-# }
+graphs = [
+	"144.mtx",  
+	"333SP.mtx",
+	"adaptive.mtx",
+	"caidaRouterLevel.mtx",
+	"coAuthorsCiteseer.mtx",
+	"delaunay_n20.mtx",
+	"europe_osm.mtx",
+	"fe_body.mtx",
+	"germany_osm.mtx",
+	"hugebubbles-00010.mtx",
+	"hugetric-00000.mtx",
+	"in2010.mtx",
+	"luxembourg_osm.mtx",
+	"rgg_n_2_20_s0.mtx",
+	"sc2010.mtx",
+	"vsp_mod2_pgp2_slptsk.mtx"
+]
 
-graphs = {
-	"luxembourg_osm.mtx"
-}
+# graphs = [
+# 	"luxembourg_osm.mtx"
+# ]
 
 path = "../../data/"
 
@@ -55,6 +55,7 @@ def main():
 	parser = argparse.ArgumentParser(description='Test fragmentation for various frameworks')
 	parser.add_argument('-t', type=str, help='Specify which frameworks to test, separated by +, e.g. o+s+h+c+f+r+x ---> c : cuda | s : scatteralloc | h : halloc | o : ouroboros | f : fdgmalloc | r : register-efficient | x : xmalloc')
 	parser.add_argument('-configfile', type=str, help='Specify the config file: config.json')
+	parser.add_argument('-graphstats', action='store_true', default=False, help='Just write graph stats and do not run testcases')
 	parser.add_argument('-runtest', action='store_true', default=False, help='Run testcases')
 	parser.add_argument('-genres', action='store_true', default=False, help='Generate results')
 	parser.add_argument('-genplot', action='store_true', default=False, help='Generate results file and plot')
@@ -114,6 +115,38 @@ def main():
 	if(args.filetype):
 		filetype = args.filetype
 
+	# Sort graphs for consistent ordering
+	graphs.sort()
+	
+	if(args.graphstats):
+		csv_path = "results/graph_stats.csv"
+		if(os.path.isfile(csv_path)):
+			print("This file <" + csv_path + "> already exists, do you really want to OVERWRITE?")
+			inputfromconsole = input()
+			if not (inputfromconsole == "yes" or inputfromconsole == "y"):
+				exit()
+		with open(csv_path, "w", newline='') as csv_file:
+			csv_file.write("Graph Stats, num vertices, num edges, mean adj length, std-dev, min adj length, max adj length\n")
+		for graph in graphs:
+			with open(csv_path, "a", newline='') as csv_file:
+				csv_file.write(graph + ",")
+			run_config = config_file + " " + path + graph + " " + str(1) + " " + csv_path
+			executecommand = "{0} {1}".format(build_path + str("c_graph_test"), run_config)
+			print("#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#")
+			print("Running command -> " + executecommand)
+			print("#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#")
+			print(executecommand)
+			_, process_killed = Command(executecommand).run()
+			if process_killed :
+				print("We killed the process!")
+				with open(csv_path, "a", newline='') as csv_file:
+					csv_file.write(",0,0,-------------------> Ran longer than " + str(time_out_val) + "\n")
+			else:
+				print("Success!")
+				with open(csv_path, "a", newline='') as csv_file:
+					csv_file.write("\n")
+		exit()
+
 	####################################################################################################
 	####################################################################################################
 	# Run testcases
@@ -127,10 +160,12 @@ def main():
 				inputfromconsole = input()
 				if not (inputfromconsole == "yes" or inputfromconsole == "y"):
 					continue
+			with open(csv_path, "w", newline='') as csv_file:
+				csv_file.write("Graph Init Testcase - " + name + ", mean(ms), std-dev(ms), min(ms), max(ms), median(ms), num iterations\n")
 			for graph in graphs:
 				with open(csv_path, "a", newline='') as csv_file:
 					csv_file.write(graph + ",")
-				run_config = config_file + " " + path + graph + " " + csv_path
+				run_config = config_file + " " + path + graph + " " + str(0) + " " + csv_path
 				executecommand = "{0} {1}".format(executable, run_config)
 				print("#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#")
 				print("Running " + name + " with command -> " + executecommand)

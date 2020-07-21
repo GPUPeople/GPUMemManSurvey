@@ -110,6 +110,7 @@ int main(int argc, char* argv[])
 	std::string init_file;
 	std::string insert_file;
 	std::string delete_file;
+	bool writeMatrixStats{false};
     if(argc >= 2)
 	{
 		config_file = std::string(argv[1]);
@@ -118,13 +119,17 @@ int main(int argc, char* argv[])
 			graph_file = std::string(argv[2]);
 			if(argc >= 4)
 			{
-				init_file = std::string(argv[3]);
+				writeMatrixStats = static_cast<bool>(atoi(argv[3]));
 				if(argc >= 5)
 				{
-					insert_file = std::string(argv[4]);
+					init_file = std::string(argv[4]);
 					if(argc >= 6)
 					{
-						delete_file = std::string(argv[5]);
+						insert_file = std::string(argv[5]);
+						if(argc >= 7)
+						{
+							delete_file = std::string(argv[6]);
+						}
 					}
 				}
 			}
@@ -187,17 +192,30 @@ int main(int argc, char* argv[])
 	}
 	std::cout << "Testing: " << graph_file;
 	std::cout << " with " << csr_mat.rows << " vertices and " << csr_mat.nnz << " edges\n";
-
-	// #######################################################
-	// #######################################################
-	// #######################################################
-	// Testcase
-	// #######################################################
-	// #######################################################
-	// #######################################################
 	std::cout << "--- " << mem_name << "---\n";
-	
-	testrun<MemoryManager, DataType>(csr_mat, config, init_file, insert_file, delete_file);
+	if(writeMatrixStats)
+	{
+		std::ofstream results_init;
+		results_init.open(init_file.c_str(), std::ios_base::app);
+		auto statistics = csr_mat.rowStatistics();
+		results_init << " " << csr_mat.rows << ", "
+			<< csr_mat.nnz << ", "
+			<< statistics.mean << ", "
+			<< statistics.std_dev << ", "
+			<< statistics.min << ", "
+			<< statistics.max;
+	}
+	else
+	{
+		// #######################################################
+		// #######################################################
+		// #######################################################
+		// Testcase
+		// #######################################################
+		// #######################################################
+		// #######################################################
+		testrun<MemoryManager, DataType>(csr_mat, config, init_file, insert_file, delete_file);
+	}
 
 	return 0;
 }
@@ -229,88 +247,81 @@ void testrun(CSR<DataType>& input_graph, const json& config, const std::string& 
 		results_delete.open(delete_csv.c_str(), std::ios_base::app);
 	}
 
-    PerfMeasure init_measure, insert_measure, delete_measure;
-    
-    // Instantiate graph
-    DynGraph<VertexData, EdgeData, MemoryManagerType> dynamic_graph(allocationSize);
+	// Instantiate graph
+	DynGraph<VertexData, EdgeData, MemoryManagerType> dynamic_graph(allocationSize);
 
-    for(auto round = 0; round < iterations; ++round)
-    {
-        if(printDebugMessages)
-            std::cout << "Round: " << round + 1 << " / " << iterations << std::endl;
+	for(auto round = 0; round < iterations; ++round)
+	{
+		if(printDebugMessages)
+			std::cout << "Round: " << round + 1 << " / " << iterations << std::endl;
 
-        Verification<DataType> verification(input_graph);
+		Verification<DataType> verification(input_graph);
 
-        // Initialization
-        dynamic_graph.init(input_graph);
+		// Initialization
+		dynamic_graph.init(input_graph);
 
-        if (verify_enabled)
-        {
-            // Test integrity
+		if (verify_enabled)
+		{
+			// Test integrity
 			CSR<DataType> test_graph;
-            dynamic_graph.dynGraphToCSR(test_graph);
-            std::string header = std::string("Initialization - ") + std::to_string(round);
+			dynamic_graph.dynGraphToCSR(test_graph);
+			std::string header = std::string("Initialization - ") + std::to_string(round);
 			verification.verify(test_graph, header.c_str(), OutputCodes::VERIFY_INITIALIZATION);
-        }
+		}
 
-        for(auto update_round = 0; update_round < update_iterations && !test_init; ++update_round, offset += range)
-        {
-            EdgeUpdateBatch<VertexData, EdgeData> insertion_updates(dynamic_graph.number_vertices);
-            insertion_updates.generateEdgeUpdates(dynamic_graph.number_vertices, batch_size, (round * update_iterations) + update_round, range, offset);
-            dynamic_graph.edgeInsertion(insertion_updates);
+		for(auto update_round = 0; update_round < update_iterations && !test_init; ++update_round, offset += range)
+		{
+			EdgeUpdateBatch<VertexData, EdgeData> insertion_updates(dynamic_graph.number_vertices);
+			insertion_updates.generateEdgeUpdates(dynamic_graph.number_vertices, batch_size, (round * update_iterations) + update_round, range, offset);
+			dynamic_graph.edgeInsertion(insertion_updates);
 
-            if (verify_enabled)
+			if (verify_enabled)
 			{
-                CSR<DataType> test_graph;
+				CSR<DataType> test_graph;
 				dynamic_graph.dynGraphToCSR(test_graph);
-                verification.hostEdgeInsertion(insertion_updates);
-                std::string header = std::string("Insertion - ") + std::to_string(update_round);
+				verification.hostEdgeInsertion(insertion_updates);
+				std::string header = std::string("Insertion - ") + std::to_string(update_round);
 				verification.verify(test_graph, header.c_str(), OutputCodes::VERIFY_INSERTION);
-            }
+			}
 
-            if (realistic_deletion)
-            {
-                EdgeUpdateBatch<VertexData, EdgeData> deletion_updates(dynamic_graph.number_vertices);
-                deletion_updates.generateEdgeUpdates(dynamic_graph, batch_size, (round * update_iterations) + update_round, range, offset);
-                
-                dynamic_graph.edgeDeletion(deletion_updates);
+			if (realistic_deletion)
+			{
+				EdgeUpdateBatch<VertexData, EdgeData> deletion_updates(dynamic_graph.number_vertices);
+				deletion_updates.generateEdgeUpdates(dynamic_graph, batch_size, (round * update_iterations) + update_round, range, offset);
+				
+				dynamic_graph.edgeDeletion(deletion_updates);
 
-                if (verify_enabled)
-                {
-                    CSR<DataType> test_graph;
-                    dynamic_graph.dynGraphToCSR(test_graph);
-                    verification.hostEdgeDeletion(deletion_updates);
-                    verification.printAdjacency(7);
-                    std::string header = std::string("Deletion - ") + std::to_string(update_round);
-                    verification.verify(test_graph, header.c_str(), OutputCodes::VERIFY_DELETION);
-                }
-            }
-            else
-            {
-                dynamic_graph.edgeDeletion(insertion_updates);
-                if (verify_enabled)
-                {
-                    CSR<DataType> test_graph;
-                    dynamic_graph.dynGraphToCSR(test_graph);
-                    verification.hostEdgeDeletion(insertion_updates);
-                    std::string header = std::string("Deletion - ") + std::to_string(update_round);
-                    verification.verify(test_graph, header.c_str(), OutputCodes::VERIFY_DELETION);
-                }
-            }
-        }
-        init_measure.addMeasure(dynamic_graph.init_performance);
-        insert_measure.addMeasure(dynamic_graph.insert_performance);
-        delete_measure.addMeasure(dynamic_graph.delete_performance);
+				if (verify_enabled)
+				{
+					CSR<DataType> test_graph;
+					dynamic_graph.dynGraphToCSR(test_graph);
+					verification.hostEdgeDeletion(deletion_updates);
+					verification.printAdjacency(7);
+					std::string header = std::string("Deletion - ") + std::to_string(update_round);
+					verification.verify(test_graph, header.c_str(), OutputCodes::VERIFY_DELETION);
+				}
+			}
+			else
+			{
+				dynamic_graph.edgeDeletion(insertion_updates);
+				if (verify_enabled)
+				{
+					CSR<DataType> test_graph;
+					dynamic_graph.dynGraphToCSR(test_graph);
+					verification.hostEdgeDeletion(insertion_updates);
+					std::string header = std::string("Deletion - ") + std::to_string(update_round);
+					verification.verify(test_graph, header.c_str(), OutputCodes::VERIFY_DELETION);
+				}
+			}
+		}
 
-        dynamic_graph.cleanup();
-    }
-    auto init_result = init_measure.generateResult();
-    auto insert_result = insert_measure.generateResult();
-	auto delete_result = delete_measure.generateResult();
-	std::cout << "Before write with " << test_init;
+		dynamic_graph.cleanup();
+	}
+    auto init_result = dynamic_graph.init_performance.generateResult();
+    auto insert_result = dynamic_graph.insert_performance.generateResult();
+	auto delete_result = dynamic_graph.delete_performance.generateResult();
 	if(test_init)
 	{
-		std::cout << "Write results to: " << init_csv << std::endl;
 		results_init << init_result.mean_ << "," << init_result.std_dev_ << "," << init_result.min_ << "," << init_result.max_ << "," << init_result.median_ << "," << init_result.num_;
 	}
 	else

@@ -21,7 +21,9 @@ struct PerfMeasure
 
 	void startMeasurement(){Utils::start_clock(ce_start, ce_stop);}
 	void stopMeasurement(){measurements_.push_back(Utils::end_clock(ce_start, ce_stop));}
-	void addMeasure(PerfMeasure& measure){measurements_.insert(measurements_.end(), measure.measurements_.begin(), measure.measurements_.end());}
+	void addMeasure(PerfMeasure& measure){
+		measurements_.insert(measurements_.end(), measure.measurements_.begin(), measure.measurements_.end());
+	}
 	
 	float mean()
 	{
@@ -43,7 +45,7 @@ struct PerfMeasure
 
 	Result generateResult()
 	{
-		if(num_ == 0)
+		if(measurements_.size() == 0)
 			return Result{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0};
 		float mean_val = mean();
 		return Result{
