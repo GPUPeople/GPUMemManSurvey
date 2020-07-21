@@ -43,6 +43,8 @@ struct PerfMeasure
 
 	Result generateResult()
 	{
+		if(num_ == 0)
+			return Result{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0};
 		float mean_val = mean();
 		return Result{
 			mean_val,

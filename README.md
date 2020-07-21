@@ -41,7 +41,7 @@ Evaluating different memory managers for dynamic GPU memory
 |**Halloc**|:a:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:question:|:heavy_check_mark:|-|-|-|-|
 |**Reg-Eff - A**|:a:|:heavy_check_mark:|:heavy_check_mark:| :heavy_check_mark:|-|-|-|:heavy_check_mark:|-|-|-|-|
 |**Reg-Eff - AW**|:a:|:heavy_check_mark:|:heavy_check_mark:| :heavy_check_mark:|-|-|-|:heavy_check_mark:|-|-|-|-|
-|**Reg-Eff - C**|:a:|:heavy_check_mark:|:heavy_check_mark:| :heavy_check_mark:|-|-|-|:watch:|-|-|-|-|
+|**Reg-Eff - C**|:a:|:heavy_check_mark:|:heavy_check_mark:| :heavy_check_mark:|-|-|-|:heavy_check_mark:|-|-|-|-|
 |**Reg-Eff - CF**|:a:|:heavy_check_mark:|:heavy_check_mark:| :watch:|-|-|-|:watch:|-|-|-|-|
 |**Reg-Eff - CM**|:a:|:heavy_check_mark:|:heavy_check_mark:| :watch:|-|-|-|:watch:|-|-|-|-|
 |**Reg-Eff - CFM**|:a:|:heavy_check_mark:|:heavy_check_mark:| :watch:|-|-|-|:watch:|-|-|-|-|
@@ -65,7 +65,7 @@ Evaluating different memory managers for dynamic GPU memory
 ## Notes Mixed
 
 ## Notes Fragmentation
-* Stopped for `Reg-Eff-C` at `4088`
+* Missing still for `Reg-Eff-CF`, `Reg-Eff-CM` and `Reg-Eff-CFM`
 
 ## Notes Dynamic Graph
 
