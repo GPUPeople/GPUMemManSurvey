@@ -137,7 +137,7 @@ int main(int argc, char* argv[])
 			allocation_size_range_lower = atoi(argv[2]);
 			if(argc >= 4)
 			{
-				allocation_size_range_upper = atoi(argv[5]);
+				allocation_size_range_upper = atoi(argv[3]);
 				if(argc >= 5)
 				{
 					num_iterations = atoi(argv[4]);
@@ -196,13 +196,13 @@ int main(int argc, char* argv[])
 		int blockSize{256};
 		int gridSize = Utils::divup(num_allocations, blockSize);
 
-		#ifdef TEST_BASELINE
-
 		// Start measurement
 		timing.startMeasurement();
+		
+		#ifdef TEST_BASELINE
 
 		int* requirements{nullptr};
-		CHECK_ERROR(cudaMalloc(&requirements, num_allocations * sizeof(int)));
+		CHECK_ERROR(cudaMalloc(&requirements, (num_allocations + 1) * sizeof(int)));
 
 		d_baseline_requirements <<< gridSize, blockSize >>> (d_allocation_sizes.get(), num_allocations, requirements);
 
@@ -211,7 +211,7 @@ int main(int argc, char* argv[])
 
 		// Copy back num elements
 		int num_items{0};
-		CHECK_ERROR(cudaMemcpy(&num_items, requirements + num_allocations, sizeof(unsigned int), cudaMemcpyDeviceToHost));
+		CHECK_ERROR(cudaMemcpy(&num_items, requirements + num_allocations, sizeof(int), cudaMemcpyDeviceToHost));
 
 		// Allocate memory
 		int* storage_area{nullptr};
@@ -229,13 +229,7 @@ int main(int argc, char* argv[])
 		CHECK_ERROR(cudaFree(requirements));
 		CHECK_ERROR(cudaFree(storage_area));
 
-		// Stop Measurement
-		timing.stopMeasurement();
-
 		#else
-
-		// Start measurement
-		timing.startMeasurement();
 
 		d_memorymanager_alloc <<< gridSize, blockSize >>>(memory_manager, d_allocation_sizes.get(), num_allocations, d_verification_ptrs.get());
 
@@ -247,10 +241,10 @@ int main(int argc, char* argv[])
 
 		d_memorymanager_free <<< gridSize, blockSize >>>(memory_manager, d_allocation_sizes.get(), num_allocations, d_verification_ptrs.get());
 
+		#endif
+
 		// Stop Measurement
 		timing.stopMeasurement();
-
-		#endif
 	}
 
 	auto result = timing.generateResult();

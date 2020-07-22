@@ -30,36 +30,52 @@ Evaluating different memory managers for dynamic GPU memory
 * Currently still buggy and fails early in multiple cases
 * Also, has several limitations, only can do warp-based allocation, cannot really free memory, only tidy up full warp, etc.
 
+## Register-Efficient
+* Has the option to `coalesce` within a warp -> adds up all allocations and then only does one large allocation
+  * Does not work with free
+    * Not sure if this is not implemented correctly, but this immediately hangs, as then possible threads are trying to delete some memory that is only part of a larger allocation and cannot be individually freed
+  * Even without free, not all sizes sime to work properly
+* Currently, `coalesceWarp` is turned off so that it works
+
 # Test table TITAN V
 
-| | Sync:a:/Async:b: |Init|Registers| Perf. 10K | Perf. 100K | Mixed 10K | Mixed 100K | Scaling 2¹ - 2²⁰| Frag. 1|Frag. 2|Graph Init.|Graph Up.|Synth.|
+| | Build |Init|Reg.| Perf. 10K | Perf. 100K | Mix 10K | Mix 100K | Scale | Frag. 1|Frag. 2|Graph Init.|Graph Up.|Synth.|
 |:---:|:---:|:---:| :---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-|**CUDA**|:ab:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|-|:watch:|-|-|
-|**XMalloc**|:a:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:boom:|:heavy_check_mark:|:boom:|:boom:|-|-|-|-|-|
-|**ScatterAlloc**|:a:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|-|-|-|-|
-|**FDGMalloc**|:a:|-|-|-|-|-|-|-|-|-|-|-|-|
-|**Halloc**|:a:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:question:|:heavy_check_mark:|-|-|-|-|
-|**Reg-Eff - A**|:a:|:heavy_check_mark:|:heavy_check_mark:|:question:| :question:|-|-|-|:heavy_check_mark:|-|-|-|-|
-|**Reg-Eff - AW**|:a:|:heavy_check_mark:|:heavy_check_mark:|:question:| :question:|-|-|-|:heavy_check_mark:|-|-|-|-|
-|**Reg-Eff - C**|:a:|:heavy_check_mark:|:heavy_check_mark:|:question:| :question:|-|-|-|:heavy_check_mark:|-|-|-|-|
-|**Reg-Eff - CF**|:a:|:heavy_check_mark:|:heavy_check_mark:|:question:| :watch:|-|-|-|:watch:|-|-|-|-|
-|**Reg-Eff - CM**|:a:|:heavy_check_mark:|:heavy_check_mark:|:question:| :watch:|-|-|-|:watch:|-|-|-|-|
-|**Reg-Eff - CFM**|:a:|:heavy_check_mark:|:heavy_check_mark:|:question:| :watch:|-|-|-|:watch:|-|-|-|-|
-|**Our - P - S**|:ab:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|-|-|-|:heavy_check_mark:|-|-|-|-|
-|**Our - P - VA**|:ab:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|-|-|-|:heavy_check_mark:|-|-|-|-|
-|**Our - P - VL**|:ab:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|-|-|-|:heavy_check_mark:|-|-|-|-|
-|**Our - C - S**|:ab:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|-|-|-|:heavy_check_mark:|-|-|-|-|
-|**Our - C - VA**|:ab:|:heavy_check_mark:|:heavy_check_mark:|-| -|-|-|-|-|-|-|-|-|
-|**Our - C - VL**|:ab:|:heavy_check_mark:|:heavy_check_mark:|-| -|-|-|-|-|-|-|-|-|
-|**BulkAlloc**|:b:|-| -|-|-|-|-|-|-|-|-|-|-|
+|**CUDA**|:ab:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|-|:watch:|-|:heavy_check_mark:|
+|**XMalloc**|:a:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:boom:|:heavy_check_mark:|:boom:|:boom:|-|-|-|-|:heavy_check_mark:|
+|**ScatterAlloc**|:a:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|-|-|-|:heavy_check_mark:|
+|**Halloc**|:a:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:question:|:heavy_check_mark:|-|-|-|:heavy_check_mark:|
+|**Reg-Eff - A**|:a:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:| :heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|-|:heavy_check_mark:|-|-|-|:heavy_check_mark:|
+|**Reg-Eff - AW**|:a:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:| :heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|-|:heavy_check_mark:|-|-|-|:heavy_check_mark:|
+|**Reg-Eff - C**|:a:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:| :heavy_check_mark:|:boom:|:boom:|-|:heavy_check_mark:|-|-|-|-|
+|**Reg-Eff - CF**|:a:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:| :watch:|:heavy_check_mark:|:heavy_check_mark:|-|:watch:|-|-|-|-|
+|**Reg-Eff - CM**|:a:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:| :watch:|:heavy_check_mark:|:boom:|-|:watch:|-|-|-|-|
+|**Reg-Eff - CFM**|:a:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:| :watch:|:heavy_check_mark:|:heavy_check_mark:|-|:watch:|-|-|-|-|
+|**Our - P - S**|:ab:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|-|:heavy_check_mark:|-|-|-|:heavy_check_mark:|
+|**Our - P - VA**|:ab:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|-|:heavy_check_mark:|-|-|-|:heavy_check_mark:|
+|**Our - P - VL**|:ab:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:boom:|:boom:|-|:heavy_check_mark:|-|-|-|:boom:|
+|**Our - C - S**|:ab:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|-|:heavy_check_mark:|-|-|-|:heavy_check_mark:|
+|**Our - C - VA**|:ab:|:heavy_check_mark:|:heavy_check_mark:|-| -|:heavy_check_mark:|:heavy_check_mark:|-|-|-|-|-|:heavy_check_mark:|
+|**Our - C - VL**|:ab:|:heavy_check_mark:|:heavy_check_mark:|-| -|:heavy_check_mark:|:heavy_check_mark:|-|-|-|-|-|:heavy_check_mark:|
 
 
 ## Notes Performance
-* `100.000`
-  * Reg-Eff-CF failed at `8192`
-  * Reg-Eff-CFM fails a few times after `7376`
-  * Reg-Eff-CM fails a few times after `6768`
-* `Reg-Eff` run again with coalesced warp
+* `Performance`
+  * `100.000`
+    * Reg-Eff-CF failed at `8192`
+    * Reg-Eff-CFM fails a few times after `7376`
+    * Reg-Eff-CM fails a few times after `6768`
+
+* `Mixed Performance`
+  * `10.000`
+    * `Reg-Eff-C` fails in between for sizes `32,64,256`
+    * `Our - P - VL` fails after `32`
+  * `100.000`
+    * `Reg-Eff-C` fails after `16`
+    * `Reg-Eff-CM` fails after `1024`
+    * `Reg-Eff-CFM` fails after `4096`
+    * `Our - C - VA` fails after `2048` -> got manual results with less iterations
+    * `Our - P - VL` fails after `32`
 
 ## Notes Scaling
 
@@ -72,6 +88,8 @@ Evaluating different memory managers for dynamic GPU memory
 * Graph Stats captured :heavy_check_mark:
 
 ## Notes Synthetic
+* `Workload`
+  * `Our - P - VL` fails after 1024
 * Could also test how write performance to that memory region is, not only the allocation speed
 
 

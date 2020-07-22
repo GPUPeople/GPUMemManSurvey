@@ -39,7 +39,7 @@ def main():
 
 	parser = argparse.ArgumentParser(description='Test fragmentation for various frameworks')
 	parser.add_argument('-t', type=str, help='Specify which frameworks to test, separated by +, e.g. o+s+h+c+f+r+x+b ---> c : cuda | s : scatteralloc | h : halloc | o : ouroboros | f : fdgmalloc | r : register-efficient | x : xmalloc')
-	parser.add_argument('-num', type=int, help='How many allocations to perform')
+	parser.add_argument('-threadrange', type=str, help='Specify number of threads, given as powers of two, e.g. 0-5 -> results in 1-32')
 	parser.add_argument('-range', type=str, help='Sepcify Allocation Range, e.g. 4-1024')
 	parser.add_argument('-iter', type=int, help='How many iterations?')
 	parser.add_argument('-runtest', action='store_true', default=False, help='Run testcases')
@@ -63,10 +63,10 @@ def main():
 		if any("s" in s for s in args.t):
 			testcases["ScatterAlloc"] = sync_build_path + str("s_synth_test")
 		if any("o" in s for s in args.t):
-			testcases["Ouroboros-P-S"] = build_path + str("o_synth_test_p")
-			testcases["Ouroboros-P-VA"] = build_path + str("o_synth_test_vap")
+			# testcases["Ouroboros-P-S"] = build_path + str("o_synth_test_p")
+			# testcases["Ouroboros-P-VA"] = build_path + str("o_synth_test_vap")
 			testcases["Ouroboros-P-VL"] = build_path + str("o_synth_test_vlp")
-			testcases["Ouroboros-C-S"] = build_path + str("o_synth_test_c")
+			# testcases["Ouroboros-C-S"] = build_path + str("o_synth_test_c")
 			# testcases["Ouroboros-C-VA"] = build_path + str("o_synth_test_vac")
 			# testcases["Ouroboros-C-VL"] = build_path + str("o_synth_test_vlc")
 		if any("f" in s for s in args.t):
@@ -79,11 +79,13 @@ def main():
 			testcases["RegEff-CM"] = sync_build_path + str("r_synth_test_cm")
 			testcases["RegEff-CFM"] = sync_build_path + str("r_synth_test_cfm")
 		if any("b" in s for s in args.t):
-			testcases["Baseline"] = sync_build_path + str("b_synth_test")
+			testcases["Baseline"] = build_path + str("b_synth_test")
 	
-	# Parse num allocation
-	if(args.num):
-		num_allocations = args.num
+	# Parse range
+	if(args.threadrange):
+		selected_range = args.threadrange.split('-')
+		smallest_num_threads = 2 ** int(selected_range[0])
+		largest_num_threads = 2 ** int(selected_range[1])
 
 	# Parse range
 	if(args.range):
@@ -124,27 +126,34 @@ def main():
 	####################################################################################################
 	if run_testcases:
 		for name, executable in testcases.items():
-			csv_path = "results/synth_" + name + "_" + str(num_allocations) + "_" + str(smallest_allocation_size) + "-" + str(largest_allocation_size) + ".csv"
+			csv_path = "results/synth_" + name + "_" + str(smallest_num_threads)+ "-" + str(largest_num_threads) + "_" + str(smallest_allocation_size) + "-" + str(largest_allocation_size) + ".csv"
 			if(os.path.isfile(csv_path)):
 				print("This file already exists, do you really want to OVERWRITE?")
 				inputfromconsole = input()
 				if not (inputfromconsole == "yes" or inputfromconsole == "y"):
 					continue
 			with open(csv_path, "w", newline='') as csv_file:
-				csv_file.write("mean, std-dev, min, max, median\n")
-			run_config = str(num_allocations) + " " + str(smallest_allocation_size) + " " + str(largest_allocation_size) + " " + str(num_iterations) + " 0 " + csv_path + " " + str(alloc_size)
-			executecommand = "{0} {1}".format(executable, run_config)
-			print("#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#")
-			print("Running " + name + " with command -> " + executecommand)
-			print("#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#")
-			print(executecommand)
-			_, process_killed = Command(executecommand).run(timeout=time_out_val)
-			if process_killed :
-				print("We killed the process!")
+				csv_file.write("NumThreads, mean, std-dev, min, max, median\n")
+			num_threads = smallest_num_threads
+			while num_threads <= largest_num_threads:
 				with open(csv_path, "a", newline='') as csv_file:
-					csv_file.write("0,0,-------------------> Ran longer than " + str(time_out_val))
-			else:
-				print("Success!")
+					csv_file.write(str(num_threads) + ", ")
+				run_config = str(num_threads) + " " + str(smallest_allocation_size) + " " + str(largest_allocation_size) + " " + str(num_iterations) + " 0 " + csv_path + " " + str(alloc_size)
+				executecommand = "{0} {1}".format(executable, run_config)
+				print("#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#")
+				print("Running " + name + " with command -> " + executecommand)
+				print("#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#")
+				print(executecommand)
+				_, process_killed = Command(executecommand).run(timeout=time_out_val)
+				if process_killed :
+					print("We killed the process!")
+					with open(csv_path, "a", newline='') as csv_file:
+						csv_file.write("0,0,-------------------> Ran longer than " + str(time_out_val) + "\n")
+				else:
+					print("Success!")
+					with open(csv_path, "a", newline='') as csv_file:
+						csv_file.write("\n")
+				num_threads *= 2
 
 	# ####################################################################################################
 	# ####################################################################################################

@@ -56,8 +56,8 @@ void DynGraph<VertexDataType, EdgeDataType, MemoryManagerType>::init(CSR<DataTyp
         number_vertices,
         d_csr_graph.row_offsets,
         d_csr_graph.col_ids);
-        init_performance.stopMeasurement();
-        CHECK_ERROR(cudaDeviceSynchronize());
+	init_performance.stopMeasurement();
+	CHECK_ERROR(cudaDeviceSynchronize());
 }
 
 // ##############################################################################################################################################

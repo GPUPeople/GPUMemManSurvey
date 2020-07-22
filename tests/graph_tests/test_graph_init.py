@@ -31,7 +31,7 @@ graphs = [
 ]
 
 # graphs = [
-# 	"luxembourg_osm.mtx"
+# 	"europe_osm.mtx"
 # ]
 
 path = "../../data/"
@@ -44,7 +44,6 @@ def main():
 
 	config_file = "config_init.json"
 	testcases = {}
-	num_iterations = 1
 	build_path = "build/"
 	sync_build_path = "sync_build/"
 	filetype = "pdf"
@@ -77,9 +76,9 @@ def main():
 			testcases["ScatterAlloc"] = sync_build_path + str("s_graph_test")
 		if any("o" in s for s in args.t):
 			testcases["Ouroboros-P-S"] = build_path + str("o_graph_test_p")
-			testcases["Ouroboros-P-VA"] = build_path + str("o_graph_test_vap")
-			testcases["Ouroboros-P-VL"] = build_path + str("o_graph_test_vlp")
-			testcases["Ouroboros-C-S"] = build_path + str("o_graph_test_c")
+			# testcases["Ouroboros-P-VA"] = build_path + str("o_graph_test_vap")
+			# testcases["Ouroboros-P-VL"] = build_path + str("o_graph_test_vlp")
+			# testcases["Ouroboros-C-S"] = build_path + str("o_graph_test_c")
 			# testcases["Ouroboros-C-VA"] = build_path + str("o_graph_test_vac")
 			# testcases["Ouroboros-C-VL"] = build_path + str("o_graph_test_vlc")
 		if any("f" in s for s in args.t):
