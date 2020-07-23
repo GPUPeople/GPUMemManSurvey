@@ -39,24 +39,24 @@ Evaluating different memory managers for dynamic GPU memory
 
 # Test table TITAN V
 
-| | Build |Init|Reg.| Perf. 10K | Perf. 100K | Mix 10K | Mix 100K | Scale | Frag. 1|Frag. 2|Graph Init.|Graph Up.|Synth.|
+| | Build |Init|Reg.| Perf. 10K | Perf. 100K | Mix 10K | Mix 100K | Scale | Frag. 1|OOM|Graph Init.|Graph Up.|Synth.|
 |:---:|:---:|:---:| :---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 |**CUDA**|:ab:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|-|:watch:|-|:heavy_check_mark:|
-|**XMalloc**|:a:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:boom:|:heavy_check_mark:|:boom:|:boom:|-|-|-|-|:heavy_check_mark:|
+|**XMalloc**|:a:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:boom:|:heavy_check_mark:|:boom:|:boom:|-|:boom:|-|-|:heavy_check_mark:|
 |**ScatterAlloc**|:a:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|-|-|-|:heavy_check_mark:|
-|**Halloc**|:a:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:question:|:heavy_check_mark:|-|-|-|:heavy_check_mark:|
-|**Reg-Eff - A**|:a:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:| :heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|-|:heavy_check_mark:|-|-|-|:heavy_check_mark:|
-|**Reg-Eff - AW**|:a:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:| :heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|-|:heavy_check_mark:|-|-|-|:heavy_check_mark:|
-|**Reg-Eff - C**|:a:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:| :heavy_check_mark:|:boom:|:boom:|-|:heavy_check_mark:|-|-|-|-|
-|**Reg-Eff - CF**|:a:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:| :watch:|:heavy_check_mark:|:heavy_check_mark:|-|:watch:|-|-|-|-|
-|**Reg-Eff - CM**|:a:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:| :watch:|:heavy_check_mark:|:boom:|-|:watch:|-|-|-|-|
-|**Reg-Eff - CFM**|:a:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:| :watch:|:heavy_check_mark:|:heavy_check_mark:|-|:watch:|-|-|-|-|
-|**Our - P - S**|:ab:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|-|:heavy_check_mark:|-|-|-|:heavy_check_mark:|
-|**Our - P - VA**|:ab:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|-|:heavy_check_mark:|-|-|-|:heavy_check_mark:|
-|**Our - P - VL**|:ab:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:boom:|:boom:|-|:heavy_check_mark:|-|-|-|:boom:|
-|**Our - C - S**|:ab:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|-|:heavy_check_mark:|-|-|-|:heavy_check_mark:|
-|**Our - C - VA**|:ab:|:heavy_check_mark:|:heavy_check_mark:|-| -|:heavy_check_mark:|:heavy_check_mark:|-|-|-|-|-|:heavy_check_mark:|
-|**Our - C - VL**|:ab:|:heavy_check_mark:|:heavy_check_mark:|-| -|:heavy_check_mark:|:heavy_check_mark:|-|-|-|-|-|:heavy_check_mark:|
+|**Halloc**|:a:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:question:|:heavy_check_mark:|:heavy_check_mark:|-|-|:heavy_check_mark:|
+|**Reg-Eff - A**|:a:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:| :heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|-|:heavy_check_mark:|:heavy_check_mark:|-|-|:heavy_check_mark:|
+|**Reg-Eff - AW**|:a:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:| :heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|-|:heavy_check_mark:|:heavy_check_mark:|-|-|:heavy_check_mark:|
+|**Reg-Eff - C**|:a:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:| :heavy_check_mark:|:boom:|:boom:|-|:heavy_check_mark:|:watch:|-|-|-|
+|**Reg-Eff - CF**|:a:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:| :watch:|:heavy_check_mark:|:heavy_check_mark:|-|:watch:|:watch:|-|-|-|
+|**Reg-Eff - CM**|:a:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:| :watch:|:heavy_check_mark:|:boom:|-|:watch:|:watch:|-|-|-|
+|**Reg-Eff - CFM**|:a:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:| :watch:|:heavy_check_mark:|:heavy_check_mark:|-|:watch:|:watch:|-|-|-|
+|**Our - P - S**|:ab:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|-|:heavy_check_mark:|:heavy_check_mark:|-|-|:heavy_check_mark:|
+|**Our - P - VA**|:ab:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|-|:heavy_check_mark:|:heavy_check_mark:|-|-|:heavy_check_mark:|
+|**Our - P - VL**|:ab:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:boom:|:boom:|-|:heavy_check_mark:|:heavy_check_mark:|-|-|:boom:|
+|**Our - C - S**|:ab:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|-|:heavy_check_mark:|:heavy_check_mark:|-|-|:heavy_check_mark:|
+|**Our - C - VA**|:ab:|:heavy_check_mark:|:heavy_check_mark:|-| -|:heavy_check_mark:|:heavy_check_mark:|-|-|:heavy_check_mark:|-|-|:heavy_check_mark:|
+|**Our - C - VL**|:ab:|:heavy_check_mark:|:heavy_check_mark:|-| -|:heavy_check_mark:|:heavy_check_mark:|-|-|:heavy_check_mark:|-|-|:heavy_check_mark:|
 
 
 ## Notes Performance
@@ -82,7 +82,13 @@ Evaluating different memory managers for dynamic GPU memory
 ## Notes Mixed
 
 ## Notes Fragmentation
-* Missing still for `Reg-Eff-CF`, `Reg-Eff-CM` and `Reg-Eff-CFM`
+* `Fragmentation`
+  * Missing still for `Reg-Eff-CF`, `Reg-Eff-CM` and `Reg-Eff-CFM`
+* `OOM`
+  * `Our - C - VA` and `Our - C - VL` become really slow after a few hundred iterations, probably not moving the front correctly.
+  * `Reg-Eff-A*` also align to 16 Bytes internally, hence they don't get to maximum in the beginning
+  * `Reg-Eff-C*` are painfully slow, hence typically are reigned in by the timeout
+    * Also get slower with every passing iteration
 
 ## Notes Dynamic Graph
 * Graph Stats captured :heavy_check_mark:

@@ -61,20 +61,20 @@ def main():
 			testcases["ScatterAlloc"] = sync_build_path + str("s_frag_test")
 		if any("o" in s for s in args.t):
 			testcases["Ouroboros-P-S"] = build_path + str("o_frag_test_p")
-			# testcases["Ouroboros-P-VA"] = build_path + str("o_frag_test_vap")
-			# testcases["Ouroboros-P-VL"] = build_path + str("o_frag_test_vlp")
-			# testcases["Ouroboros-C-S"] = build_path + str("o_frag_test_c")
-			# testcases["Ouroboros-C-VA"] = build_path + str("o_frag_test_vac")
-			# testcases["Ouroboros-C-VL"] = build_path + str("o_frag_test_vlc")
+			testcases["Ouroboros-P-VA"] = build_path + str("o_frag_test_vap")
+			testcases["Ouroboros-P-VL"] = build_path + str("o_frag_test_vlp")
+			testcases["Ouroboros-C-S"] = build_path + str("o_frag_test_c")
+			testcases["Ouroboros-C-VA"] = build_path + str("o_frag_test_vac")
+			testcases["Ouroboros-C-VL"] = build_path + str("o_frag_test_vlc")
 		if any("f" in s for s in args.t):
 			testcases["FDGMalloc"] = sync_build_path + str("f_frag_test")
 		if any("r" in s for s in args.t):
-			testcases["RegEff-A"] = sync_build_path + str("r_frag_test_a")
-			testcases["RegEff-AW"] = sync_build_path + str("r_frag_test_aw")
-			testcases["RegEff-C"] = sync_build_path + str("r_frag_test_c")
-			testcases["RegEff-CF"] = sync_build_path + str("r_frag_test_cf")
+			# testcases["RegEff-A"] = sync_build_path + str("r_frag_test_a")
+			# testcases["RegEff-AW"] = sync_build_path + str("r_frag_test_aw")
+			# testcases["RegEff-C"] = sync_build_path + str("r_frag_test_c")
+			# testcases["RegEff-CF"] = sync_build_path + str("r_frag_test_cf")
 			testcases["RegEff-CM"] = sync_build_path + str("r_frag_test_cm")
-			testcases["RegEff-CFM"] = sync_build_path + str("r_frag_test_cfm")
+			# testcases["RegEff-CFM"] = sync_build_path + str("r_frag_test_cfm")
 	
 	# Parse num allocation
 	if(args.num):
@@ -137,11 +137,11 @@ def main():
 				print("Running " + name + " with command -> " + executecommand)
 				print("#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#")
 				print(executecommand)
-				_, process_killed = Command(executecommand).run(timeout=time_out_val * num_iterations)
+				_, process_killed = Command(executecommand).run(timeout=time_out_val)
 				if process_killed :
 					print("We killed the process!")
 					with open(csv_path, "a", newline='') as csv_file:
-						csv_file.write("0,0,-------------------> Ran longer than " + str(time_out_val * num_iterations))
+						csv_file.write("-------------------> Ran longer than " + str(time_out_val))
 				else:
 					print("Success!")
 				allocation_size *= 2

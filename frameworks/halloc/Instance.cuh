@@ -7,7 +7,7 @@ struct MemoryManagerHalloc : public MemoryManagerBase
 {
 	explicit MemoryManagerHalloc(size_t instantiation_size) : MemoryManagerBase(instantiation_size)
 	{
-		ha_init(halloc_opts_t(size));
+		ha_init(halloc_opts_t(instantiation_size));
 	}
 
 	~MemoryManagerHalloc()
