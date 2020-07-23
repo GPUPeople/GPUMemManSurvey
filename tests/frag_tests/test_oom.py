@@ -24,7 +24,7 @@ def main():
 	num_allocations = 10000
 	smallest_allocation_size = 4
 	largest_allocation_size = 1024
-	alloc_size = 2048*1024*1024
+	alloc_size = 2
 	free_memory = 1
 	generate_results = True
 	generate_plots = True
@@ -61,9 +61,9 @@ def main():
 			testcases["ScatterAlloc"] = sync_build_path + str("s_frag_test")
 		if any("o" in s for s in args.t):
 			testcases["Ouroboros-P-S"] = build_path + str("o_frag_test_p")
-			testcases["Ouroboros-P-VA"] = build_path + str("o_frag_test_vap")
+			# testcases["Ouroboros-P-VA"] = build_path + str("o_frag_test_vap")
 			# testcases["Ouroboros-P-VL"] = build_path + str("o_frag_test_vlp")
-			testcases["Ouroboros-C-S"] = build_path + str("o_frag_test_c")
+			# testcases["Ouroboros-C-S"] = build_path + str("o_frag_test_c")
 			# testcases["Ouroboros-C-VA"] = build_path + str("o_frag_test_vac")
 			# testcases["Ouroboros-C-VL"] = build_path + str("o_frag_test_vlc")
 		if any("f" in s for s in args.t):
@@ -88,7 +88,7 @@ def main():
 	
 	# Parse num iterations
 	if(args.allocsize):
-		alloc_size = (int)(args.allocsize * 1024 * 1024 * 1024)
+		alloc_size = args.allocsize
 
 	# Run Testcases
 	run_testcases = args.runtest
@@ -128,8 +128,9 @@ def main():
 			while allocation_size <= largest_allocation_size:
 				with open(csv_path, "a", newline='') as csv_file:
 					csv_file.write("\n" + str(allocation_size))
-				num_iterations = alloc_size / (allocation_size * num_iterations)
-				print("Iterations: " + num_iterations)
+				size = alloc_size * 1024 * 1024 * 1024
+				num_iterations = size / (allocation_size * num_allocations)
+				print("Iterations: " + str(num_iterations))
 				run_config = str(num_allocations) + " " + str(allocation_size) + " " + str(num_iterations) + " 1 " + csv_path + " " + str(alloc_size)
 				executecommand = "{0} {1}".format(executable, run_config)
 				print("#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#")
@@ -143,7 +144,7 @@ def main():
 						csv_file.write("0,0,-------------------> Ran longer than " + str(time_out_val * num_iterations))
 				else:
 					print("Success!")
-				allocation_size += 4
+				allocation_size *= 2
 
 	####################################################################################################
 	####################################################################################################

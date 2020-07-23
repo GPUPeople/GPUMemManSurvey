@@ -211,7 +211,8 @@ int main(int argc, char* argv[])
 			d_testAllocation <decltype(memory_manager), false> <<<gridSize, blockSize>>>(memory_manager, d_memory, num_allocations, allocation_size_byte);
 			CHECK_ERROR(cudaDeviceSynchronize());
 			results_frag << "," << i;
-			std::cout << "Round " << i + 1 << " done" << std::endl;
+			results_frag.flush();
+			std::cout << "Round " << i + 1 << "/" << num_iterations << " done" << std::endl;
 		}
 		else
 		{

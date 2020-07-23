@@ -11,28 +11,28 @@ from Helper import plotMean
 import csv
 import argparse
 
-graphs = [
-	"144.mtx",  
-	"333SP.mtx",
-	"adaptive.mtx",
-	"caidaRouterLevel.mtx",
-	"coAuthorsCiteseer.mtx",
-	"delaunay_n20.mtx",
-	"europe_osm.mtx",
-	"fe_body.mtx",
-	"germany_osm.mtx",
-	"hugebubbles-00010.mtx",
-	"hugetric-00000.mtx",
-	"in2010.mtx",
-	"luxembourg_osm.mtx",
-	"rgg_n_2_20_s0.mtx",
-	"sc2010.mtx",
-	"vsp_mod2_pgp2_slptsk.mtx"
-]
-
 # graphs = [
-# 	"europe_osm.mtx"
+# 	"144.mtx",  
+# 	"333SP.mtx",
+# 	"adaptive.mtx",
+# 	"caidaRouterLevel.mtx",
+# 	"coAuthorsCiteseer.mtx",
+# 	"delaunay_n20.mtx",
+# 	"europe_osm.mtx",
+# 	"fe_body.mtx",
+# 	"germany_osm.mtx",
+# 	"hugebubbles-00010.mtx",
+# 	"hugetric-00000.mtx",
+# 	"in2010.mtx",
+# 	"luxembourg_osm.mtx",
+# 	"rgg_n_2_20_s0.mtx",
+# 	"sc2010.mtx",
+# 	"vsp_mod2_pgp2_slptsk.mtx"
 # ]
+
+graphs = [
+	"europe_osm.mtx"
+]
 
 path = "../../data/"
 
