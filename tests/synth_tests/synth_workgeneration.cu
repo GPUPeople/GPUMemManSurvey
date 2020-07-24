@@ -245,7 +245,9 @@ int main(int argc, char* argv[])
 
 		// Stop Measurement
 		timing.stopMeasurement();
+		std::cout << "#" << std::flush;
 	}
+	std::cout << std::endl;
 
 	auto result = timing.generateResult();
 	results << result.mean_ << "," << result.std_dev_ << "," << result.min_ << "," << result.max_ << "," << result.median_;

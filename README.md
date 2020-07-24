@@ -47,10 +47,10 @@ Evaluating different memory managers for dynamic GPU memory
 |**Halloc**|:a:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:question:|:heavy_check_mark:|:heavy_check_mark:|-|-|:heavy_check_mark:|
 |**Reg-Eff - A**|:a:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:| :heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|-|:heavy_check_mark:|:heavy_check_mark:|-|-|:heavy_check_mark:|
 |**Reg-Eff - AW**|:a:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:| :heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|-|:heavy_check_mark:|:heavy_check_mark:|-|-|:heavy_check_mark:|
-|**Reg-Eff - C**|:a:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:| :heavy_check_mark:|:boom:|:boom:|-|:heavy_check_mark:|:watch:|-|-|-|
-|**Reg-Eff - CF**|:a:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:| :watch:|:heavy_check_mark:|:heavy_check_mark:|-|:watch:|:watch:|-|-|-|
-|**Reg-Eff - CM**|:a:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:| :watch:|:heavy_check_mark:|:boom:|-|:watch:|:watch:|-|-|-|
-|**Reg-Eff - CFM**|:a:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:| :watch:|:heavy_check_mark:|:heavy_check_mark:|-|:watch:|:watch:|-|-|-|
+|**Reg-Eff - C**|:a:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:| :heavy_check_mark:|:boom:|:boom:|-|:heavy_check_mark:|:watch:|-|-|:boom:|
+|**Reg-Eff - CF**|:a:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:| :watch:|:heavy_check_mark:|:heavy_check_mark:|-|:watch:|:watch:|-|-|:heavy_check_mark:|
+|**Reg-Eff - CM**|:a:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:| :watch:|:heavy_check_mark:|:boom:|-|:watch:|:watch:|-|-|:heavy_check_mark:|
+|**Reg-Eff - CFM**|:a:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:| :watch:|:heavy_check_mark:|:heavy_check_mark:|-|:watch:|:watch:|-|-|:heavy_check_mark:|
 |**Oro - P - S**|:ab:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|-|:heavy_check_mark:|:heavy_check_mark:|-|-|:heavy_check_mark:|
 |**Oro - P - VA**|:ab:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|-|:heavy_check_mark:|:heavy_check_mark:|-|-|:heavy_check_mark:|
 |**Oro - P - VL**|:ab:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:boom:|:boom:|-|:heavy_check_mark:|:heavy_check_mark:|-|-|:boom:|
@@ -99,6 +99,7 @@ Evaluating different memory managers for dynamic GPU memory
 ## Notes Synthetic
 * `Workload`
   * `Oro - P - VL` fails after 1024
+  * `Reg-Eff-C` fails after `8192`
 * Could also test how write performance to that memory region is, not only the allocation speed
 
 
