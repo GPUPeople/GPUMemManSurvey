@@ -187,7 +187,6 @@ def main():
 		plotLine(result_oom, 
 			testcases,
 			plotscale,
-			False, 
 			'Bytes', 
 			'% of Maximum', 
 			"Perform " + str(num_allocations) + " allocations until out-of-memory is reported", 

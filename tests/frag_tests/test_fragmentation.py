@@ -7,7 +7,7 @@ import time
 from datetime import datetime
 from timedprocess import Command
 from Helper import generateResultsFromFileFragmentation
-from Helper import plotLine
+from Helper import plotLineRange
 import csv
 import argparse
 import numpy as np
@@ -65,8 +65,8 @@ def main():
 			testcases["Ouroboros-P-VA"] = build_path + str("o_frag_test_vap")
 			testcases["Ouroboros-P-VL"] = build_path + str("o_frag_test_vlp")
 			testcases["Ouroboros-C-S"] = build_path + str("o_frag_test_c")
-			# testcases["Ouroboros-C-VA"] = build_path + str("o_frag_test_vac")
-			# testcases["Ouroboros-C-VL"] = build_path + str("o_frag_test_vlc")
+			testcases["Ouroboros-C-VA"] = build_path + str("o_frag_test_vac")
+			testcases["Ouroboros-C-VL"] = build_path + str("o_frag_test_vlc")
 		if any("f" in s for s in args.t):
 			testcases["FDGMalloc"] = sync_build_path + str("f_frag_test")
 		if any("r" in s for s in args.t):
@@ -181,13 +181,12 @@ def main():
 				continue
 			# We want the one matching our input
 			with open(filename) as f:
-				reader = csv.reader(f)
-				result_frag = list(reader)
+				result_frag = list(csv.reader(f))
 
 		####################################################################################################
 		# Lineplot
 		####################################################################################################
-		plotLine(result_frag, 
+		plotLineRange(result_frag, 
 			testcases,
 			plotscale,
 			False, 
@@ -199,7 +198,7 @@ def main():
 		####################################################################################################
 		# Lineplot with range
 		####################################################################################################
-		plotLine(result_frag, 
+		plotLineRange(result_frag, 
 			testcases,
 			plotscale,
 			True, 

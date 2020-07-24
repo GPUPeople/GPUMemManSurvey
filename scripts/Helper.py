@@ -241,7 +241,7 @@ def generateResultsFromFileFragmentation(folderpath, param1, param2, param3, dim
 		print("Processing -> " + str(filename))
 		approach_name = filename.split('_')[approach_pos]
 		with open(filename, newline='') as csv_file:
-			dataframe = pandas.read_csv(csv_file)
+			csvreader = list(csv.reader(csv_file, delimiter=',', quotechar='|'))
 			if not written_header_frag:
 				actual_size = [i for i in range(param2, param3 + 4, 4)]
 				result_frag.append(list(actual_size))
@@ -250,12 +250,13 @@ def generateResultsFromFileFragmentation(folderpath, param1, param2, param3, dim
 				result_frag.append(list(actual_size))
 				result_frag[-1].insert(0, "ActualSize - range")
 				result_frag.append(list(actual_size))
-				result_frag[-1].insert(0, "ActualSize - static range after " + str(iter) + " iterations")
+				result_frag[-1].insert(0, "ActualSize - static range")
 				written_header_frag = True
-			result_frag.append(list(dataframe.iloc[:, 1]))
+			csvreader = csvreader[1:]
+			result_frag.append([row[1] for row in csvreader])
 			result_frag[-1].insert(0, approach_name + " - range")
-			result_frag.append(list(dataframe.iloc[:, iter * 2 - 1]))
-			result_frag[-1].insert(0, approach_name + " - static range after " + str(iter) + " iterations")
+			result_frag.append([row[-1] for row in csvreader])
+			result_frag[-1].insert(0, approach_name + " - static range")
 
 	# Get Timestring
 	now = datetime.now()
@@ -271,8 +272,8 @@ def generateResultsFromFileFragmentation(folderpath, param1, param2, param3, dim
 			writer.writerow(row)
 	print("####################")
 
-# lineplot
-def plotLine(results, testcases, plotscale, plotrange, xlabel, ylabel, title, filename, xscale="linear"):
+# Lineplot
+def plotLine(results, testcases, plotscale, xlabel, ylabel, title, filename, xscale="linear"):
 	plt.figure(figsize=(lineplot_width, lineplot_height))
 	x_values = np.asarray([float(i) for i in results[0][1:]])
 	results = results[1:]
@@ -285,12 +286,36 @@ def plotLine(results, testcases, plotscale, plotrange, xlabel, ylabel, title, fi
 			continue
 		print("Generate plot for " + labelname)
 		plt.plot(x_values, y_values, marker='', color=colours[labelname], linewidth=1, label=labelname, linestyle=linestyles[labelname])
+	if plotscale == "log":
+		plt.yscale("log")
+	plt.xscale(xscale, base=2)
+	plt.ylabel(ylabel)
+	plt.xlabel(xlabel)
+	plt.title(title)
+	plt.legend()
+	plt.savefig(filename, dpi=600)
+
+	# Clear Figure
+	plt.clf()
+
+# Lineplot with range
+def plotLineRange(results, testcases, plotscale, plotrange, xlabel, ylabel, title, filename):
+	plt.figure(figsize=(lineplot_width, lineplot_height))
+	x_values = np.asarray([float(i) for i in results[0][1:]])
+	results = results[1:]
+	results.sort(key=lambda x: x[0])
+	for i in range(0, len(results), 2):
+		y_values = np.asarray([float(i) for i in results[i][1:]])
+		labelname = results[i][0].split(" ")[0]
+		if labelname not in testcases and labelname != "ActualSize":
+			continue
+		print("Generate plot for " + labelname)
+		plt.plot(x_values, y_values, marker='', color=colours[labelname], linewidth=1, label=labelname, linestyle=linestyles[labelname])
 		if plotrange:
 			y_max = np.asarray([float(i) for i in results[i+1][1:]])
 			plt.fill_between(x_values, y_values, y_max, alpha=0.5, edgecolor=colours[labelname], facecolor=colours[labelname])
 	if plotscale == "log":
 		plt.yscale("log")
-	plt.xscale(xscale, base=2)
 	plt.ylabel(ylabel)
 	plt.xlabel(xlabel)
 	plt.title(title)
@@ -463,7 +488,6 @@ def generateResultsFromFileRegisters(folderpath, dimension_name, approach_pos):
 		for row in result_init:
 			writer.writerow(row)
 	print("####################")
-
 
 def plotRegisters(results, testcases, plotscale, xlabel, ylabel, title, filename, grouping):
 	plt.figure(figsize=(barplot_width, barplot_height))
