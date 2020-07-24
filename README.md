@@ -23,7 +23,7 @@ Evaluating different memory managers for dynamic GPU memory
 | Halloc (2014)				    |  :heavy_check_mark: 	| [Presentation](http://on-demand.gputechconf.com/gtc/2014/presentations/S4271-halloc-high-throughput-dynamic-memory-allocator.pdf) | [GitHub - Repository](https://github.com/canonizer/halloc) |
 | DynaSOAr (2019)               |   Not usable   | [Webpage](https://drops.dagstuhl.de/opus/volltexte/2019/10809/pdf/LIPIcs-ECOOP-2019-17.pdf) | [GitHub - Repository](https://github.com/prg-titech/dynasoar)|
 | Bulk-Sempaphore (2019)		| 	:watch: 	| [Webpage](https://research.nvidia.com/publication/2019-02_Throughput-oriented-GPU-memory) | - |
-| Ouroboros (2020)			    | :heavy_check_mark:	| [Paper](https://dl.acm.org/doi/pdf/10.1145/3392717.3392742) | [GitHub - Repository](https://github.com/GPUPeople/Ouroboros) |
+| Orooboros (2020)			    | :heavy_check_mark:	| [Paper](https://dl.acm.org/doi/pdf/10.1145/3392717.3392742) | [GitHub - Repository](https://github.com/GPUPeople/Orooboros) |
 
 # Notes to individual approaches
 ## FDGMalloc
@@ -51,16 +51,19 @@ Evaluating different memory managers for dynamic GPU memory
 |**Reg-Eff - CF**|:a:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:| :watch:|:heavy_check_mark:|:heavy_check_mark:|-|:watch:|:watch:|-|-|-|
 |**Reg-Eff - CM**|:a:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:| :watch:|:heavy_check_mark:|:boom:|-|:watch:|:watch:|-|-|-|
 |**Reg-Eff - CFM**|:a:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:| :watch:|:heavy_check_mark:|:heavy_check_mark:|-|:watch:|:watch:|-|-|-|
-|**Our - P - S**|:ab:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|-|:heavy_check_mark:|:heavy_check_mark:|-|-|:heavy_check_mark:|
-|**Our - P - VA**|:ab:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|-|:heavy_check_mark:|:heavy_check_mark:|-|-|:heavy_check_mark:|
-|**Our - P - VL**|:ab:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:boom:|:boom:|-|:heavy_check_mark:|:heavy_check_mark:|-|-|:boom:|
-|**Our - C - S**|:ab:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|-|:heavy_check_mark:|:heavy_check_mark:|-|-|:heavy_check_mark:|
-|**Our - C - VA**|:ab:|:heavy_check_mark:|:heavy_check_mark:|-| -|:heavy_check_mark:|:heavy_check_mark:|-|-|:heavy_check_mark:|-|-|:heavy_check_mark:|
-|**Our - C - VL**|:ab:|:heavy_check_mark:|:heavy_check_mark:|-| -|:heavy_check_mark:|:heavy_check_mark:|-|-|:heavy_check_mark:|-|-|:heavy_check_mark:|
+|**Oro - P - S**|:ab:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|-|:heavy_check_mark:|:heavy_check_mark:|-|-|:heavy_check_mark:|
+|**Oro - P - VA**|:ab:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|-|:heavy_check_mark:|:heavy_check_mark:|-|-|:heavy_check_mark:|
+|**Oro - P - VL**|:ab:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:boom:|:boom:|-|:heavy_check_mark:|:heavy_check_mark:|-|-|:boom:|
+|**Oro - C - S**|:ab:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|-|:heavy_check_mark:|:heavy_check_mark:|-|-|:heavy_check_mark:|
+|**Oro - C - VA**|:ab:|:heavy_check_mark:|:heavy_check_mark:|:boom:| -|:heavy_check_mark:|:heavy_check_mark:|-|-|:heavy_check_mark:|-|-|:heavy_check_mark:|
+|**Oro - C - VL**|:ab:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:| -|:heavy_check_mark:|:heavy_check_mark:|-|-|:heavy_check_mark:|-|-|:heavy_check_mark:|
 
 
 ## Notes Performance
 * `Performance`
+  * `10.000`
+    * `Oro - C - VA` fail with increasing likelihood for the larger allocation sizes
+    * `Oro - C - VL` seems to work, but is quite slow
   * `100.000`
     * Reg-Eff-CF failed at `8192`
     * Reg-Eff-CFM fails a few times after `7376`
@@ -69,13 +72,13 @@ Evaluating different memory managers for dynamic GPU memory
 * `Mixed Performance`
   * `10.000`
     * `Reg-Eff-C` fails in between for sizes `32,64,256`
-    * `Our - P - VL` fails after `32`
+    * `Oro - P - VL` fails after `32`
   * `100.000`
     * `Reg-Eff-C` fails after `16`
     * `Reg-Eff-CM` fails after `1024`
     * `Reg-Eff-CFM` fails after `4096`
-    * `Our - C - VA` fails after `2048` -> got manual results with less iterations
-    * `Our - P - VL` fails after `32`
+    * `Oro - C - VA` fails after `2048` -> got manual results with less iterations
+    * `Oro - P - VL` fails after `32`
 
 ## Notes Scaling
 
@@ -85,7 +88,7 @@ Evaluating different memory managers for dynamic GPU memory
 * `Fragmentation`
   * Missing still for `Reg-Eff-CF`, `Reg-Eff-CM` and `Reg-Eff-CFM`
 * `OOM`
-  * `Our - C - VA` and `Our - C - VL` become really slow after a few hundred iterations, probably not moving the front correctly.
+  * `Oro - C - VA` and `Oro - C - VL` become really slow after a few hundred iterations, probably not moving the front correctly.
   * `Reg-Eff-A*` also align to 16 Bytes internally, hence they don't get to maximum in the beginning
   * `Reg-Eff-C*` are painfully slow, hence typically are reigned in by the timeout
     * Also get slower with every passing iteration
@@ -95,7 +98,7 @@ Evaluating different memory managers for dynamic GPU memory
 
 ## Notes Synthetic
 * `Workload`
-  * `Our - P - VL` fails after 1024
+  * `Oro - P - VL` fails after 1024
 * Could also test how write performance to that memory region is, not only the allocation speed
 
 
