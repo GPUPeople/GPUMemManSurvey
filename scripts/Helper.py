@@ -9,6 +9,7 @@ import math
 
 colours = {
 	'ActualSize' : 'black',
+	'BaseLine' : 'black',
 	'Halloc' : 'orange' , 
     'XMalloc' : 'silver',
 	'Ouroboros-P-VA' : 'lightcoral' , 'Ouroboros-P-VL' : 'darkred' , 'Ouroboros-P-S' : 'red' ,
@@ -22,6 +23,7 @@ colours = {
 
 linestyles = {
 	'ActualSize' : 'solid',
+	'BaseLine' : 'solid',
 	'Halloc' : 'solid' , 
     'XMalloc' : 'solid',
 	'Ouroboros-P-VA' : 'dotted' , 'Ouroboros-P-VL' : 'dashed' , 'Ouroboros-P-S' : 'solid' ,
@@ -234,7 +236,7 @@ def generateResultsFromFileFragmentation(folderpath, param1, param2, param3, dim
 		filename = folderpath + str("/") + os.fsdecode(file)
 		if(os.path.isdir(filename)):
 			continue
-		if str(param1) != filename.split('_')[approach_pos+1] or str(param2) + "-" + str(param3) != filename.split('_')[approach_pos+2].split(".")[0]:
+		if str("frag") != filename.split('_')[0].split('/')[1] or str(param1) != filename.split('_')[approach_pos+1] or str(param2) + "-" + str(param3) != filename.split('_')[approach_pos+2].split(".")[0]:
 			continue
 		print("Processing -> " + str(filename))
 		approach_name = filename.split('_')[approach_pos]
@@ -269,11 +271,13 @@ def generateResultsFromFileFragmentation(folderpath, param1, param2, param3, dim
 			writer.writerow(row)
 	print("####################")
 
-# Plot mean as a line plot with std-dev
-def plotFrag(results, testcases, plotscale, plotrange, xlabel, ylabel, title, filename):
+# lineplot
+def plotLine(results, testcases, plotscale, plotrange, xlabel, ylabel, title, filename, xscale="linear"):
 	plt.figure(figsize=(lineplot_width, lineplot_height))
 	x_values = np.asarray([float(i) for i in results[0][1:]])
-	for i in range(1, len(results)):
+	results = results[1:]
+	results.sort(key=lambda x: x[0])
+	for i in range(0, len(results)):
 		y_values = np.asarray([float(i) for i in results[i][1:]])
 		labelname = results[i][0].split(" ")[0]
 		print(labelname)
@@ -286,6 +290,7 @@ def plotFrag(results, testcases, plotscale, plotrange, xlabel, ylabel, title, fi
 			plt.fill_between(x_values, y_values, y_max, alpha=0.5, edgecolor=colours[labelname], facecolor=colours[labelname])
 	if plotscale == "log":
 		plt.yscale("log")
+	plt.xscale(xscale, base=2)
 	plt.ylabel(ylabel)
 	plt.xlabel(xlabel)
 	plt.title(title)
@@ -295,34 +300,49 @@ def plotFrag(results, testcases, plotscale, plotrange, xlabel, ylabel, title, fi
 	# Clear Figure
 	plt.clf()
 
-def generateResultsFromFileOOM(folderpath, param1, param2, param3, dimension_name, approach_pos, alloc_size):
+def generateResultsFromFileOOM(folderpath, testcases, param1, param2, param3, dimension_name, approach_pos, alloc_size):
 	print("Generate Results for identifier " + str(param1) + "_" + str(param2) + "-" + str(param3))
 	# Gather results
 	result_oom = list(list())
+	percent = 100
+
+	max_rounds = []
+	num = param2
+	while num <= param3:
+		max_rounds.append(int(alloc_size / (param1 * num)))
+		num *= 2
 
 	# Go over files, read data and generate new
-	written_header_frag = False
+	written_header = False
 	for file in os.listdir(folderpath):
 		filename = folderpath + str("/") + os.fsdecode(file)
 		if(os.path.isdir(filename)):
 			continue
-		if str(param1) != filename.split('_')[approach_pos+1] or str(param2) + "-" + str(param3) != filename.split('_')[approach_pos+2].split(".")[0]:
+		if str("oom") != filename.split('_')[0].split('/')[1] or str(param1) != filename.split('_')[approach_pos+1] or str(param2) + "-" + str(param3) != filename.split('_')[approach_pos+2].split(".")[0]:
+			continue
+		approach_name = filename.split('_')[approach_pos]
+		if approach_name not in testcases:
 			continue
 		print("Processing -> " + str(filename))
-		approach_name = filename.split('_')[approach_pos]
 		with open(filename, newline='') as csv_file:
 			csvreader = csv.reader(csv_file, delimiter=',', quotechar='|')
-			if not written_header_frag:
-				actual_size = [i for i in range(param2, param3 + 4, 4)]
-				result_oom.append(list(actual_size))
+			if not written_header:
+				header = []
+				best_case = []
+				num = param2
+				while num <= param3:
+					header.append(num)
+					best_case.append(percent)
+					num *= 2
+				result_oom.append(list(header))
 				result_oom[-1].insert(0, dimension_name)
-				actual_size = [(int)(alloc_size / (i * param1)) for i in range(param2, param3 + 4, 4)]
-				result_oom.append(list(actual_size))
-				result_oom[-1].insert(0, "ActualSize")
-				written_header_frag = True
-			approach_rounds = [len(row) for row in csvreader]
+				result_oom.append(list(best_case))
+				result_oom[-1].insert(0, "BaseLine")
+				written_header = True
+			approach_rounds = [len(row)-1 for row in csvreader]
 			approach_rounds = approach_rounds[1:]
-			result_oom.append(list(approach_rounds))
+			result = [(b / a)*percent for a,b in zip(max_rounds, approach_rounds)]
+			result_oom.append(list(result))
 			result_oom[-1].insert(0, approach_name)
 
 	# Get Timestring

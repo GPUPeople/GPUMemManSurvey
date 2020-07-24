@@ -6,9 +6,8 @@ import shutil
 import time
 from datetime import datetime
 from timedprocess import Command
-from Helper import generateResultsFromFileFragmentation
 from Helper import generateResultsFromFileOOM
-from Helper import plotFrag
+from Helper import plotLine
 import csv
 import argparse
 import numpy as np
@@ -50,6 +49,7 @@ def main():
 	args = parser.parse_args()
 
 	# Parse approaches
+	testcases["BaseLine"] = str("xx")
 	if(args.t):
 		if any("c" in s for s in args.t):
 			testcases["CUDA"] = build_path + str("c_frag_test")
@@ -152,7 +152,7 @@ def main():
 	####################################################################################################
 	####################################################################################################
 	if generate_results:
-		generateResultsFromFileOOM("results", num_allocations, smallest_allocation_size, largest_allocation_size, "Bytes", 1, alloc_size)
+		generateResultsFromFileOOM("results", testcases, num_allocations, smallest_allocation_size, largest_allocation_size, "Bytes", 1, alloc_size * 1024 * 1024 * 1024)
 
 	####################################################################################################
 	####################################################################################################
@@ -184,14 +184,15 @@ def main():
 		####################################################################################################
 		# Lineplot
 		####################################################################################################
-		plotFrag(result_oom, 
+		plotLine(result_oom, 
 			testcases,
 			plotscale,
 			False, 
 			'Bytes', 
-			'Number of Rounds', 
-			"Out-Of-Memory: Number of rounds before OOM", 
-			str("results/plots/") + time_string + "_oom." + filetype)
+			'% of Maximum', 
+			"Perform " + str(num_allocations) + " allocations until out-of-memory is reported", 
+			str("results/plots/") + time_string + "_oom." + filetype,
+			"log")
 
 
 	print("Done")

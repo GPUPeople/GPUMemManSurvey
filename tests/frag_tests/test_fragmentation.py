@@ -6,10 +6,8 @@ import shutil
 import time
 from datetime import datetime
 from timedprocess import Command
-from Helper import generateResultsFromFileAllocation
 from Helper import generateResultsFromFileFragmentation
-from Helper import plotMean
-from Helper import plotFrag
+from Helper import plotLine
 import csv
 import argparse
 import numpy as np
@@ -189,7 +187,7 @@ def main():
 		####################################################################################################
 		# Lineplot
 		####################################################################################################
-		plotFrag(result_frag, 
+		plotLine(result_frag, 
 			testcases,
 			plotscale,
 			False, 
@@ -201,7 +199,7 @@ def main():
 		####################################################################################################
 		# Lineplot with range
 		####################################################################################################
-		plotFrag(result_frag, 
+		plotLine(result_frag, 
 			testcases,
 			plotscale,
 			True, 
