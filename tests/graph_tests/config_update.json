@@ -1,0 +1,11 @@
+{
+  "device" : 0,
+  "iterations" : 1,
+  "update_iterations" : 50,
+  "batch_size" : 100000,
+  "range" : 0,
+  "test_init" : false,
+  "verify" : false,
+  "realistic_deletion": false,
+  "manageable_memory_mb" : 8192
+}

@@ -271,6 +271,8 @@ void testrun(CSR<DataType>& input_graph, const json& config, const std::string& 
 
 		for(auto update_round = 0; update_round < update_iterations && !test_init; ++update_round, offset += range)
 		{
+			if(printDebugMessages)
+				std::cout << "Update-Round: " << update_round + 1 << " / " << update_iterations << std::endl;
 			EdgeUpdateBatch<VertexData, EdgeData> insertion_updates(dynamic_graph.number_vertices);
 			insertion_updates.generateEdgeUpdates(dynamic_graph.number_vertices, batch_size, (round * update_iterations) + update_round, range, offset);
 			dynamic_graph.edgeInsertion(insertion_updates);
