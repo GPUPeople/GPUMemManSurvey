@@ -49,7 +49,6 @@ def main():
 	args = parser.parse_args()
 
 	# Parse approaches
-	testcases["BaseLine"] = str("xx")
 	if(args.t):
 		if any("c" in s for s in args.t):
 			testcases["CUDA"] = build_path + str("c_frag_test")
@@ -75,6 +74,8 @@ def main():
 			# testcases["RegEff-CF"] = sync_build_path + str("r_frag_test_cf")
 			testcases["RegEff-CM"] = sync_build_path + str("r_frag_test_cm")
 			# testcases["RegEff-CFM"] = sync_build_path + str("r_frag_test_cfm")
+		if any("b" in s for s in args.t):
+			testcases["BaseLine"] = str("xx")
 	
 	# Parse num allocation
 	if(args.num):
