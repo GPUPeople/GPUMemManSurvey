@@ -153,7 +153,8 @@ int main(int argc, char* argv[])
     const auto device{config.find("device").value().get<int>()};
 	cudaSetDevice(device);
 	cudaDeviceProp prop;
-    cudaGetDeviceProperties(&prop, device);
+	cudaGetDeviceProperties(&prop, device);
+	std::cout << "Going to use " << prop.name << " " << prop.major << "." << prop.minor << "\n";
 
 	std::string filename = graph_file;
 	CSR<DataType> csr_mat;

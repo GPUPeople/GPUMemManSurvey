@@ -18,10 +18,7 @@ graphs = [
 	"caidaRouterLevel.mtx",
 	"coAuthorsCiteseer.mtx",
 	"delaunay_n20.mtx",
-	"europe_osm.mtx",
 	"fe_body.mtx",
-	"germany_osm.mtx",
-	"hugebubbles-00010.mtx",
 	"hugetric-00000.mtx",
 	"in2010.mtx",
 	"luxembourg_osm.mtx",
@@ -34,7 +31,7 @@ graphs = [
 # 	"luxembourg_osm.mtx"
 # ]
 
-path = "../../data/"
+path = "../../../graphs/"
 
 def main():
 	# Run all files from a directory
@@ -75,10 +72,10 @@ def main():
 		if any("s" in s for s in args.t):
 			testcases["ScatterAlloc"] = sync_build_path + str("s_graph_test")
 		if any("o" in s for s in args.t):
-			testcases["Ouroboros-P-S"] = build_path + str("o_graph_test_p")
+			# testcases["Ouroboros-P-S"] = build_path + str("o_graph_test_p")
 			# testcases["Ouroboros-P-VA"] = build_path + str("o_graph_test_vap")
 			# testcases["Ouroboros-P-VL"] = build_path + str("o_graph_test_vlp")
-			# testcases["Ouroboros-C-S"] = build_path + str("o_graph_test_c")
+			testcases["Ouroboros-C-S"] = build_path + str("o_graph_test_c")
 			# testcases["Ouroboros-C-VA"] = build_path + str("o_graph_test_vac")
 			# testcases["Ouroboros-C-VL"] = build_path + str("o_graph_test_vlc")
 		if any("f" in s for s in args.t):
