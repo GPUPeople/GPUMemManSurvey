@@ -56,21 +56,21 @@ def main():
 		if any("s" in s for s in args.t):
 			testcases["ScatterAlloc"] = sync_build_path + str("s_alloc_test")
 		if any("o" in s for s in args.t):
-			# testcases["Ouroboros-P-S"] = build_path + str("o_alloc_test_p")
-			# testcases["Ouroboros-P-VA"] = build_path + str("o_alloc_test_vap")
-			# testcases["Ouroboros-P-VL"] = build_path + str("o_alloc_test_vlp")
-			# testcases["Ouroboros-C-S"] = build_path + str("o_alloc_test_c")
+			testcases["Ouroboros-P-S"] = build_path + str("o_alloc_test_p")
+			testcases["Ouroboros-P-VA"] = build_path + str("o_alloc_test_vap")
+			testcases["Ouroboros-P-VL"] = build_path + str("o_alloc_test_vlp")
+			testcases["Ouroboros-C-S"] = build_path + str("o_alloc_test_c")
 			# testcases["Ouroboros-C-VA"] = build_path + str("o_alloc_test_vac")
 			testcases["Ouroboros-C-VL"] = build_path + str("o_alloc_test_vlc")
 		if any("f" in s for s in args.t):
 			testcases["FDGMalloc"] = sync_build_path + str("f_alloc_test")
 		if any("r" in s for s in args.t):
-			# testcases["RegEff-A"] = sync_build_path + str("r_alloc_test_a")
-			# testcases["RegEff-AW"] = sync_build_path + str("r_alloc_test_aw")
+			testcases["RegEff-A"] = sync_build_path + str("r_alloc_test_a")
+			testcases["RegEff-AW"] = sync_build_path + str("r_alloc_test_aw")
 			# testcases["RegEff-C"] = sync_build_path + str("r_alloc_test_c")
 			# testcases["RegEff-CF"] = sync_build_path + str("r_alloc_test_cf")
-			testcases["RegEff-CM"] = sync_build_path + str("r_alloc_test_cm")
-			testcases["RegEff-CFM"] = sync_build_path + str("r_alloc_test_cfm")
+			# testcases["RegEff-CM"] = sync_build_path + str("r_alloc_test_cm")
+			# testcases["RegEff-CFM"] = sync_build_path + str("r_alloc_test_cfm")
 	
 	# Parse num allocation
 	if(args.num):
@@ -172,7 +172,7 @@ def main():
 	####################################################################################################
 	####################################################################################################
 	if generate_results:
-		generateResultsFromFileAllocation("results/performance", num_allocations, smallest_allocation_size, largest_allocation_size, "Bytes", "perf", 2)
+		generateResultsFromFileAllocation(testcases, "results/performance", num_allocations, smallest_allocation_size, largest_allocation_size, "Bytes", "perf", 2)
 	
 	####################################################################################################
 	####################################################################################################
@@ -217,6 +217,7 @@ def main():
 			"Allocation performance for " + str(num_allocations) + " allocations (mean)", 
 			str("results/plots/performance/") + time_string + "_alloc." + filetype,
 			"stddev")
+		print("---------------------------------------")
 		plotMean(result_alloc, 
 			testcases,
 			plotscale,
@@ -226,7 +227,7 @@ def main():
 			"Allocation performance for " + str(num_allocations) + " allocations (mean + std-dev)", 
 			str("results/plots/performance/") + time_string + "_alloc_stddev." + filetype,
 			"stddev")
-
+		print("---------------------------------------")
 		####################################################################################################
 		# Free - Mean - Std-dev
 		####################################################################################################
@@ -239,6 +240,7 @@ def main():
 			"Free performance for " + str(num_allocations) + " allocations (mean)", 
 			str("results/plots/performance/") + time_string + "_free." + filetype,
 			"stddev")
+		print("---------------------------------------")
 		plotMean(result_free, 
 			testcases,
 			plotscale,
@@ -248,7 +250,7 @@ def main():
 			"Free performance for " + str(num_allocations) + " allocations (mean + std-dev)", 
 			str("results/plots/performance/") + time_string + "_free_stddev." + filetype,
 			"stddev")
-
+		print("---------------------------------------")
 		####################################################################################################
 		# Alloc - Mean - Min/Max
 		####################################################################################################
@@ -261,7 +263,7 @@ def main():
 			"Allocation performance for " + str(num_allocations) + " allocations (mean + min/max)", 
 			str("results/plots/performance/") + time_string + "_alloc_min_max." + filetype,
 			"minmax")
-
+		print("---------------------------------------")
 		####################################################################################################
 		# Free - Mean - Min/Max
 		####################################################################################################
@@ -274,7 +276,7 @@ def main():
 			"Free performance for " + str(num_allocations) + " allocations (mean + min/max)", 
 			str("results/plots/performance/") + time_string + "_free_min_max." + filetype,
 			"minmax")
-
+		print("---------------------------------------")
 		####################################################################################################
 		# Alloc - Median
 		####################################################################################################
@@ -287,7 +289,7 @@ def main():
 			"Allocation performance for " + str(num_allocations) + " allocations (median)", 
 			str("results/plots/performance/") + time_string + "_alloc_median." + filetype,
 			"median")
-
+		print("---------------------------------------")
 		####################################################################################################
 		# Free - Median
 		####################################################################################################
@@ -300,6 +302,7 @@ def main():
 			"Free performance for " + str(num_allocations) + " allocations (median)", 
 			str("results/plots/performance/") + time_string + "_free_median." + filetype,
 			"median")
+		print("---------------------------------------")
 
 	####################################################################################################
 	####################################################################################################

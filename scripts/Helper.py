@@ -45,7 +45,7 @@ barplot_height = 10
 # Generate new Results
 ####################################################################################################
 ####################################################################################################
-def generateResultsFromFileAllocation(folderpath, param1, param2, param3, dimension_name, output_name_short, approach_pos):
+def generateResultsFromFileAllocation(testcases, folderpath, param1, param2, param3, dimension_name, output_name_short, approach_pos):
 	print("Generate Results for identifier " + str(param1) + "_" + str(param2) + "-" + str(param3))
 	# Gather results
 	result_alloc = list(list())
@@ -60,8 +60,10 @@ def generateResultsFromFileAllocation(folderpath, param1, param2, param3, dimens
 			continue
 		if str(param1) != filename.split('_')[approach_pos+1] or str(param2) + "-" + str(param3) != filename.split('_')[approach_pos+2].split(".")[0]:
 			continue
-		print("Processing -> " + str(filename))
 		approach_name = filename.split('_')[approach_pos]
+		if approach_name not in testcases:
+			continue
+		print("Processing -> " + str(filename))
 		with open(filename, newline='') as csv_file:
 			dataframe = pandas.read_csv(csv_file)
 			if "free" in filename:
@@ -125,28 +127,41 @@ median_offset = 4
 def plotMean(results, testcases, plotscale, plotrange, xlabel, ylabel, title, filename, variant):
 	plt.figure(figsize=(lineplot_width, lineplot_height))
 	x_values = np.asarray([float(i) for i in results[0][1:]])
+	y_values = dict()
+	y_min = dict()
+	y_max = dict()
+	y_stddev = dict()
 	for i in range(1, len(results), 5):
-		y_values = None
-		if variant == "median":
-			y_values = np.asarray([float(i) for i in results[i+median_offset][1:]])
-		else:
-			y_values = np.asarray([float(i) for i in results[i][1:]])
-		y_min = None
-		y_max = None
-		if variant == "stddev":
-			y_stddev = np.asarray([float(i) for i in results[i+std_dev_offset][1:]])
-			y_min = y_values-y_stddev
-			y_max = y_values+y_stddev
-		else:
-			y_min = np.asarray([float(i) for i in results[i+min_offset][1:]])
-			y_max = np.asarray([float(i) for i in results[i+max_offset][1:]])
 		labelname = results[i][0].split(" ")[0]
 		if labelname not in testcases:
 			continue
-		print("Generate plot for " + labelname + " with " + variant)
-		plt.plot(x_values, y_values, marker='', color=colours[labelname], linewidth=1, label=labelname, linestyle=linestyles[labelname])
-		if plotrange:
-			plt.fill_between(x_values, y_min, y_max, alpha=0.5, edgecolor=colours[labelname], facecolor=colours[labelname])
+		print("Generate plot for " + results[i][0] + " with " + variant)
+		y = None
+		if variant == "median":
+			y = np.asarray([float(i) for i in results[i+median_offset][1:]])
+			y_values[labelname] = y
+		else:
+			y = np.asarray([float(i) for i in results[i][1:]])
+			y_values[labelname] = y
+		if variant == "stddev":
+			y_stddev = np.asarray([float(i) for i in results[i+std_dev_offset][1:]])
+			y_min[labelname] = y - y_stddev
+			y_max[labelname] = y + y_stddev
+		else:
+			y_min[labelname] = np.asarray([float(i) for i in results[i+min_offset][1:]])
+			y_max[labelname] = np.asarray([float(i) for i in results[i+max_offset][1:]])
+
+	y_values = sorted(y_values.items())
+	y_min = sorted(y_min.items())
+	y_max = sorted(y_max.items())
+
+	for key, value in y_values:
+		plt.plot(x_values, value, marker='', color=colours[key], linewidth=1, label=key, linestyle=linestyles[key])
+	if plotrange:
+		for key, value in y_values:
+			min_values = y_min[key]
+			max_values = y_max[key]
+			plt.fill_between(x_values, min_values, max_values, alpha=0.5, edgecolor=colours[key], facecolor=colours[key])
 	if plotscale == "log":
 		plt.yscale("log")
 	plt.ylabel(ylabel)
