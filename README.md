@@ -11,8 +11,6 @@ Evaluating different memory managers for dynamic GPU memory
 * `make`
 * Similar procedure for all tests, just navigate to, e.g. `tests/alloc_tests` and create build folder the same as before
 
-# Work in Progress!
-
 | Framework | Status | Link to Paper | Code |
 |:---:|:---:|:---:| :---:|
 | CUDA Device Allocator | :heavy_check_mark: 	| - | - |
@@ -51,10 +49,10 @@ Evaluating different memory managers for dynamic GPU memory
 |**Reg-Eff - CF**|:a:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:| :heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|-|:watch:|:watch:|-|-|:heavy_check_mark:|
 |**Reg-Eff - CM**|:a:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:| :heavy_check_mark:|:heavy_check_mark:|:boom:|-|:watch:|:watch:|-|-|:heavy_check_mark:|
 |**Reg-Eff - CFM**|:a:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:| :heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|-|:watch:|:watch:|-|-|:heavy_check_mark:|
-|**Oro - P - S**|:ab:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|-|:heavy_check_mark:|:heavy_check_mark:|-|-|:heavy_check_mark:|
-|**Oro - P - VA**|:ab:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|-|:heavy_check_mark:|:heavy_check_mark:|-|-|:heavy_check_mark:|
-|**Oro - P - VL**|:ab:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:boom:|:boom:|-|:heavy_check_mark:|:heavy_check_mark:|-|-|:boom:|
-|**Oro - C - S**|:ab:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|-|:heavy_check_mark:|:heavy_check_mark:|-|-|:heavy_check_mark:|
+|**Oro - P - S**|:ab:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|-|-|:heavy_check_mark:|
+|**Oro - P - VA**|:ab:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|-|-|:heavy_check_mark:|
+|**Oro - P - VL**|:ab:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:boom:|:boom:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|-|-|:boom:|
+|**Oro - C - S**|:ab:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|-|-|:heavy_check_mark:|
 |**Oro - C - VA**|:ab:|:heavy_check_mark:|:heavy_check_mark:|:boom:| -|:heavy_check_mark:|:heavy_check_mark:|-|:heavy_check_mark:|:heavy_check_mark:|-|-|:heavy_check_mark:|
 |**Oro - C - VL**|:ab:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:| -|:heavy_check_mark:|:heavy_check_mark:|-|:heavy_check_mark:|:heavy_check_mark:|-|-|:heavy_check_mark:|
 
@@ -81,6 +79,7 @@ Evaluating different memory managers for dynamic GPU memory
     * `Oro - P - VL` fails after `32`
 
 ## Notes Scaling
+* `Oro - C - S` fails for the largest two sizes `4096` and `8192` the largest two thread counts `500.000` and `1.000.000`
 
 ## Notes Mixed
 
