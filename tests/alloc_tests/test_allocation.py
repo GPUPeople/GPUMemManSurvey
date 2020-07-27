@@ -65,10 +65,10 @@ def main():
 		if any("f" in s for s in args.t):
 			testcases["FDGMalloc"] = sync_build_path + str("f_alloc_test")
 		if any("r" in s for s in args.t):
-			testcases["RegEff-A"] = sync_build_path + str("r_alloc_test_a")
-			testcases["RegEff-AW"] = sync_build_path + str("r_alloc_test_aw")
-			testcases["RegEff-C"] = sync_build_path + str("r_alloc_test_c")
-			testcases["RegEff-CF"] = sync_build_path + str("r_alloc_test_cf")
+			# testcases["RegEff-A"] = sync_build_path + str("r_alloc_test_a")
+			# testcases["RegEff-AW"] = sync_build_path + str("r_alloc_test_aw")
+			# testcases["RegEff-C"] = sync_build_path + str("r_alloc_test_c")
+			# testcases["RegEff-CF"] = sync_build_path + str("r_alloc_test_cf")
 			testcases["RegEff-CM"] = sync_build_path + str("r_alloc_test_cm")
 			testcases["RegEff-CFM"] = sync_build_path + str("r_alloc_test_cfm")
 	
@@ -159,9 +159,9 @@ def main():
 				if process_killed :
 					print("We killed the process!")
 					with open(csv_path_alloc, "a", newline='') as csv_file:
-						csv_file.write("0.00,0.00,0.00,0.00,0.00,-------------------> Ran longer than " + str(time_out_val * 1000))
+						csv_file.write("0.00,0.00,0.00,0.00,0.00,-------------------> Ran longer than " + str(time_out_val))
 					with open(csv_path_free, "a", newline='') as csv_file:
-						csv_file.write("0.00,0.00,0.00,0.00,0.00,-------------------> Ran longer than " + str(time_out_val * 1000))
+						csv_file.write("0.00,0.00,0.00,0.00,0.00,-------------------> Ran longer than " + str(time_out_val))
 				else:
 					print("Success!")
 				allocation_size += 4
