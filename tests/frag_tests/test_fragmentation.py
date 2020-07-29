@@ -23,7 +23,7 @@ def main():
 	num_allocations = 10000
 	smallest_allocation_size = 4
 	largest_allocation_size = 1024
-	alloc_size = 2048*1024*1024
+	alloc_size = 8
 	num_iterations = 1
 	free_memory = 1
 	generate_results = True
@@ -72,10 +72,10 @@ def main():
 		if any("r" in s for s in args.t):
 			# testcases["RegEff-A"] = sync_build_path + str("r_frag_test_a")
 			# testcases["RegEff-AW"] = sync_build_path + str("r_frag_test_aw")
-			testcases["RegEff-C"] = sync_build_path + str("r_frag_test_c")
+			# testcases["RegEff-C"] = sync_build_path + str("r_frag_test_c")
 			# testcases["RegEff-CF"] = sync_build_path + str("r_frag_test_cf")
 			# testcases["RegEff-CM"] = sync_build_path + str("r_frag_test_cm")
-			# testcases["RegEff-CFM"] = sync_build_path + str("r_frag_test_cfm")
+			testcases["RegEff-CFM"] = sync_build_path + str("r_frag_test_cfm")
 	
 	# Parse num allocation
 	if(args.num):
