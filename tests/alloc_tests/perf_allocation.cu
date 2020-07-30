@@ -276,7 +276,7 @@ int main(int argc, char* argv[])
 
 	for(auto i = 0; i < num_iterations; ++i)
 	{
-		std::cout << "#";
+		std::cout << "#" << std::flush;
 		if(onDeviceMeasure)
 		{
 			d_testAllocation <<<gridSize, blockSize>>>(memory_manager, d_memory, num_allocations, allocation_size_byte, per_thread_timing_allocation.getDevicePtr());
