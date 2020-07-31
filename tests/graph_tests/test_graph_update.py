@@ -28,7 +28,9 @@ graphs = [
 ]
 
 # graphs = [
-# 	"luxembourg_osm.mtx"
+# 	"333SP.mtx",
+# 	"adaptive.mtx",
+# 	"hugetric-00000.mtx"
 # ]
 
 path = "../../../graphs/"
@@ -75,13 +77,13 @@ def main():
 			# testcases["Ouroboros-P-S"] = build_path + str("o_graph_test_p")
 			# testcases["Ouroboros-P-VA"] = build_path + str("o_graph_test_vap")
 			# testcases["Ouroboros-P-VL"] = build_path + str("o_graph_test_vlp")
-			testcases["Ouroboros-C-S"] = build_path + str("o_graph_test_c")
-			# testcases["Ouroboros-C-VA"] = build_path + str("o_graph_test_vac")
+			# testcases["Ouroboros-C-S"] = build_path + str("o_graph_test_c")
+			testcases["Ouroboros-C-VA"] = build_path + str("o_graph_test_vac")
 			# testcases["Ouroboros-C-VL"] = build_path + str("o_graph_test_vlc")
 		if any("f" in s for s in args.t):
 			testcases["FDGMalloc"] = sync_build_path + str("f_graph_test")
 		if any("r" in s for s in args.t):
-			# testcases["RegEff-A"] = sync_build_path + str("r_graph_test_a")
+			testcases["RegEff-A"] = sync_build_path + str("r_graph_test_a")
 			testcases["RegEff-AW"] = sync_build_path + str("r_graph_test_aw")
 			# testcases["RegEff-C"] = sync_build_path + str("r_graph_test_c")
 			# testcases["RegEff-CF"] = sync_build_path + str("r_graph_test_cf")
@@ -150,8 +152,11 @@ def main():
 	####################################################################################################
 	if run_testcases:
 		for name, executable in testcases.items():
-			csv_path_insert = "results/graph_update_" + name + "_insert.csv"
-			csv_path_delete = "results/graph_update_" + name + "_delete.csv"
+			suffix = ".csv"
+			if "range" in config_file:
+				suffix = "_range.csv"
+			csv_path_insert = "results/graph_update_" + name + "_insert" + suffix
+			csv_path_delete = "results/graph_update_" + name + "_delete" + suffix
 			if(os.path.isfile(csv_path_insert)):
 				print("This file <" + csv_path_insert + "> already exists, do you really want to OVERWRITE?")
 				inputfromconsole = input()
