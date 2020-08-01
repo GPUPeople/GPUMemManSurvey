@@ -73,7 +73,7 @@ def main():
 			# testcases["RegEff-C"] = sync_build_path + str("r_frag_test_c")
 			# testcases["RegEff-CF"] = sync_build_path + str("r_frag_test_cf")
 			testcases["RegEff-CM"] = sync_build_path + str("r_frag_test_cm")
-			testcases["RegEff-CFM"] = sync_build_path + str("r_frag_test_cfm")
+			# testcases["RegEff-CFM"] = sync_build_path + str("r_frag_test_cfm")
 		if any("b" in s for s in args.t):
 			testcases["BaseLine"] = str("xx")
 	
@@ -136,6 +136,7 @@ def main():
 				executecommand = "{0} {1}".format(executable, run_config)
 				print("#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#")
 				print("Running " + name + " with command -> " + executecommand)
+				print(now.strftime("%b-%d-%Y_%H-%M-%S"))
 				print("#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#")
 				print(executecommand)
 				_, process_killed = Command(executecommand).run(timeout=time_out_val)

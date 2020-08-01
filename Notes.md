@@ -39,12 +39,16 @@
   * In this case it will try to *wrap around* to the beginning using successive atomicCAS operations
     * So it will simply start overwriting data from the front
 * Has no de-allocation and no re-use
+
+
+These methods get slower over time during allocation if no free happens
+
 ### Circular
-* Not yet working in simple testcase
+
 ### Circular Fused
 Text
 ### Circular Multi
-* Not yet working in simple testcase
+
 ### Circular Fused
 Text
 
