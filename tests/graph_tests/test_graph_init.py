@@ -75,10 +75,10 @@ def main():
 		if any("o" in s for s in args.t):
 			# testcases["Ouroboros-P-S"] = build_path + str("o_graph_test_p")
 			# testcases["Ouroboros-P-VA"] = build_path + str("o_graph_test_vap")
-			# testcases["Ouroboros-P-VL"] = build_path + str("o_graph_test_vlp")
+			testcases["Ouroboros-P-VL"] = build_path + str("o_graph_test_vlp")
 			# testcases["Ouroboros-C-S"] = build_path + str("o_graph_test_c")
 			# testcases["Ouroboros-C-VA"] = build_path + str("o_graph_test_vac")
-			testcases["Ouroboros-C-VL"] = build_path + str("o_graph_test_vlc")
+			# testcases["Ouroboros-C-VL"] = build_path + str("o_graph_test_vlc")
 		if any("f" in s for s in args.t):
 			testcases["FDGMalloc"] = sync_build_path + str("f_graph_test")
 		if any("r" in s for s in args.t):

@@ -9,7 +9,6 @@ from timedprocess import Command
 from Helper import generateResultsFromFileAllocation
 from Helper import generateResultsFromFileFragmentation
 from Helper import plotMean
-from Helper import plotFrag
 import csv
 import argparse
 import numpy as np
@@ -25,7 +24,7 @@ def main():
 	num_allocations = 10000
 	smallest_allocation_size = 4
 	largest_allocation_size = 1024
-	alloc_size = 2048*1024*1024
+	alloc_size = 8
 	num_iterations = 1
 	free_memory = 1
 	generate_results = True
@@ -128,7 +127,7 @@ def main():
 		for name, executable in testcases.items():
 			csv_path = "results/synth_" + name + "_" + str(smallest_num_threads)+ "-" + str(largest_num_threads) + "_" + str(smallest_allocation_size) + "-" + str(largest_allocation_size) + ".csv"
 			if(os.path.isfile(csv_path)):
-				print("This file already exists, do you really want to OVERWRITE?")
+				print("This file <" + csv_path + "> already exists, do you really want to OVERWRITE?")
 				inputfromconsole = input()
 				if not (inputfromconsole == "yes" or inputfromconsole == "y"):
 					continue

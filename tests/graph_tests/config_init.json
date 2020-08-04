@@ -5,7 +5,7 @@
   "batch_size" : 10000,
   "range" : 0,
   "test_init" : true,
-  "verify" : true,
+  "verify" : false,
   "realistic_deletion": false,
   "manageable_memory_mb" : 8192
 }
