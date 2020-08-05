@@ -84,17 +84,19 @@ __global__ void d_testAllocation(MemoryManagerType mm, int** verification_ptr, i
 	if(warp_based)
 	{
 		tid = (threadIdx.x + blockIdx.x * blockDim.x) / 32;
-		if(threadIdx.x % 32 != 0)
+		if(tid >= num_allocations)
 			return;
+		if(threadIdx.x % 32 == 0)
+			verification_ptr[tid] = reinterpret_cast<int*>(mm.malloc(allocation_size));
 	}
 	else
 	{
 		tid = threadIdx.x + blockIdx.x * blockDim.x;
-	}
-	if(tid >= num_allocations)
-		return;
+		if(tid >= num_allocations)
+			return;
 
-	verification_ptr[tid] = reinterpret_cast<int*>(mm.malloc(allocation_size));
+		verification_ptr[tid] = reinterpret_cast<int*>(mm.malloc(allocation_size));
+	}
 }
 
 template <typename MemoryManagerType>
@@ -124,17 +126,20 @@ __global__ void d_testFree(MemoryManagerType mm, int** verification_ptr, int num
 	if(warp_based)
 	{
 		tid = (threadIdx.x + blockIdx.x * blockDim.x) / 32;
-		if(threadIdx.x % 32 != 0)
+		if(tid >= num_allocations)
 			return;
+	
+		if(threadIdx.x % 32 == 0)
+			mm.free(verification_ptr[tid]);
 	}
 	else
 	{
 		tid = threadIdx.x + blockIdx.x * blockDim.x;
-	}
-	if(tid >= num_allocations)
-		return;
+		if(tid >= num_allocations)
+			return;
 
-	mm.free(verification_ptr[tid]);
+		mm.free(verification_ptr[tid]);
+	}
 }
 
 template <typename MemoryManagerType>

@@ -58,19 +58,19 @@ def main():
 		if any("o" in s for s in args.t):
 			# testcases["Ouroboros-P-S"] = build_path + str("o_alloc_test_p")
 			# testcases["Ouroboros-P-VA"] = build_path + str("o_alloc_test_vap")
-			testcases["Ouroboros-P-VL"] = build_path + str("o_alloc_test_vlp")
+			# testcases["Ouroboros-P-VL"] = build_path + str("o_alloc_test_vlp")
 			# testcases["Ouroboros-C-S"] = build_path + str("o_alloc_test_c")
 			# testcases["Ouroboros-C-VA"] = build_path + str("o_alloc_test_vac")
-			# testcases["Ouroboros-C-VL"] = build_path + str("o_alloc_test_vlc")
+			testcases["Ouroboros-C-VL"] = build_path + str("o_alloc_test_vlc")
 		if any("f" in s for s in args.t):
 			testcases["FDGMalloc"] = sync_build_path + str("f_alloc_test")
 		if any("r" in s for s in args.t):
 			# testcases["RegEff-A"] = sync_build_path + str("r_alloc_test_a")
-			# testcases["RegEff-AW"] = sync_build_path + str("r_alloc_test_aw")
-			# testcases["RegEff-C"] = sync_build_path + str("r_alloc_test_c")
-			# testcases["RegEff-CF"] = sync_build_path + str("r_alloc_test_cf")
+			testcases["RegEff-AW"] = sync_build_path + str("r_alloc_test_aw")
+			testcases["RegEff-C"] = sync_build_path + str("r_alloc_test_c")
+			testcases["RegEff-CF"] = sync_build_path + str("r_alloc_test_cf")
 			testcases["RegEff-CM"] = sync_build_path + str("r_alloc_test_cm")
-			# testcases["RegEff-CFM"] = sync_build_path + str("r_alloc_test_cfm")
+			testcases["RegEff-CFM"] = sync_build_path + str("r_alloc_test_cfm")
 	
 	# Parse num allocation
 	if(args.num):
@@ -87,8 +87,10 @@ def main():
 		num_iterations = args.iter
 
 	# Generate results
+	warpstring = str("")
 	if args.warp:
 		test_warp_based = 1
+		warpstring = "warp_"
 	else:
 		test_warp_based = 0
 	
@@ -133,8 +135,8 @@ def main():
 	if run_testcases:
 		# Run Testcase
 		for name, path in testcases.items():
-			csv_path_alloc = "results/performance/perf_alloc_" + name + "_" + str(num_allocations) + "_" + str(smallest_allocation_size) + "-" + str(largest_allocation_size) + ".csv"
-			csv_path_free = "results/performance/perf_free_" + name + "_" + str(num_allocations) + "_" + str(smallest_allocation_size) + "-" + str(largest_allocation_size) + ".csv"
+			csv_path_alloc = "results/performance/" + warpstring + "perf_alloc_" + name + "_" + str(num_allocations) + "_" + str(smallest_allocation_size) + "-" + str(largest_allocation_size) + ".csv"
+			csv_path_free = "results/performance/" + warpstring + "perf_free_" + name + "_" + str(num_allocations) + "_" + str(smallest_allocation_size) + "-" + str(largest_allocation_size) + ".csv"
 			if(os.path.isfile(csv_path_alloc)):
 				print("This file <" + csv_path_alloc + "> already exists, do you really want to OVERWRITE?")
 				inputfromconsole = input()
