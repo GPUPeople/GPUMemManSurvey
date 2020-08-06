@@ -1,6 +1,6 @@
 {
   "device" : 0,
-  "iterations" : 25,
+  "iterations" : 10,
   "update_iterations" : 0,
   "batch_size" : 10000,
   "range" : 0,

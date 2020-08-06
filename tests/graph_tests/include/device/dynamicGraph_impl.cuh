@@ -45,8 +45,8 @@ void DynGraph<VertexDataType, EdgeDataType, MemoryManagerType>::init(CSR<DataTyp
 
     number_vertices = input_graph.rows;
     
-    CHECK_ERROR(cudaMalloc(&d_vertices, sizeof(VertexDataType) * number_vertices));
-
+	CHECK_ERROR(cudaMalloc(&d_vertices, sizeof(VertexDataType) * number_vertices));
+	
     int blockSize {256};
     int gridSize {Utils::divup<int>(number_vertices, blockSize)};
     init_performance.startMeasurement();

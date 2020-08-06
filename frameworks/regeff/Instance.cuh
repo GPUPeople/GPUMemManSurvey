@@ -27,7 +27,7 @@ struct MemoryManagerRegEff : public MemoryManagerBase
 		alloc_info.maxFrag = 2.0;
 		alloc_info.chunkRatio = 1.0;
 
-		cudaMemcpyToSymbol(c_alloc, &alloc_info, sizeof(AllocInfo));
+		CHECK_ERROR(cudaMemcpyToSymbol(c_alloc, &alloc_info, sizeof(AllocInfo)));
 		if(variant == RegEffVariants::CudaMalloc)
 		{
 			if(!initialized)
@@ -43,12 +43,12 @@ struct MemoryManagerRegEff : public MemoryManagerBase
 
 		// Set the heapBase
 		char* m_mallocData{nullptr};
-		cudaMalloc(&m_mallocData, size);
-		cudaMemcpyToSymbol(g_heapBase, &m_mallocData, sizeof(char*));
+		CHECK_ERROR(cudaMalloc(&m_mallocData, size));
+		CHECK_ERROR(cudaMemcpyToSymbol(g_heapBase, &m_mallocData, sizeof(char*)));
 
 		// Init the heapOffset
 		unsigned int _g_heapOffset{0};
-		cudaMemcpyToSymbol(g_heapOffset, &_g_heapOffset, sizeof(unsigned int));
+		CHECK_ERROR(cudaMemcpyToSymbol(g_heapOffset, &_g_heapOffset, sizeof(unsigned int)));
 
 		if (variant == RegEffVariants::CMalloc || variant == RegEffVariants::CFMalloc ||
 			variant == RegEffVariants::CMMalloc || variant == RegEffVariants::CFMMalloc)
@@ -64,12 +64,12 @@ struct MemoryManagerRegEff : public MemoryManagerBase
 			cudaGetDevice(&device);
 			int m_numSM{0};
 			cudaDeviceGetAttribute(&m_numSM, cudaDevAttrMultiProcessorCount, device);
-			cudaMemcpyToSymbol(g_numSM, &m_numSM, sizeof(unsigned int));
+			CHECK_ERROR(cudaMemcpyToSymbol(g_numSM, &m_numSM, sizeof(unsigned int)));
 			// printf("Device: %d - NumSms: %d\n", device, m_numSM);
 
 			unsigned int** m_multiOffset{nullptr};
-			cudaMalloc(&m_multiOffset, m_numSM * sizeof(unsigned int*));
-			cudaMemcpyToSymbol(g_heapMultiOffset, &m_multiOffset, sizeof(unsigned int*));
+			CHECK_ERROR(cudaMalloc(&m_multiOffset, m_numSM * sizeof(unsigned int*)));
+			CHECK_ERROR(cudaMemcpyToSymbol(g_heapMultiOffset, &m_multiOffset, sizeof(unsigned int*)));
 
 			// Init the header size
 			unsigned int heapSize = size;
@@ -81,7 +81,7 @@ struct MemoryManagerRegEff : public MemoryManagerBase
 				headerSize = sizeof(unsigned int);
 
 			unsigned int heapLock{0};
-			cudaMemcpyToSymbol(g_heapLock, &heapLock, sizeof(unsigned int));
+			CHECK_ERROR(cudaMemcpyToSymbol(g_heapLock, &heapLock, sizeof(unsigned int)));
 
 			// // Set the chunk size
 			unsigned int numChunks{0};
@@ -122,39 +122,43 @@ struct MemoryManagerRegEff : public MemoryManagerBase
 			if(variant == RegEffVariants::CMalloc)
 			{
 				CircularMallocPrepare3 <<<gridSize, blockSize>>> (numChunks, chunkSize);
-				cudaDeviceSynchronize();
+				CHECK_ERROR(cudaDeviceSynchronize());
 			}
 			else if(variant == RegEffVariants::CFMalloc)
 			{
 				CircularFusedMallocPrepare3 <<<gridSize, blockSize>>> (numChunks, chunkSize);
-				cudaDeviceSynchronize();
+				CHECK_ERROR(cudaDeviceSynchronize());
 			}
 			else if(variant == RegEffVariants::CMMalloc)
 			{
 				CircularMultiMallocPrepare3 <<<gridSize, blockSize>>> (numChunks, chunkSize);
-				cudaDeviceSynchronize();
+				CHECK_ERROR(cudaDeviceSynchronize());
 			}
 			else if(variant == RegEffVariants::CFMMalloc)
 			{
 				CircularFusedMultiMallocPrepare3 <<<gridSize, blockSize>>> (numChunks, chunkSize);
-				cudaDeviceSynchronize();
+				CHECK_ERROR(cudaDeviceSynchronize());
 			}
 		}
 	}
 
+	MemoryManagerRegEff(const MemoryManagerRegEff& src) : IAMACOPY{true} {}
+
 	~MemoryManagerRegEff()
 	{
+		if(IAMACOPY)
+			return;
 		if(variant != RegEffVariants::CudaMalloc)
 		{
 			char* m_mallocData{nullptr};
-			cudaMemcpyFromSymbol(m_mallocData, g_heapBase, sizeof(char*));
-			cudaFree(m_mallocData);
+			CHECK_ERROR(cudaMemcpyFromSymbol(&m_mallocData, g_heapBase, sizeof(char*)));
+			CHECK_ERROR(cudaFree(m_mallocData));
 			if (variant == RegEffVariants::CMalloc || variant == RegEffVariants::CFMalloc ||
 				variant == RegEffVariants::CMMalloc || variant == RegEffVariants::CFMMalloc)
 			{
-				unsigned int** m_multiOffset{nullptr};
-				cudaMemcpyFromSymbol(m_multiOffset, g_heapMultiOffset, sizeof(unsigned int**));
-				cudaFree(m_multiOffset);
+				unsigned int* m_multiOffset{nullptr};
+				CHECK_ERROR(cudaMemcpyFromSymbol(&m_multiOffset, g_heapMultiOffset, sizeof(unsigned int*)));
+				CHECK_ERROR(cudaFree(m_multiOffset));
 			}
 		}
 	}
@@ -263,6 +267,7 @@ struct MemoryManagerRegEff : public MemoryManagerBase
 	static constexpr double chunkRatio{1.0};
 
 	static bool initialized;
+	bool IAMACOPY{false}; // TODO: That is an ugly hack so we don't get a double free when making a copy for the device
 };
 
 template <RegEffVariants variant>

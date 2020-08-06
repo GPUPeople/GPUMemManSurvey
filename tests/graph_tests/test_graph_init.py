@@ -11,26 +11,26 @@ from Helper import plotMean
 import csv
 import argparse
 
-graphs = [
-	"144.mtx",  
-	"333SP.mtx",
-	"adaptive.mtx",
-	"caidaRouterLevel.mtx",
-	"coAuthorsCiteseer.mtx",
-	"delaunay_n20.mtx",
-	"fe_body.mtx",
-	"hugetric-00000.mtx",
-	"in2010.mtx",
-	"luxembourg_osm.mtx",
-	"rgg_n_2_20_s0.mtx",
-	"sc2010.mtx",
-	"vsp_mod2_pgp2_slptsk.mtx"
-]
-
 # graphs = [
-# 	"adaptive.mtx"
-# 	"hugetric-00000.mtx"
+# 	"144.mtx",  
+# 	"333SP.mtx",
+# 	"adaptive.mtx",
+# 	"caidaRouterLevel.mtx",
+# 	"coAuthorsCiteseer.mtx",
+# 	"delaunay_n20.mtx",
+# 	"fe_body.mtx",
+# 	"hugetric-00000.mtx",
+# 	"in2010.mtx",
+# 	"luxembourg_osm.mtx",
+# 	"rgg_n_2_20_s0.mtx",
+# 	"sc2010.mtx",
+# 	"vsp_mod2_pgp2_slptsk.mtx"
 # ]
+
+graphs = [
+	"adaptive.mtx",
+	"hugetric-00000.mtx"
+]
 
 path = "../../../graphs/"
 
@@ -82,10 +82,10 @@ def main():
 		if any("f" in s for s in args.t):
 			testcases["FDGMalloc"] = sync_build_path + str("f_graph_test")
 		if any("r" in s for s in args.t):
-			testcases["RegEff-A"] = sync_build_path + str("r_graph_test_a")
+			# testcases["RegEff-A"] = sync_build_path + str("r_graph_test_a")
 			# testcases["RegEff-AW"] = sync_build_path + str("r_graph_test_aw")
-			# testcases["RegEff-C"] = sync_build_path + str("r_graph_test_c")
-			# testcases["RegEff-CF"] = sync_build_path + str("r_graph_test_cf")
+			testcases["RegEff-C"] = sync_build_path + str("r_graph_test_c")
+			testcases["RegEff-CF"] = sync_build_path + str("r_graph_test_cf")
 			# testcases["RegEff-CM"] = sync_build_path + str("r_graph_test_cm")
 			# testcases["RegEff-CFM"] = sync_build_path + str("r_graph_test_cfm")
 	
