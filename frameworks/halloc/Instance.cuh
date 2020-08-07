@@ -10,9 +10,12 @@ struct MemoryManagerHalloc : public MemoryManagerBase
 		ha_init(halloc_opts_t(instantiation_size));
 	}
 
+	MemoryManagerHalloc(const MemoryManagerHalloc& src) : IAMACOPY{true} {}
+
 	~MemoryManagerHalloc()
 	{
-		ha_shutdown();
+		if(!IAMACOPY)
+			ha_shutdown();
 	}
 
 	virtual __device__ __forceinline__ void* malloc(size_t size) override
@@ -24,4 +27,6 @@ struct MemoryManagerHalloc : public MemoryManagerBase
 	{
 		hafree(ptr);
 	}
+
+	bool IAMACOPY{false}; // TODO: That is an ugly hack so we don't get a double free when making a copy for the device
 };
