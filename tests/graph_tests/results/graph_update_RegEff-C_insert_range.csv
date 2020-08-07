@@ -1,0 +1,14 @@
+Graph Update Testcase - RegEff-C, mean(ms), std-dev(ms), min(ms), max(ms), median(ms), num iterations
+144.mtx,2.25996,2.26583,0.525312,8.62003,0.836608,20
+333SP.mtx,
+adaptive.mtx,3235.58,1077.58,5.04624,3901.06,3553.91,20
+caidaRouterLevel.mtx,
+coAuthorsCiteseer.mtx,
+delaunay_n20.mtx,
+fe_body.mtx,0.876336,0.412028,0.565248,1.97837,0.706592,20
+hugetric-00000.mtx,
+in2010.mtx,
+luxembourg_osm.mtx,2.30129,0.820231,1.29843,3.63213,2.15962,20
+rgg_n_2_20_s0.mtx,
+sc2010.mtx,
+vsp_mod2_pgp2_slptsk.mtx,

@@ -64,19 +64,19 @@ def main():
 		if any("o" in s for s in args.t):
 			# testcases["Ouroboros-P-S"] = build_path + str("o_synth_test_p")
 			# testcases["Ouroboros-P-VA"] = build_path + str("o_synth_test_vap")
-			testcases["Ouroboros-P-VL"] = build_path + str("o_synth_test_vlp")
+			# testcases["Ouroboros-P-VL"] = build_path + str("o_synth_test_vlp")
 			# testcases["Ouroboros-C-S"] = build_path + str("o_synth_test_c")
 			# testcases["Ouroboros-C-VA"] = build_path + str("o_synth_test_vac")
-			# testcases["Ouroboros-C-VL"] = build_path + str("o_synth_test_vlc")
+			testcases["Ouroboros-C-VL"] = build_path + str("o_synth_test_vlc")
 		if any("f" in s for s in args.t):
 			testcases["FDGMalloc"] = sync_build_path + str("f_synth_test")
 		if any("r" in s for s in args.t):
 			# testcases["RegEff-A"] = sync_build_path + str("r_synth_test_a")
 			# testcases["RegEff-AW"] = sync_build_path + str("r_synth_test_aw")
-			testcases["RegEff-C"] = sync_build_path + str("r_synth_test_c")
+			# testcases["RegEff-C"] = sync_build_path + str("r_synth_test_c")
 			# testcases["RegEff-CF"] = sync_build_path + str("r_synth_test_cf")
 			# testcases["RegEff-CM"] = sync_build_path + str("r_synth_test_cm")
-			# testcases["RegEff-CFM"] = sync_build_path + str("r_synth_test_cfm")
+			testcases["RegEff-CFM"] = sync_build_path + str("r_synth_test_cfm")
 		if any("b" in s for s in args.t):
 			testcases["Baseline"] = build_path + str("b_synth_test")
 	

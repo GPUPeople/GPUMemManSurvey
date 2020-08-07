@@ -36,7 +36,7 @@ __forceinline__ __device__ bool d_binarySearchDeletion(UpdateDataType* edge_upda
 
 // ##############################################################################################################################################
 //
-template <typename VertexDataType, typename EdgeDataType, typename MemoryManagerType>
+template <typename VertexDataType, typename EdgeDataType, typename MemoryManagerType, bool VECTORIZED_COPY>
 __global__ void d_edgeDeletionVertexCentric(VertexDataType* vertices, 
                                              unsigned int number_vertices,
                                              MemoryManagerType memory_manager,
@@ -93,18 +93,25 @@ __global__ void d_edgeDeletionVertexCentric(VertexDataType* vertices,
 		{
 			printf("Could not allocate Page for Vertex %u for Size %u!\n", tid, new_page_size);
 			return;
-        }
-        
-        // Copy over data vectorized
-		auto iterations = Utils::divup(new_page_size, sizeof(uint4));
-		for (auto i = 0U; i < iterations; ++i)
-		{
-			reinterpret_cast<uint4*>(adjacency)[i] = reinterpret_cast<uint4*>(vertex.adjacency)[i];
 		}
-		// for (auto i = 0U; i < vertex.meta_data.neighbours; ++i)
-		// {
-		// 	adjacency[i] = vertex.adjacency[i];
-        // }
+		
+		if(VECTORIZED_COPY)
+		{
+			// Copy over data vectorized
+			auto iterations = Utils::divup(new_page_size, sizeof(uint4));
+			for (auto i = 0U; i < iterations; ++i)
+			{
+				reinterpret_cast<uint4*>(adjacency)[i] = reinterpret_cast<uint4*>(vertex.adjacency)[i];
+			}
+		}
+		else
+		{
+			for (auto i = 0U; i < vertex.meta_data.neighbours; ++i)
+			{
+				adjacency[i] = vertex.adjacency[i];
+			}
+		}
+
         // Free old page and set new pointer and index
 		memory_manager.free(vertex.adjacency);
 		vertices[tid].adjacency = adjacency;
@@ -135,7 +142,7 @@ void DynGraph<VertexDataType, EdgeDataType, MemoryManagerType>::edgeDeletion(Edg
     // #######################################################################################
 	// Deletion
 	delete_performance.startMeasurement();
-	d_edgeDeletionVertexCentric<VertexDataType, EdgeDataType> << <grid_size, block_size >> > (
+	d_edgeDeletionVertexCentric<VertexDataType, EdgeDataType, MemoryManagerType, true> << <grid_size, block_size >> > (
 		d_vertices,
         number_vertices,
         memory_manager,

@@ -5,7 +5,7 @@
 
 // ##############################################################################################################################################
 //
-template <typename VertexDataType, typename EdgeDataType, typename MemoryManagerType>
+template <typename VertexDataType, typename EdgeDataType, typename MemoryManagerType, bool VECTORIZED_COPY>
 __global__ void d_edgeInsertionVertexCentric(VertexDataType* vertices, 
                                              unsigned int number_vertices,
                                              MemoryManagerType memory_manager,
@@ -38,12 +38,27 @@ __global__ void d_edgeInsertionVertexCentric(VertexDataType* vertices,
 			return;
 		}
 
-		// Copy over data vectorized
-		auto iterations = Utils::divup(vertex.meta_data.neighbours * sizeof(EdgeDataType), sizeof(uint4));
-		for (auto i = 0U; i < iterations; ++i)
+		if(VECTORIZED_COPY)
 		{
-			reinterpret_cast<uint4*>(adjacency)[i] = reinterpret_cast<uint4*>(vertex.adjacency)[i];
+			// Copy over data vectorized
+			auto iterations = Utils::divup(vertex.meta_data.neighbours * sizeof(EdgeDataType), sizeof(uint4));
+			for (auto i = 0U; i < iterations; ++i)
+			{
+				reinterpret_cast<uint4*>(adjacency)[i] = reinterpret_cast<uint4*>(vertex.adjacency)[i];
+			}
 		}
+		else
+		{
+			for (auto i = 0U; i < vertex.meta_data.neighbours; ++i)
+			{
+				adjacency[i] = vertex.adjacency[i];
+			}
+		}
+		
+
+		// Copy over data vectorized
+		auto iterations = Utils::divup(vertex.meta_data.neighbours * sizeof(EdgeDataType), sizeof(unsigned int));
+		
 
 		// Do insertion now
 		for (auto i = 0U, j = vertex.meta_data.neighbours; i < range_updates; ++i)
@@ -188,7 +203,7 @@ void DynGraph<VertexDataType, EdgeDataType, MemoryManagerType>::edgeInsertion(Ed
 	// Insertion
 	grid_size = Utils::divup(number_vertices, block_size);
 	insert_performance.startMeasurement();
-	d_edgeInsertionVertexCentric<VertexDataType, EdgeDataType, MemoryManagerType> << <grid_size, block_size >> >(
+	d_edgeInsertionVertexCentric<VertexDataType, EdgeDataType, MemoryManagerType, true> << <grid_size, block_size >> >(
         d_vertices,
         number_vertices,
         memory_manager,
