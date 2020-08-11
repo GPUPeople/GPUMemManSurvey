@@ -62,11 +62,11 @@ def main():
 		if any("s" in s for s in args.t):
 			testcases["ScatterAlloc"] = sync_build_path + str("s_synth_test")
 		if any("o" in s for s in args.t):
-			# testcases["Ouroboros-P-S"] = build_path + str("o_synth_test_p")
-			# testcases["Ouroboros-P-VA"] = build_path + str("o_synth_test_vap")
-			# testcases["Ouroboros-P-VL"] = build_path + str("o_synth_test_vlp")
-			# testcases["Ouroboros-C-S"] = build_path + str("o_synth_test_c")
-			# testcases["Ouroboros-C-VA"] = build_path + str("o_synth_test_vac")
+			testcases["Ouroboros-P-S"] = build_path + str("o_synth_test_p")
+			testcases["Ouroboros-P-VA"] = build_path + str("o_synth_test_vap")
+			testcases["Ouroboros-P-VL"] = build_path + str("o_synth_test_vlp")
+			testcases["Ouroboros-C-S"] = build_path + str("o_synth_test_c")
+			testcases["Ouroboros-C-VA"] = build_path + str("o_synth_test_vac")
 			testcases["Ouroboros-C-VL"] = build_path + str("o_synth_test_vlc")
 		if any("f" in s for s in args.t):
 			testcases["FDGMalloc"] = sync_build_path + str("f_synth_test")
@@ -74,8 +74,8 @@ def main():
 			# testcases["RegEff-A"] = sync_build_path + str("r_synth_test_a")
 			# testcases["RegEff-AW"] = sync_build_path + str("r_synth_test_aw")
 			# testcases["RegEff-C"] = sync_build_path + str("r_synth_test_c")
-			# testcases["RegEff-CF"] = sync_build_path + str("r_synth_test_cf")
-			# testcases["RegEff-CM"] = sync_build_path + str("r_synth_test_cm")
+			testcases["RegEff-CF"] = sync_build_path + str("r_synth_test_cf")
+			testcases["RegEff-CM"] = sync_build_path + str("r_synth_test_cm")
 			testcases["RegEff-CFM"] = sync_build_path + str("r_synth_test_cfm")
 		if any("b" in s for s in args.t):
 			testcases["Baseline"] = build_path + str("b_synth_test")
@@ -125,7 +125,7 @@ def main():
 	####################################################################################################
 	if run_testcases:
 		for name, executable in testcases.items():
-			csv_path = "results/synth_" + name + "_" + str(smallest_num_threads)+ "-" + str(largest_num_threads) + "_" + str(smallest_allocation_size) + "-" + str(largest_allocation_size) + ".csv"
+			csv_path = "results/synth_write_" + name + "_" + str(smallest_num_threads)+ "-" + str(largest_num_threads) + "_" + str(smallest_allocation_size) + "-" + str(largest_allocation_size) + ".csv"
 			if(os.path.isfile(csv_path)):
 				print("This file <" + csv_path + "> already exists, do you really want to OVERWRITE?")
 				inputfromconsole = input()
