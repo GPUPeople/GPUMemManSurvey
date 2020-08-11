@@ -331,7 +331,7 @@ int main(int argc, char* argv[])
 
 		timing.startMeasurement();
 		gridSize = Utils::divup(num_integers, blockSize);
-		for(auto j = 0; j < num_iterations; ++j)
+		for(auto j = 0; j < 100; ++j)
 			d_write<<<gridSize, blockSize>>>(d_assignment.get(), d_pos.get(), requirements, d_verification_ptrs.get(), num_integers);
 		
 		timing.stopMeasurement();
