@@ -74,7 +74,7 @@ def main():
 			# testcases["RegEff-A"] = sync_build_path + str("r_synth_test_a")
 			# testcases["RegEff-AW"] = sync_build_path + str("r_synth_test_aw")
 			# testcases["RegEff-C"] = sync_build_path + str("r_synth_test_c")
-			testcases["RegEff-CF"] = sync_build_path + str("r_synth_test_cf")
+			# testcases["RegEff-CF"] = sync_build_path + str("r_synth_test_cf")
 			testcases["RegEff-CM"] = sync_build_path + str("r_synth_test_cm")
 			testcases["RegEff-CFM"] = sync_build_path + str("r_synth_test_cfm")
 		if any("b" in s for s in args.t):
