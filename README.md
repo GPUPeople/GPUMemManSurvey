@@ -2,10 +2,8 @@
 Evaluating different memory managers for dynamic GPU memory
 
 # Instructions
-* `git clone https://github.com/GPUPeople/GPUMemManSurvey.git <chosen_directory>`
+* `git clone --recursive https://github.com/GPUPeople/GPUMemManSurvey.git <chosen_directory>`
 * `cd <chosen_directory>`
-* `git submodule init`
-* `git submodule update`
 * `mkdir build && cd build`
 * `ccmake ..` -> set correct CC (some only build in sync mode)
 * `make`
@@ -24,16 +22,36 @@ Evaluating different memory managers for dynamic GPU memory
 | Orooboros (2020)			    | :heavy_check_mark:	| [Paper](https://dl.acm.org/doi/pdf/10.1145/3392717.3392742) | [GitHub - Repository](https://github.com/GPUPeople/Orooboros) |
 
 # Notes to individual approaches
+## XMalloc
+`XMalloc` is currently not publicly available, but an existing implementation is included in this repository which was obtained a few years ago, the license file is included `<frameworks/xmalloc/LICENSE>`
+
+## ScatterAlloc
+`ScatterAlloc` is cloned from a [public GitHub - Repository](https://github.com/ax3l/scatteralloc)
+
 ## FDGMalloc
-* Currently still buggy and fails early in multiple cases
-* Also, has several limitations, only can do warp-based allocation, cannot really free memory, only tidy up full warp, etc.
+`FDGMalloc` is included as well, the original source code can be downloaded from their respecive [webpage](https://www.gcc.tu-darmstadt.de/home/proj/fdgmalloc/index.en.jsp).
+Unfortunately, it does not seem to work even for simple cases and as other limitations do not fit the description of a general purpose memory manager, it is ommited in all tests
 
 ## Register-Efficient
+`Register-Efficient` is downloaded from their [webpage](http://decibel.fi.muni.cz/~xvinkl/CMalloc/)
 * Has the option to `coalesce` within a warp -> adds up all allocations and then only does one large allocation
   * Does not work with free
     * Not sure if this is not implemented correctly, but this immediately hangs, as then possible threads are trying to delete some memory that is only part of a larger allocation and cannot be individually freed
   * Even without free, not all sizes sime to work properly
 * Currently, `coalesceWarp` is turned off so that it works
+
+## Halloc
+`Halloc` is cloned from a [public GitHub - Repository](https://github.com/canonizer/halloc)
+
+## DynaSOAr
+`DynaSOAr` cannot be used as a general purpose memory allocator, as it can only manage pre-defined objects instantiated in their specific format
+
+## Bulk-Semaphore
+The two memory managers described in the [paper](https://research.nvidia.com/publication/2019-02_Throughput-oriented-GPU-memory) are unfortunately not publicly available
+
+## Ouroboros
+All variants of `Ouroboros` can be cloned from their [public GitHub - Repository](https://github.com/GPUPeople/Orooboros)
+
 
 # Test table TITAN V
 
@@ -55,56 +73,4 @@ Evaluating different memory managers for dynamic GPU memory
 |**Oro - C - S**|:ab:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|
 |**Oro - C - VA**|:ab:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|
 |**Oro - C - VL**|:ab:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:watch:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|
-
-
-## Notes Performance
-* `Performance`
-  * `10.000`
-    * `Oro - C - VA` fail with increasing likelihood for the larger allocation sizes
-    * `Oro - C - VL` seems to work, but is quite slow
-  * `100.000`
-    * Reg-Eff-CF failed at `8192`
-    * Reg-Eff-CFM fails a few times after `7376`
-    * Reg-Eff-CM fails a few times after `6768`
-
-* `Mixed Performance`
-  * `10.000`
-    * `Reg-Eff-C` fails in between for sizes `32,64,256`
-    * `Oro - P - VL` fails after `32`
-  * `100.000`
-    * `Reg-Eff-C` fails after `16`
-    * `Reg-Eff-CM` fails after `1024`
-    * `Reg-Eff-CFM` fails after `4096`
-    * `Oro - C - VA` fails after `2048` -> got manual results with less iterations
-    * `Oro - P - VL` fails after `32`
-
-## Notes Scaling
-* `Oro - C - S` fails for the largest two sizes `4096` and `8192` the largest two thread counts `500.000` and `1.000.000`
-
-## Notes Mixed
-
-## Notes Fragmentation
-* `Fragmentation`
-  * Missing still for `Reg-Eff-CF`, `Reg-Eff-CM` and `Reg-Eff-CFM`
-* `OOM`
-  * `Oro - C - VA` and `Oro - C - VL` become really slow after a few hundred iterations, probably not moving the front correctly.
-  * `Reg-Eff-A*` also align to 16 Bytes internally, hence they don't get to maximum in the beginning
-  * `Reg-Eff-C*` are painfully slow, hence typically are reigned in by the timeout
-    * Also get slower with every passing iteration
-
-## Notes Dynamic Graph
-* Graph Stats captured :heavy_check_mark:
-* `Init`
-  * `Oro - P - V*` not everything works, `VA` dies sometimes with `died in freePage`
-    * `VA` is missing `333SP`, `hugetric` and `adaptive`
-    * `VL` is missing `caidaRouterLevel`, `delaunay_n20`
-* `Update`
-  * `Reg-Eff` does not return 16-byte aligned memory, hence copying data over vectorized does not work
-
-## Notes Synthetic
-* `Workload`
-  * `Oro - P - VL` fails after 1024
-  * `Reg-Eff-C` fails after `8192`
-* Could also test how write performance to that memory region is, not only the allocation speed
-
 

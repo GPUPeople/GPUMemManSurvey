@@ -36,6 +36,7 @@ if(TEST_CUDA)
 		src/main.cu
 	)
 	target_compile_definitions(c_main PUBLIC TEST_CUDA)
+	set_property(TARGET c_main PROPERTY CUDA_ARCHITECTURES OFF)
 
 endif()
 
@@ -53,6 +54,7 @@ if(TEST_XMALLOC)
 	)
 	target_compile_definitions(x_main PUBLIC TEST_XMALLOC)
 	target_include_directories(x_main PUBLIC ${BASE_PATH}frameworks/xmalloc)
+	set_property(TARGET x_main PROPERTY CUDA_ARCHITECTURES OFF)
 
 endif ()
 
@@ -70,6 +72,7 @@ if(TEST_HALLOC AND NOT CUDA_BUILD_CC70_ASYNC)
 	)
 	target_compile_definitions(h_main PUBLIC TEST_HALLOC)
 	target_include_directories(h_main PUBLIC ${BASE_PATH}frameworks/halloc/repository/src)
+	set_property(TARGET h_main PROPERTY CUDA_ARCHITECTURES OFF)
 
 endif ()
 
@@ -87,6 +90,7 @@ if(TEST_SCATTERALLOC)
 	)
 	target_compile_definitions(s_main PUBLIC TEST_SCATTERALLOC)
 	target_include_directories(s_main PUBLIC ${BASE_PATH}frameworks/scatteralloc/repository/src/include/mallocMC)
+	set_property(TARGET s_main PROPERTY CUDA_ARCHITECTURES OFF)
 
 endif ()
 
@@ -105,6 +109,7 @@ if(TEST_OUROBOROS)
 	target_compile_definitions(o_main_p PUBLIC TEST_OUROBOROS)
 	target_compile_definitions(o_main_p PUBLIC TEST_PAGES)
 	target_include_directories(o_main_p PUBLIC ${BASE_PATH}frameworks/ouroboros/repository/include)
+	set_property(TARGET o_main_p PROPERTY CUDA_ARCHITECTURES OFF)
 
 	add_executable(o_main_c
 	src/main.cu
@@ -112,6 +117,7 @@ if(TEST_OUROBOROS)
 	target_compile_definitions(o_main_c PUBLIC TEST_OUROBOROS)
 	target_compile_definitions(o_main_c PUBLIC TEST_CHUNKS)
 	target_include_directories(o_main_c PUBLIC ${BASE_PATH}frameworks/ouroboros/repository/include)
+	set_property(TARGET o_main_c PROPERTY CUDA_ARCHITECTURES OFF)
 
 	add_executable(o_main_vap
 	src/main.cu
@@ -120,6 +126,7 @@ if(TEST_OUROBOROS)
 	target_compile_definitions(o_main_vap PUBLIC TEST_PAGES)
 	target_compile_definitions(o_main_vap PUBLIC TEST_VIRTUALIZED_ARRAY)
 	target_include_directories(o_main_vap PUBLIC ${BASE_PATH}frameworks/ouroboros/repository/include)
+	set_property(TARGET o_main_vap PROPERTY CUDA_ARCHITECTURES OFF)
 
 	add_executable(o_main_vac
 	src/main.cu
@@ -128,6 +135,7 @@ if(TEST_OUROBOROS)
 	target_compile_definitions(o_main_vac PUBLIC TEST_CHUNKS)
 	target_compile_definitions(o_main_vac PUBLIC TEST_VIRTUALIZED_ARRAY)
 	target_include_directories(o_main_vac PUBLIC ${BASE_PATH}frameworks/ouroboros/repository/include)
+	set_property(TARGET o_main_vac PROPERTY CUDA_ARCHITECTURES OFF)
 
 	add_executable(o_main_vlp
 	src/main.cu
@@ -136,6 +144,7 @@ if(TEST_OUROBOROS)
 	target_compile_definitions(o_main_vlp PUBLIC TEST_PAGES)
 	target_compile_definitions(o_main_vlp PUBLIC TEST_VIRTUALIZED_LIST)
 	target_include_directories(o_main_vlp PUBLIC ${BASE_PATH}frameworks/ouroboros/repository/include)
+	set_property(TARGET o_main_vlp PROPERTY CUDA_ARCHITECTURES OFF)
 
 	add_executable(o_main_vlc
 	src/main.cu
@@ -144,6 +153,7 @@ if(TEST_OUROBOROS)
 	target_compile_definitions(o_main_vlc PUBLIC TEST_CHUNKS)
 	target_compile_definitions(o_main_vlc PUBLIC TEST_VIRTUALIZED_LIST)
 	target_include_directories(o_main_vlc PUBLIC ${BASE_PATH}frameworks/ouroboros/repository/include)
+	set_property(TARGET o_main_vlc PROPERTY CUDA_ARCHITECTURES OFF)
 
 endif ()
 
@@ -160,6 +170,7 @@ if(TEST_FDG)
 	src/main.cu
 	)
 	target_compile_definitions(f_main PUBLIC TEST_FDG)
+	set_property(TARGET f_main PROPERTY CUDA_ARCHITECTURES OFF)
 
 endif()
 
@@ -177,35 +188,41 @@ if(TEST_REG)
 	)
 	target_compile_definitions(r_main_a PUBLIC TEST_REGEFF)
 	target_compile_definitions(r_main_a PUBLIC TEST_ATOMIC)
+	set_property(TARGET r_main_a PROPERTY CUDA_ARCHITECTURES OFF)
 
 	add_executable(r_main_aw
 	src/main.cu
 	)
 	target_compile_definitions(r_main_aw PUBLIC TEST_REGEFF)
 	target_compile_definitions(r_main_aw PUBLIC TEST_ATOMIC_WRAP)
+	set_property(TARGET r_main_aw PROPERTY CUDA_ARCHITECTURES OFF)
 
 	add_executable(r_main_c
 	src/main.cu
 	)
 	target_compile_definitions(r_main_c PUBLIC TEST_REGEFF)
 	target_compile_definitions(r_main_c PUBLIC TEST_CIRCULAR)
+	set_property(TARGET r_main_c PROPERTY CUDA_ARCHITECTURES OFF)
 
 	add_executable(r_main_cf
 	src/main.cu
 	)
 	target_compile_definitions(r_main_cf PUBLIC TEST_REGEFF)
 	target_compile_definitions(r_main_cf PUBLIC TEST_CIRCULAR_FUSED)
+	set_property(TARGET r_main_cf PROPERTY CUDA_ARCHITECTURES OFF)
 
 	add_executable(r_main_cm
 	src/main.cu
 	)
 	target_compile_definitions(r_main_cm PUBLIC TEST_REGEFF)
 	target_compile_definitions(r_main_cm PUBLIC TEST_CIRCULAR_MULTI)
+	set_property(TARGET r_main_cm PROPERTY CUDA_ARCHITECTURES OFF)
 
 	add_executable(r_main_cfm
 	src/main.cu
 	)
 	target_compile_definitions(r_main_cfm PUBLIC TEST_REGEFF)
 	target_compile_definitions(r_main_cfm PUBLIC TEST_CIRCULAR_FUSED_MULTI)
+	set_property(TARGET r_main_cfm PROPERTY CUDA_ARCHITECTURES OFF)
 
 endif()
