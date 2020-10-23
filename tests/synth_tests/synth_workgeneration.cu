@@ -205,74 +205,6 @@ int main(int argc, char* argv[])
 	auto range = allocation_size_range_upper - allocation_size_range_lower;
 	auto offset = allocation_size_range_lower;
 
-	// PerfMeasure timing;
-
-	// for(auto i = 0; i < num_iterations; ++i)
-	// {
-	// 	std::mt19937 gen(i); //Standard mersenne_twister_engine seeded with iteration
-    // 	std::uniform_real_distribution<> dis(0.0, 1.0);
-	// 	// Generate sizes
-	// 	srand(i);
-	// 	int num_integers{0};
-	// 	for(auto i = 0; i < num_allocations; ++i)
-	// 	{
-	// 		int val = Utils::alignment(offset + dis(gen) * range, sizeof(int));
-	// 		allocation_sizes[i] = val;
-	// 		num_integers += val / sizeof(int);
-	// 	}
-			
-	// 	d_allocation_sizes.copyToDevice(allocation_sizes, num_allocations);
-
-	// 	int blockSize{256};
-	// 	int gridSize = Utils::divup(num_allocations, blockSize);
-
-	// 	// Start measurement
-	// 	timing.startMeasurement();
-		
-	// 	#ifdef TEST_BASELINE
-
-	// 	int* requirements{nullptr};
-	// 	CHECK_ERROR(cudaMalloc(&requirements, (num_allocations + 1) * sizeof(int)));
-
-	// 	d_baseline_requirements <<< gridSize, blockSize >>> (d_allocation_sizes.get(), num_allocations, requirements);
-
-	// 	// Exclusive sum
-	// 	Helper::thrustExclusiveSum(requirements, num_allocations + 1);
-
-	// 	// Copy back num elements
-	// 	int num_items{0};
-	// 	CHECK_ERROR(cudaMemcpy(&num_items, requirements + num_allocations, sizeof(int), cudaMemcpyDeviceToHost));
-
-	// 	// Allocate memory
-	// 	int* storage_area{nullptr};
-	// 	CHECK_ERROR(cudaMalloc(&storage_area, num_items * sizeof(int)));
-
-	// 	// Write ptrs to verification ptrs
-	// 	d_baseline_write <<< gridSize, blockSize >>>(requirements, num_allocations, storage_area, d_verification_ptrs.get());
-
-	// 	#else
-	// 	d_memorymanager_alloc <<< gridSize, blockSize >>>(memory_manager, d_allocation_sizes.get(), num_allocations, d_verification_ptrs.get());
-	// 	#endif
-
-	// 	// **********
-	// 	// **********
-	// 	// Now we could write to this area
-	// 	// **********
-	// 	// **********
-
-	// 	#ifdef TEST_BASELINE
-	// 	CHECK_ERROR(cudaFree(requirements));
-	// 	CHECK_ERROR(cudaFree(storage_area));
-	// 	#else
-	// 	d_memorymanager_free <<< gridSize, blockSize >>>(memory_manager, d_allocation_sizes.get(), num_allocations, d_verification_ptrs.get());
-	// 	#endif
-
-	// 	// Stop Measurement
-	// 	timing.stopMeasurement();
-	// 	std::cout << "#" << std::flush;
-	// }
-	// std::cout << std::endl;
-
 	PerfMeasure timing;
 
 	for(auto i = 0; i < num_iterations; ++i)
@@ -294,6 +226,11 @@ int main(int argc, char* argv[])
 		int blockSize{256};
 		int gridSize = Utils::divup(num_allocations, blockSize);
 
+		// Start measurement
+		timing.startMeasurement();
+		
+		#ifdef TEST_BASELINE
+
 		int* requirements{nullptr};
 		CHECK_ERROR(cudaMalloc(&requirements, (num_allocations + 1) * sizeof(int)));
 
@@ -301,8 +238,6 @@ int main(int argc, char* argv[])
 
 		// Exclusive sum
 		Helper::thrustExclusiveSum(requirements, num_allocations + 1);
-		
-		#ifdef TEST_BASELINE
 
 		// Copy back num elements
 		int num_items{0};
@@ -325,17 +260,6 @@ int main(int argc, char* argv[])
 		// **********
 		// **********
 
-		CudaUniquePointer<int> d_assignment(num_integers);
-		CudaUniquePointer<int> d_pos(num_integers);
-		d_write_assignment<<<gridSize, blockSize>>>(d_assignment.get(), d_pos.get(), num_allocations, requirements);
-
-		timing.startMeasurement();
-		gridSize = Utils::divup(num_integers, blockSize);
-		for(auto j = 0; j < 100; ++j)
-			d_write<<<gridSize, blockSize>>>(d_assignment.get(), d_pos.get(), requirements, d_verification_ptrs.get(), num_integers);
-		
-		timing.stopMeasurement();
-
 		#ifdef TEST_BASELINE
 		CHECK_ERROR(cudaFree(requirements));
 		CHECK_ERROR(cudaFree(storage_area));
@@ -343,9 +267,85 @@ int main(int argc, char* argv[])
 		d_memorymanager_free <<< gridSize, blockSize >>>(memory_manager, d_allocation_sizes.get(), num_allocations, d_verification_ptrs.get());
 		#endif
 
+		// Stop Measurement
+		timing.stopMeasurement();
 		std::cout << "#" << std::flush;
 	}
 	std::cout << std::endl;
+
+	// PerfMeasure timing;
+
+	// for(auto i = 0; i < num_iterations; ++i)
+	// {
+	// 	std::mt19937 gen(i); //Standard mersenne_twister_engine seeded with iteration
+    // 	std::uniform_real_distribution<> dis(0.0, 1.0);
+	// 	// Generate sizes
+	// 	srand(i);
+	// 	int num_integers{0};
+	// 	for(auto i = 0; i < num_allocations; ++i)
+	// 	{
+	// 		int val = Utils::alignment(offset + dis(gen) * range, sizeof(int));
+	// 		allocation_sizes[i] = val;
+	// 		num_integers += val / sizeof(int);
+	// 	}
+			
+	// 	d_allocation_sizes.copyToDevice(allocation_sizes, num_allocations);
+
+	// 	int blockSize{256};
+	// 	int gridSize = Utils::divup(num_allocations, blockSize);
+
+	// 	int* requirements{nullptr};
+	// 	CHECK_ERROR(cudaMalloc(&requirements, (num_allocations + 1) * sizeof(int)));
+
+	// 	d_baseline_requirements <<< gridSize, blockSize >>> (d_allocation_sizes.get(), num_allocations, requirements);
+
+	// 	// Exclusive sum
+	// 	Helper::thrustExclusiveSum(requirements, num_allocations + 1);
+		
+	// 	#ifdef TEST_BASELINE
+
+	// 	// Copy back num elements
+	// 	int num_items{0};
+	// 	CHECK_ERROR(cudaMemcpy(&num_items, requirements + num_allocations, sizeof(int), cudaMemcpyDeviceToHost));
+
+	// 	// Allocate memory
+	// 	int* storage_area{nullptr};
+	// 	CHECK_ERROR(cudaMalloc(&storage_area, num_items * sizeof(int)));
+
+	// 	// Write ptrs to verification ptrs
+	// 	d_baseline_write <<< gridSize, blockSize >>>(requirements, num_allocations, storage_area, d_verification_ptrs.get());
+
+	// 	#else
+	// 	d_memorymanager_alloc <<< gridSize, blockSize >>>(memory_manager, d_allocation_sizes.get(), num_allocations, d_verification_ptrs.get());
+	// 	#endif
+
+	// 	// **********
+	// 	// **********
+	// 	// Now we could write to this area
+	// 	// **********
+	// 	// **********
+
+	// 	CudaUniquePointer<int> d_assignment(num_integers);
+	// 	CudaUniquePointer<int> d_pos(num_integers);
+	// 	d_write_assignment<<<gridSize, blockSize>>>(d_assignment.get(), d_pos.get(), num_allocations, requirements);
+
+	// 	timing.startMeasurement();
+	// 	gridSize = Utils::divup(num_integers, blockSize);
+	// 	for(auto j = 0; j < 100; ++j)
+	// 		d_write<<<gridSize, blockSize>>>(d_assignment.get(), d_pos.get(), requirements, d_verification_ptrs.get(), num_integers);
+		
+	// 	timing.stopMeasurement();
+
+	// 	#ifdef TEST_BASELINE
+	// 	CHECK_ERROR(cudaFree(requirements));
+	// 	CHECK_ERROR(cudaFree(storage_area));
+	// 	#else
+	// 	d_memorymanager_free <<< gridSize, blockSize >>>(memory_manager, d_allocation_sizes.get(), num_allocations, d_verification_ptrs.get());
+	// 	#endif
+
+	// 	std::cout << "#" << std::flush;
+	// }
+	// std::cout << std::endl;
 
 	auto result = timing.generateResult();
 	results << result.mean_ << "," << result.std_dev_ << "," << result.min_ << "," << result.max_ << "," << result.median_;
