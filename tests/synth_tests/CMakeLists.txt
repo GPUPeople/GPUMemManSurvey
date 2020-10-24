@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(synth_tests LANGUAGES CXX CUDA VERSION 1.0)
+project(GPUMemoryManagers LANGUAGES CXX CUDA VERSION 1.0)
 
 set(BASE_PATH "../../")
 

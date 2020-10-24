@@ -9,22 +9,22 @@ class Command(object):
         self.process = None
         self.out = None
 
-    def run_command(self, capture = False):
+    def run_command(self, capture = False, working_directory = ""):
         if not capture:
             self.process = subprocess.Popen(self.cmd,shell=True)
             self.process.communicate()
             return
         # capturing the outputs of shell commands
-        self.process = subprocess.Popen(self.cmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE,stdin=subprocess.PIPE)
+        self.process = subprocess.Popen(self.cmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE,stdin=subprocess.PIPE, cwd=working_directory)
         out,err = self.process.communicate()
         if len(out) > 0:
             self.out = out.splitlines()
         else:
             self.out = None
 
-    # set default timeout to 2 minutes
-    def run(self, capture = False, timeout = 120):
-        thread = threading.Thread(target=self.run_command, args=(capture,))
+    # set default timeout to 10 minutes
+    def run(self, capture = False, timeout = 600, working_directory = ""):
+        thread = threading.Thread(target=self.run_command, args=(capture, working_directory))
         thread.start()
         thread.join(timeout)
         thread_killed = False

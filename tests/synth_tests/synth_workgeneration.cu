@@ -201,7 +201,7 @@ int main(int argc, char* argv[])
 
 	CudaUniquePointer<int> d_allocation_sizes(num_allocations);
 	CudaUniquePointer<int*> d_verification_ptrs(num_allocations);
-	int allocation_sizes[num_allocations];
+	std::vector<int> allocation_sizes(num_allocations);
 	auto range = allocation_size_range_upper - allocation_size_range_lower;
 	auto offset = allocation_size_range_lower;
 
@@ -221,7 +221,7 @@ int main(int argc, char* argv[])
 			num_integers += val / sizeof(int);
 		}
 			
-		d_allocation_sizes.copyToDevice(allocation_sizes, num_allocations);
+		d_allocation_sizes.copyToDevice(allocation_sizes.data(), num_allocations);
 
 		int blockSize{256};
 		int gridSize = Utils::divup(num_allocations, blockSize);
@@ -289,7 +289,7 @@ int main(int argc, char* argv[])
 	// 		num_integers += val / sizeof(int);
 	// 	}
 			
-	// 	d_allocation_sizes.copyToDevice(allocation_sizes, num_allocations);
+	// 	d_allocation_sizes.copyToDevice(allocation_sizes.data(), num_allocations);
 
 	// 	int blockSize{256};
 	// 	int gridSize = Utils::divup(num_allocations, blockSize);
