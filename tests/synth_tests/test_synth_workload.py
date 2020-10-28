@@ -126,10 +126,12 @@ def main():
 	####################################################################################################
 	if run_testcases:
 		testwritestr = "0"
+		namestr = ""
 		if args.testwrite:
 			testwritestr = "1"
+			namestr = "write_"
 		for name, executable in testcases.items():
-			csv_path = "results/synth_" + name + "_" + str(smallest_num_threads)+ "-" + str(largest_num_threads) + "_" + str(smallest_allocation_size) + "-" + str(largest_allocation_size) + ".csv"
+			csv_path = "results/synth_" + namestr + name + "_" + str(smallest_num_threads)+ "-" + str(largest_num_threads) + "_" + str(smallest_allocation_size) + "-" + str(largest_allocation_size) + ".csv"
 			if(os.path.isfile(csv_path)):
 				print("This file <" + csv_path + "> already exists, do you really want to OVERWRITE?")
 				inputfromconsole = input()
