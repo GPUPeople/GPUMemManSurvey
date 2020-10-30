@@ -7,7 +7,7 @@ import time
 from datetime import datetime
 from timedprocess import Command
 from Helper import generateResultsFromFileAllocation
-from Helper import plotMean
+# from Helper import plotMean
 import csv
 import argparse
 
@@ -27,8 +27,12 @@ def main():
 	filetype = "pdf"
 	time_out_val = 10
 	free_memory = 1
-	build_path = "build/"
-	sync_build_path = "sync_build/"
+	if os.name == 'nt': # If on Windows
+		build_path = os.path.join("build", "Release")
+		sync_build_path = os.path.join("sync_build", "Release")
+	else:
+		build_path = "build/"
+		sync_build_path = "sync_build/"
 
 	parser = argparse.ArgumentParser(description='Test allocation performance for various frameworks')
 	parser.add_argument('-t', type=str, help='Specify which frameworks to test, separated by +, e.g. o+s+h+c+f+r+x ---> c : cuda | s : scatteralloc | h : halloc | o : ouroboros | f : fdgmalloc | r : register-efficient | x : xmalloc')
@@ -44,35 +48,40 @@ def main():
 	parser.add_argument('-plotscale', type=str, help='log/linear')
 	parser.add_argument('-timeout', type=int, help='Timeout Value in Seconds, process will be killed after as many seconds')
 	parser.add_argument('-filetype', type=str, help='png or pdf')
+	parser.add_argument('-allocsize', type=int, help='How large is the manageable memory in GiB?', default=8)
+	parser.add_argument('-device', type=int, help='Which device to use', default=0)
 
 	args = parser.parse_args()
 
+	executable_extension = ""
+	if os.name == 'nt': # If on Windows
+		executable_extension = ".exe"
 	# Parse approaches
 	if(args.t):
 		if any("c" in s for s in args.t):
-			testcases["CUDA"] = build_path + str("c_alloc_test")
+			testcases["CUDA"] = os.path.join(build_path, str("c_alloc_test") + executable_extension)
 		if any("x" in s for s in args.t):
-			testcases["XMalloc"] = sync_build_path + str("x_alloc_test")
+			testcases["XMalloc"] = os.path.join(sync_build_path, str("x_alloc_test") + executable_extension)
 		if any("h" in s for s in args.t):
-			testcases["Halloc"] = sync_build_path + str("h_alloc_test")
+			testcases["Halloc"] = os.path.join(sync_build_path, str("h_alloc_test") + executable_extension)
 		if any("s" in s for s in args.t):
-			testcases["ScatterAlloc"] = sync_build_path + str("s_alloc_test")
+			testcases["ScatterAlloc"] = os.path.join(sync_build_path, str("s_alloc_test") + executable_extension)
 		if any("o" in s for s in args.t):
-			testcases["Ouroboros-P-S"] = build_path + str("o_alloc_test_p")
-			testcases["Ouroboros-P-VA"] = build_path + str("o_alloc_test_vap")
-			testcases["Ouroboros-P-VL"] = build_path + str("o_alloc_test_vlp")
-			testcases["Ouroboros-C-S"] = build_path + str("o_alloc_test_c")
-			testcases["Ouroboros-C-VA"] = build_path + str("o_alloc_test_vac")
-			testcases["Ouroboros-C-VL"] = build_path + str("o_alloc_test_vlc")
+			testcases["Ouroboros-P-S"] = os.path.join(build_path, str("o_alloc_test_p") + executable_extension)
+			testcases["Ouroboros-P-VA"] = os.path.join(build_path, str("o_alloc_test_vap") + executable_extension)
+			testcases["Ouroboros-P-VL"] = os.path.join(build_path, str("o_alloc_test_vlp") + executable_extension)
+			testcases["Ouroboros-C-S"] = os.path.join(build_path, str("o_alloc_test_c") + executable_extension)
+			testcases["Ouroboros-C-VA"] = os.path.join(build_path, str("o_alloc_test_vac") + executable_extension)
+			testcases["Ouroboros-C-VL"] = os.path.join(build_path, str("o_alloc_test_vlc") + executable_extension)
 		if any("f" in s for s in args.t):
-			testcases["FDGMalloc"] = sync_build_path + str("f_alloc_test")
+			testcases["FDGMalloc"] = os.path.join(sync_build_path, str("f_alloc_test") + executable_extension)
 		if any("r" in s for s in args.t):
-			# testcases["RegEff-A"] = sync_build_path + str("r_alloc_test_a")
-			testcases["RegEff-AW"] = sync_build_path + str("r_alloc_test_aw")
-			testcases["RegEff-C"] = sync_build_path + str("r_alloc_test_c")
-			testcases["RegEff-CF"] = sync_build_path + str("r_alloc_test_cf")
-			testcases["RegEff-CM"] = sync_build_path + str("r_alloc_test_cm")
-			testcases["RegEff-CFM"] = sync_build_path + str("r_alloc_test_cfm")
+			# testcases["RegEff-A"] = os.path.join(sync_build_path, str("r_alloc_test_a") + executable_extension)
+			testcases["RegEff-AW"] = os.path.join(sync_build_path, str("r_alloc_test_aw") + executable_extension)
+			testcases["RegEff-C"] = os.path.join(sync_build_path, str("r_alloc_test_c") + executable_extension)
+			testcases["RegEff-CF"] = os.path.join(sync_build_path, str("r_alloc_test_cf") + executable_extension)
+			testcases["RegEff-CM"] = os.path.join(sync_build_path, str("r_alloc_test_cm") + executable_extension)
+			testcases["RegEff-CFM"] = os.path.join(sync_build_path, str("r_alloc_test_cfm") + executable_extension)
 	
 	# Parse allocation size
 	if(args.byterange):
@@ -154,7 +163,7 @@ def main():
 						csv_file.write("\n" + str(num_threads) + ",")
 					with open(csv_path_free, "a", newline='') as csv_file:
 						csv_file.write("\n" + str(num_threads) + ",")
-					run_config = str(num_threads) + " " + str(allocation_size) + " " + str(num_iterations) + " " + str(measure_on_device) + " " + str(test_warp_based) + " 1 " + str(free_memory) + " " + csv_path_alloc + " " + csv_path_free
+					run_config = str(num_threads) + " " + str(allocation_size) + " " + str(num_iterations) + " " + str(measure_on_device) + " " + str(test_warp_based) + " 1 " + str(free_memory) + " " + csv_path_alloc + " " + csv_path_free + " " + str(args.allocsize) + " " + str(args.device)
 					executecommand = "{0} {1}".format(path, run_config)
 					print("#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#")
 					print("Running " + name + " with command -> " + executecommand)
@@ -175,179 +184,181 @@ def main():
 	####################################################################################################
 	####################################################################################################
 	if generate_results:
+		if not os.path.exists("results/scaling/aggregate"):
+			os.mkdir("results/scaling/aggregate")
 		allocation_size = smallest_allocation_size
 		while allocation_size <= largest_allocation_size:
-			generateResultsFromFileAllocation("results/scaling", allocation_size, smallest_num_threads, largest_allocation_size, "Threads", "scale", 2)
+			generateResultsFromFileAllocation(testcases, "results/scaling", allocation_size, smallest_num_threads, largest_num_threads, "Threads", "scale", 2)
 			allocation_size *= 2
 
-	####################################################################################################
-	####################################################################################################
-	# Generate plots
-	####################################################################################################
-	####################################################################################################
-	if generate_plots:
-		# Get Timestring
-		now = datetime.now()
-		time_string = now.strftime("%b-%d-%Y_%H-%M-%S")
-		if plotscale == "log":
-			time_string += "_log"
-		else:
-			time_string += "_lin"
-		# Generate plots for each byte size
-		byte_range = []
-		start_val = smallest_allocation_size
-		while start_val <= largest_allocation_size:
-			byte_range.append(start_val)
-			start_val *= 2
+	# ####################################################################################################
+	# ####################################################################################################
+	# # Generate plots
+	# ####################################################################################################
+	# ####################################################################################################
+	# if generate_plots:
+	# 	# Get Timestring
+	# 	now = datetime.now()
+	# 	time_string = now.strftime("%b-%d-%Y_%H-%M-%S")
+	# 	if plotscale == "log":
+	# 		time_string += "_log"
+	# 	else:
+	# 		time_string += "_lin"
+	# 	# Generate plots for each byte size
+	# 	byte_range = []
+	# 	start_val = smallest_allocation_size
+	# 	while start_val <= largest_allocation_size:
+	# 		byte_range.append(start_val)
+	# 		start_val *= 2
 
-		for num_bytes in byte_range:
-			# Generate plots for this byte size
-			print("Generate plots for size: " + str(num_bytes) + " Bytes")
-			result_alloc = list(list())
-			result_free = list(list())			
+	# 	for num_bytes in byte_range:
+	# 		# Generate plots for this byte size
+	# 		print("Generate plots for size: " + str(num_bytes) + " Bytes")
+	# 		result_alloc = list(list())
+	# 		result_free = list(list())			
 
-			for file in os.listdir("results/scaling/aggregate"):
-				filename = str("results/scaling/aggregate/") + os.fsdecode(file)
-				if(os.path.isdir(filename)):
-					continue
-				if filename.split("_")[2] != "scale" or str(num_bytes) != filename.split('_')[4] or str(smallest_num_threads) + "-" + str(largest_num_threads) != filename.split('_')[5].split(".")[0]:
-					continue
-				# We want the one matching our input
-				with open(filename) as f:
-					reader = csv.reader(f)
-					if "free" in filename:
-						result_free = list(reader)
-					else:
-						result_alloc = list(reader)
+	# 		for file in os.listdir("results/scaling/aggregate"):
+	# 			filename = str("results/scaling/aggregate/") + os.fsdecode(file)
+	# 			if(os.path.isdir(filename)):
+	# 				continue
+	# 			if filename.split("_")[2] != "scale" or str(num_bytes) != filename.split('_')[4] or str(smallest_num_threads) + "-" + str(largest_num_threads) != filename.split('_')[5].split(".")[0]:
+	# 				continue
+	# 			# We want the one matching our input
+	# 			with open(filename) as f:
+	# 				reader = csv.reader(f)
+	# 				if "free" in filename:
+	# 					result_free = list(reader)
+	# 				else:
+	# 					result_alloc = list(reader)
 
-			####################################################################################################
-			# Alloc - Mean - Std-dev
-			####################################################################################################
-			print("Generate mean/stddev alloc plot for " + str(num_bytes))
-			plotMean(result_alloc, 
-				testcases,
-				plotscale,
-				False,
-				'Threads', 
-				'ms', 
-				"Allocation Scaling for " + str(num_bytes) + " Bytes (mean)", 
-				str("results/plots/scaling/") + time_string + "_alloc_scale_" + str(num_bytes) + "_mean." + filetype,
-				"stddev")
-			plotMean(result_alloc, 
-				testcases,
-				plotscale,
-				True,
-				'Threads', 
-				'ms', 
-				"Allocation Scaling for " + str(num_bytes) + " Bytes (mean + std-dev)", 
-				str("results/plots/scaling/") + time_string + "_alloc_scale_" + str(num_bytes) + "_mean_stddev." + filetype,
-				"stddev")
+	# 		####################################################################################################
+	# 		# Alloc - Mean - Std-dev
+	# 		####################################################################################################
+	# 		print("Generate mean/stddev alloc plot for " + str(num_bytes))
+	# 		plotMean(result_alloc, 
+	# 			testcases,
+	# 			plotscale,
+	# 			False,
+	# 			'Threads', 
+	# 			'ms', 
+	# 			"Allocation Scaling for " + str(num_bytes) + " Bytes (mean)", 
+	# 			str("results/plots/scaling/") + time_string + "_alloc_scale_" + str(num_bytes) + "_mean." + filetype,
+	# 			"stddev")
+	# 		plotMean(result_alloc, 
+	# 			testcases,
+	# 			plotscale,
+	# 			True,
+	# 			'Threads', 
+	# 			'ms', 
+	# 			"Allocation Scaling for " + str(num_bytes) + " Bytes (mean + std-dev)", 
+	# 			str("results/plots/scaling/") + time_string + "_alloc_scale_" + str(num_bytes) + "_mean_stddev." + filetype,
+	# 			"stddev")
 
-			####################################################################################################
-			# Free - Mean - Std-dev
-			####################################################################################################
-			print("Generate mean/stddev free plot for " + str(num_bytes))
-			plotMean(result_free, 
-				testcases,
-				plotscale,
-				False,
-				'Threads', 
-				'ms', 
-				"Free scaling for " + str(num_bytes) + " Bytes (mean)", 
-				str("results/plots/scaling/") + time_string + "_free_scale_" + str(num_bytes) + "_mean." + filetype,
-				"stddev")
-			plotMean(result_free, 
-				testcases,
-				plotscale,
-				True,
-				'Threads', 
-				'ms', 
-				"Free scaling for " + str(num_bytes) + " Bytes (mean + std-dev)", 
-				str("results/plots/scaling/") + time_string + "_free_scale_" + str(num_bytes) + "_mean_stddev." + filetype,
-				"stddev")
+	# 		####################################################################################################
+	# 		# Free - Mean - Std-dev
+	# 		####################################################################################################
+	# 		print("Generate mean/stddev free plot for " + str(num_bytes))
+	# 		plotMean(result_free, 
+	# 			testcases,
+	# 			plotscale,
+	# 			False,
+	# 			'Threads', 
+	# 			'ms', 
+	# 			"Free scaling for " + str(num_bytes) + " Bytes (mean)", 
+	# 			str("results/plots/scaling/") + time_string + "_free_scale_" + str(num_bytes) + "_mean." + filetype,
+	# 			"stddev")
+	# 		plotMean(result_free, 
+	# 			testcases,
+	# 			plotscale,
+	# 			True,
+	# 			'Threads', 
+	# 			'ms', 
+	# 			"Free scaling for " + str(num_bytes) + " Bytes (mean + std-dev)", 
+	# 			str("results/plots/scaling/") + time_string + "_free_scale_" + str(num_bytes) + "_mean_stddev." + filetype,
+	# 			"stddev")
 
-			####################################################################################################
-			# Alloc - Mean - Min/Max
-			####################################################################################################
-			print("Generate mean/min/max alloc plot for " + str(num_bytes))
-			plotMean(result_alloc, 
-				testcases,
-				plotscale,
-				True,
-				'Threads', 
-				'ms', 
-				"Allocation scaling for " + str(num_bytes) + " Bytes (mean + min/max)", 
-				str("results/plots/scaling/") + time_string + "_alloc_scale_" + str(num_bytes) + "_min_max." + filetype,
-				"minmax")
+	# 		####################################################################################################
+	# 		# Alloc - Mean - Min/Max
+	# 		####################################################################################################
+	# 		print("Generate mean/min/max alloc plot for " + str(num_bytes))
+	# 		plotMean(result_alloc, 
+	# 			testcases,
+	# 			plotscale,
+	# 			True,
+	# 			'Threads', 
+	# 			'ms', 
+	# 			"Allocation scaling for " + str(num_bytes) + " Bytes (mean + min/max)", 
+	# 			str("results/plots/scaling/") + time_string + "_alloc_scale_" + str(num_bytes) + "_min_max." + filetype,
+	# 			"minmax")
 
-			####################################################################################################
-			# Free - Mean - Min/Max
-			####################################################################################################
-			print("Generate mean/min/max free plot for " + str(num_bytes))
-			plotMean(result_free, 
-				testcases,
-				plotscale,
-				True,
-				'Threads', 
-				'ms', 
-				"Free scaling for " + str(num_bytes) + " Bytes (mean + min/max)", 
-				str("results/plots/scaling/") + time_string + "_free_scale_" + str(num_bytes) + "_min_max." + filetype,
-				"minmax")
+	# 		####################################################################################################
+	# 		# Free - Mean - Min/Max
+	# 		####################################################################################################
+	# 		print("Generate mean/min/max free plot for " + str(num_bytes))
+	# 		plotMean(result_free, 
+	# 			testcases,
+	# 			plotscale,
+	# 			True,
+	# 			'Threads', 
+	# 			'ms', 
+	# 			"Free scaling for " + str(num_bytes) + " Bytes (mean + min/max)", 
+	# 			str("results/plots/scaling/") + time_string + "_free_scale_" + str(num_bytes) + "_min_max." + filetype,
+	# 			"minmax")
 
-			####################################################################################################
-			# Alloc - Median
-			####################################################################################################
-			print("Generate median alloc plot for " + str(num_bytes))
-			plotMean(result_alloc, 
-				testcases,
-				plotscale, 
-				False,
-				'Threads', 
-				'ms', 
-				"Allocation scaling for " + str(num_bytes) + " Bytes (median)", 
-				str("results/plots/scaling/") + time_string + "_alloc_scale_" + str(num_bytes) + "_median." + filetype,
-				"median")
+	# 		####################################################################################################
+	# 		# Alloc - Median
+	# 		####################################################################################################
+	# 		print("Generate median alloc plot for " + str(num_bytes))
+	# 		plotMean(result_alloc, 
+	# 			testcases,
+	# 			plotscale, 
+	# 			False,
+	# 			'Threads', 
+	# 			'ms', 
+	# 			"Allocation scaling for " + str(num_bytes) + " Bytes (median)", 
+	# 			str("results/plots/scaling/") + time_string + "_alloc_scale_" + str(num_bytes) + "_median." + filetype,
+	# 			"median")
 
-			####################################################################################################
-			# Free - Median
-			####################################################################################################
-			print("Generate median free plot for " + str(num_bytes))
-			plotMean(result_free, 
-				testcases,
-				plotscale, 
-				False,
-				'Threads', 
-				'ms', 
-				"Free scaling for " + str(num_bytes) + " Bytes (median)", 
-				str("results/plots/scaling/") + time_string + "_free_scale_" + str(num_bytes) + "_median." + filetype,
-				"median")
+	# 		####################################################################################################
+	# 		# Free - Median
+	# 		####################################################################################################
+	# 		print("Generate median free plot for " + str(num_bytes))
+	# 		plotMean(result_free, 
+	# 			testcases,
+	# 			plotscale, 
+	# 			False,
+	# 			'Threads', 
+	# 			'ms', 
+	# 			"Free scaling for " + str(num_bytes) + " Bytes (median)", 
+	# 			str("results/plots/scaling/") + time_string + "_free_scale_" + str(num_bytes) + "_median." + filetype,
+	# 			"median")
 
 
-	####################################################################################################
-	####################################################################################################
-	# Clean temporary files
-	####################################################################################################
-	####################################################################################################
-	if clean_temporary_files:
-		print("Do you REALLY want to delete all temporary files?:")
-		inputfromconsole = input()
-		if not (inputfromconsole == "yes" or inputfromconsole == "y"):
-			exit(-1)
-		for file in os.listdir("results/tmp"):
-			filename = str("results/tmp/") + os.fsdecode(file)
-			if(os.path.isdir(filename)):
-				continue
-			os.remove(filename)
-		for file in os.listdir("results/tmp/aggregate"):
-			filename = str("results/tmp/aggregate/") + os.fsdecode(file)
-			if(os.path.isdir(filename)):
-				continue
-			os.remove(filename)
-		for file in os.listdir("results/plots"):
-			filename = str("results/plots/") + os.fsdecode(file)
-			if(os.path.isdir(filename)):
-				continue
-			os.remove(filename)
+	# ####################################################################################################
+	# ####################################################################################################
+	# # Clean temporary files
+	# ####################################################################################################
+	# ####################################################################################################
+	# if clean_temporary_files:
+	# 	print("Do you REALLY want to delete all temporary files?:")
+	# 	inputfromconsole = input()
+	# 	if not (inputfromconsole == "yes" or inputfromconsole == "y"):
+	# 		exit(-1)
+	# 	for file in os.listdir("results/tmp"):
+	# 		filename = str("results/tmp/") + os.fsdecode(file)
+	# 		if(os.path.isdir(filename)):
+	# 			continue
+	# 		os.remove(filename)
+	# 	for file in os.listdir("results/tmp/aggregate"):
+	# 		filename = str("results/tmp/aggregate/") + os.fsdecode(file)
+	# 		if(os.path.isdir(filename)):
+	# 			continue
+	# 		os.remove(filename)
+	# 	for file in os.listdir("results/plots"):
+	# 		filename = str("results/plots/") + os.fsdecode(file)
+	# 		if(os.path.isdir(filename)):
+	# 			continue
+	# 		os.remove(filename)
 
 	print("Done")
 

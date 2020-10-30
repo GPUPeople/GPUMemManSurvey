@@ -159,6 +159,7 @@ int main(int argc, char* argv[])
 	bool test_oom{false};
 	int allocSizeinGB{8};
 	std::string csv_path{"../results/tmp/"};
+	int device{0};
 	if(argc >= 2)
 	{
 		num_allocations = atoi(argv[1]);
@@ -177,6 +178,10 @@ int main(int argc, char* argv[])
 						if(argc >= 7)
 						{
 							allocSizeinGB = atoi(argv[6]);
+							if(argc >= 8)
+							{
+								device = atoi(argv[7]);
+							}
 						}
 					}
 				}
@@ -188,10 +193,10 @@ int main(int argc, char* argv[])
 	if(print_output)
 		std::cout << "Number of Allocations: " << num_allocations << " | Allocation Size: " << allocation_size_byte << std::endl;
 
-	int device{0};
 	cudaSetDevice(device);
 	cudaDeviceProp prop;
 	cudaGetDeviceProperties(&prop, device);
+	std::cout << "Going to use " << prop.name << " " << prop.major << "." << prop.minor << "\n";
 	
 	MemoryManager memory_manager(allocSizeinGB * 1024ULL * 1024ULL * 1024ULL);
 
@@ -243,13 +248,13 @@ int main(int argc, char* argv[])
 			auto max_ptr = *max_element(verification_pointers.begin(), verification_pointers.end());
 			static_min_ptr = std::min(static_min_ptr, min_ptr);
 			static_max_ptr = std::max(static_max_ptr, max_ptr);
-			printf("%llu | %llu | %llu MB | %llu | %llu | %llu B\n", 
-			reinterpret_cast<unsigned long long>(min_ptr), 
-			reinterpret_cast<unsigned long long>(max_ptr), 
-			(reinterpret_cast<unsigned long long>(max_ptr) - reinterpret_cast<unsigned long long>(min_ptr)) / (1024*1024),
-			reinterpret_cast<unsigned long long>(static_min_ptr), 
-			reinterpret_cast<unsigned long long>(static_max_ptr), 
-			(reinterpret_cast<unsigned long long>(static_max_ptr) - reinterpret_cast<unsigned long long>(static_min_ptr)));
+			// printf("%llu | %llu | %llu MB | %llu | %llu | %llu B\n", 
+			// reinterpret_cast<unsigned long long>(min_ptr), 
+			// reinterpret_cast<unsigned long long>(max_ptr), 
+			// (reinterpret_cast<unsigned long long>(max_ptr) - reinterpret_cast<unsigned long long>(min_ptr)) / (1024*1024),
+			// reinterpret_cast<unsigned long long>(static_min_ptr), 
+			// reinterpret_cast<unsigned long long>(static_max_ptr), 
+			// (reinterpret_cast<unsigned long long>(static_max_ptr) - reinterpret_cast<unsigned long long>(static_min_ptr)));
 			results_frag << "," << (reinterpret_cast<unsigned long long>(max_ptr) - reinterpret_cast<unsigned long long>(min_ptr)) 
 				<< "," 
 				<<(reinterpret_cast<unsigned long long>(static_max_ptr) - reinterpret_cast<unsigned long long>(static_min_ptr));

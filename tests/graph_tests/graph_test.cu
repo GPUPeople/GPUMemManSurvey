@@ -95,7 +95,7 @@ const std::string mem_name("FDGMalloc");
 using DataType = float;
 
 template <typename MemoryManagerType, typename DataType>
-void testrun(CSR<DataType>& input_graph, const json& config, const std::string& init_csv, const std::string& insert_csv, const std::string& delete_csv);
+void testrun(CSR<DataType>& input_graph, const json& config, const std::string& init_csv, const std::string& insert_csv, const std::string& delete_csv, int allocSizeinGB);
 
 int main(int argc, char* argv[])
 {
@@ -110,7 +110,9 @@ int main(int argc, char* argv[])
 	std::string init_file;
 	std::string insert_file;
 	std::string delete_file;
+	int allocSizeinGB{8};
 	bool writeMatrixStats{false};
+	int device{0};
     if(argc >= 2)
 	{
 		config_file = std::string(argv[1]);
@@ -129,6 +131,14 @@ int main(int argc, char* argv[])
 						if(argc >= 7)
 						{
 							delete_file = std::string(argv[6]);
+							if(argc >= 8)
+							{
+								allocSizeinGB = atoi(argv[7]);
+								if(argc >= 9)
+								{
+									device = atoi(argv[8]);
+								}
+							}
 						}
 					}
 				}
@@ -150,7 +160,6 @@ int main(int argc, char* argv[])
 	json config;
     json_input >> config;
 
-    const auto device{config.find("device").value().get<int>()};
 	cudaSetDevice(device);
 	cudaDeviceProp prop;
 	cudaGetDeviceProperties(&prop, device);
@@ -215,25 +224,24 @@ int main(int argc, char* argv[])
 		// #######################################################
 		// #######################################################
 		// #######################################################
-		testrun<MemoryManager, DataType>(csr_mat, config, init_file, insert_file, delete_file);
+		testrun<MemoryManager, DataType>(csr_mat, config, init_file, insert_file, delete_file, allocSizeinGB);
 	}
 
 	return 0;
 }
 
 template <typename MemoryManagerType, typename DataType>
-void testrun(CSR<DataType>& input_graph, const json& config, const std::string& init_csv, const std::string& insert_csv, const std::string& delete_csv)
+void testrun(CSR<DataType>& input_graph, const json& config, const std::string& init_csv, const std::string& insert_csv, const std::string& delete_csv, int allocSizeinGB)
 {
     // Parameters
 	const auto iterations{config.find("iterations").value().get<int>()};
 	const auto update_iterations{config.find("update_iterations").value().get<int>()};
 	const auto batch_size{config.find("batch_size").value().get<int>()};
 	const auto realistic_deletion{config.find("realistic_deletion").value().get<bool>()};
-    const auto verify_enabled{ config.find("verify").value().get<bool>() };
-    const auto allocMB{ config.find("manageable_memory_mb").value().get<size_t>() };
-    size_t allocationSize{allocMB * 1024ULL * 1024ULL};
-    const auto range{config.find("range").value().get<unsigned int>()};
-    unsigned int offset{0};
+	const auto verify_enabled{ config.find("verify").value().get<bool>() };
+	size_t allocationSize{allocSizeinGB * 1024ULL * 1024ULL * 1024ULL};
+	const auto range{config.find("range").value().get<unsigned int>()};
+	unsigned int offset{0};
 	const bool printResults{true};
 	const auto test_init{config.find("test_init").value().get<bool>()};
 	

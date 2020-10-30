@@ -92,10 +92,21 @@ __global__ void freeKernel(MemoryManager mm, int** __restrict verification_ptr)
 int main(int argc, char* argv[])
 {
 	std::string csv_path{"../results/tmp/"};
+	int device{0};
 	if(argc >= 2)
 	{
 		csv_path = std::string(argv[1]);
+		if(argc >= 3)
+		{
+			device = atoi(argv[2]);
+		}
 	}
+
+	cudaSetDevice(device);
+	cudaDeviceProp prop;
+	cudaGetDeviceProperties(&prop, device);
+	std::cout << "Going to use " << prop.name << " " << prop.major << "." << prop.minor << "\n";
+	
 	std::ofstream results;
 	results.open(csv_path.c_str(), std::ios_base::app);
 

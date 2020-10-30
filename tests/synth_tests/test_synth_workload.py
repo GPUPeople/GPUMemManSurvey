@@ -6,12 +6,10 @@ import shutil
 import time
 from datetime import datetime
 from timedprocess import Command
-from Helper import generateResultsFromFileAllocation
-from Helper import generateResultsFromFileFragmentation
-from Helper import plotMean
+from Helper import generateResultsFromSynthetic
+# from Helper import plotMean
 import csv
 import argparse
-import numpy as np
 
 def main():
 	# Run all files from a directory
@@ -33,8 +31,12 @@ def main():
 	test_warp_based = False
 	filetype = "pdf"
 	time_out_val = 100
-	build_path = "build/"
-	sync_build_path = "sync_build/"
+	if os.name == 'nt': # If on Windows
+		build_path = os.path.join("build", "Release")
+		sync_build_path = os.path.join("sync_build", "Release")
+	else:
+		build_path = "build/"
+		sync_build_path = "sync_build/"
 
 	parser = argparse.ArgumentParser(description='Test workload for various frameworks')
 	parser.add_argument('-t', type=str, help='Specify which frameworks to test, separated by +, e.g. o+s+h+c+f+r+x+b ---> c : cuda | s : scatteralloc | h : halloc | o : ouroboros | f : fdgmalloc | r : register-efficient | x : xmalloc')
@@ -49,38 +51,42 @@ def main():
 	parser.add_argument('-plotscale', type=str, help='log/linear')
 	parser.add_argument('-filetype', type=str, help='png or pdf')
 	parser.add_argument('-allocsize', type=int, help='How large is the manageable memory in GiB?')
+	parser.add_argument('-device', type=int, help='Which device to use', default=0)
 
 	args = parser.parse_args()
 
+	executable_extension = ""
+	if os.name == 'nt': # If on Windows
+		executable_extension = ".exe"
 	# Parse approaches
 	if(args.t):
 		if any("c" in s for s in args.t):
-			testcases["CUDA"] = build_path + str("c_synth_test")
+			testcases["CUDA"] = os.path.join(build_path, str("c_synth_test") + executable_extension)
 		if any("x" in s for s in args.t):
-			testcases["XMalloc"] = sync_build_path + str("x_synth_test")
+			testcases["XMalloc"] = os.path.join(sync_build_path, str("x_synth_test") + executable_extension)
 		if any("h" in s for s in args.t):
-			testcases["Halloc"] = sync_build_path + str("h_synth_test")
+			testcases["Halloc"] = os.path.join(sync_build_path, str("h_synth_test") + executable_extension)
 		if any("s" in s for s in args.t):
-			testcases["ScatterAlloc"] = sync_build_path + str("s_synth_test")
+			testcases["ScatterAlloc"] = os.path.join(sync_build_path, str("s_synth_test") + executable_extension)
 		if any("o" in s for s in args.t):
-			testcases["Ouroboros-P-S"] = build_path + str("o_synth_test_p")
-			testcases["Ouroboros-P-VA"] = build_path + str("o_synth_test_vap")
-			testcases["Ouroboros-P-VL"] = build_path + str("o_synth_test_vlp")
-			testcases["Ouroboros-C-S"] = build_path + str("o_synth_test_c")
-			testcases["Ouroboros-C-VA"] = build_path + str("o_synth_test_vac")
-			testcases["Ouroboros-C-VL"] = build_path + str("o_synth_test_vlc")
+			testcases["Ouroboros-P-S"] = os.path.join(build_path, str("o_synth_test_p") + executable_extension)
+			testcases["Ouroboros-P-VA"] = os.path.join(build_path, str("o_synth_test_vap") + executable_extension)
+			testcases["Ouroboros-P-VL"] = os.path.join(build_path, str("o_synth_test_vlp") + executable_extension)
+			testcases["Ouroboros-C-S"] = os.path.join(build_path, str("o_synth_test_c") + executable_extension)
+			testcases["Ouroboros-C-VA"] = os.path.join(build_path, str("o_synth_test_vac") + executable_extension)
+			testcases["Ouroboros-C-VL"] = os.path.join(build_path, str("o_synth_test_vlc") + executable_extension)
 		if any("f" in s for s in args.t):
-			testcases["FDGMalloc"] = sync_build_path + str("f_synth_test")
+			testcases["FDGMalloc"] = os.path.join(sync_build_path, str("f_synth_test") + executable_extension)
 		if any("r" in s for s in args.t):
-			# testcases["RegEff-A"] = sync_build_path + str("r_synth_test_a")
-			testcases["RegEff-AW"] = sync_build_path + str("r_synth_test_aw")
-			testcases["RegEff-C"] = sync_build_path + str("r_synth_test_c")
-			testcases["RegEff-CF"] = sync_build_path + str("r_synth_test_cf")
-			testcases["RegEff-CM"] = sync_build_path + str("r_synth_test_cm")
-			testcases["RegEff-CFM"] = sync_build_path + str("r_synth_test_cfm")
+			# testcases["RegEff-A"] = os.path.join(sync_build_path, str("r_synth_test_a") + executable_extension)
+			testcases["RegEff-AW"] = os.path.join(sync_build_path, str("r_synth_test_aw") + executable_extension)
+			testcases["RegEff-C"] = os.path.join(sync_build_path, str("r_synth_test_c") + executable_extension)
+			testcases["RegEff-CF"] = os.path.join(sync_build_path, str("r_synth_test_cf") + executable_extension)
+			testcases["RegEff-CM"] = os.path.join(sync_build_path, str("r_synth_test_cm") + executable_extension)
+			testcases["RegEff-CFM"] = os.path.join(sync_build_path, str("r_synth_test_cfm") + executable_extension)
 		if any("b" in s for s in args.t):
-			testcases["Baseline"] = build_path + str("b_synth_test")
-	
+			testcases["Baseline"] = os.path.join(sync_build_path, str("b_synth_test") + executable_extension)
+
 	# Parse range
 	if(args.threadrange):
 		selected_range = args.threadrange.split('-')
@@ -143,7 +149,7 @@ def main():
 			while num_threads <= largest_num_threads:
 				with open(csv_path, "a", newline='') as csv_file:
 					csv_file.write(str(num_threads) + ", ")
-				run_config = str(num_threads) + " " + str(smallest_allocation_size) + " " + str(largest_allocation_size) + " " + str(num_iterations) + " 0 " + csv_path + " " + str(alloc_size) + " " + testwritestr
+				run_config = str(num_threads) + " " + str(smallest_allocation_size) + " " + str(largest_allocation_size) + " " + str(num_iterations) + " 0 " + csv_path + " " + str(alloc_size) + " " + testwritestr + " " + str(args.device)
 				executecommand = "{0} {1}".format(executable, run_config)
 				print("#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#")
 				print("Running " + name + " with command -> " + executecommand)
@@ -165,59 +171,13 @@ def main():
 	# # Generate new Results
 	# ####################################################################################################
 	# ####################################################################################################
-	# if generate_results:
-	# 	generateResultsFromFileFragmentation("results", num_allocations, smallest_allocation_size, largest_allocation_size, "Bytes", 1, num_iterations)
-
-	# ####################################################################################################
-	# ####################################################################################################
-	# # Generate new plots
-	# ####################################################################################################
-	# ####################################################################################################
-	# if generate_plots:
-	# 	result_frag = list()
-	# 	# Get Timestring
-	# 	now = datetime.now()
-	# 	time_string = now.strftime("%b-%d-%Y_%H-%M-%S")
-
-	# 	if plotscale == "log":
-	# 		time_string += "_log"
-	# 	else:
-	# 		time_string += "_lin"
-
-	# 	for file in os.listdir("results/aggregate"):
-	# 		filename = str("results/aggregate/") + os.fsdecode(file)
-	# 		if(os.path.isdir(filename)):
-	# 			continue
-	# 		if filename.split("_")[2] != "frag" or str(num_allocations) != filename.split('_')[3] or str(smallest_allocation_size) + "-" + str(largest_allocation_size) != filename.split('_')[4].split(".")[0]:
-	# 			continue
-	# 		# We want the one matching our input
-	# 		with open(filename) as f:
-	# 			reader = csv.reader(f)
-	# 			result_frag = list(reader)
-
-	# 	####################################################################################################
-	# 	# Lineplot
-	# 	####################################################################################################
-	# 	plotFrag(result_frag, 
-	# 		testcases,
-	# 		plotscale,
-	# 		False, 
-	# 		'Bytes', 
-	# 		'Byte - Range', 
-	# 		"Fragmentation: Byte-Range for " + str(num_allocations) + " allocations", 
-	# 		str("results/plots/") + time_string + "_frag." + filetype)
-
-	# 	####################################################################################################
-	# 	# Lineplot with range
-	# 	####################################################################################################
-	# 	plotFrag(result_frag, 
-	# 		testcases,
-	# 		plotscale,
-	# 		True, 
-	# 		'Bytes', 
-	# 		'Byte - Range',
-	# 		"Fragmentation: Byte-Range for " + str(num_allocations) + " allocations", 
-	# 		str("results/plots/") + time_string + "_frag_range." + filetype)
+	if generate_results:
+		if not os.path.exists("results/aggregate"):
+			os.mkdir("results/aggregate")
+		if args.testwrite:
+			generateResultsFromSynthetic(testcases, "results", smallest_num_threads, largest_num_threads, smallest_allocation_size, largest_allocation_size, "Num Threads", "synth_write", 2)
+		else:
+			generateResultsFromSynthetic(testcases, "results", smallest_num_threads, largest_num_threads, smallest_allocation_size, largest_allocation_size, "Num Threads", "synth", 1)
 
 	print("Done")
 

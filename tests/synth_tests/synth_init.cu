@@ -84,19 +84,25 @@ int main(int argc, char* argv[])
 {
 	int allocSizeinGB{8};
 	std::string csv_path{"../results/tmp/"};
+	int device{0};
 	if(argc >= 2)
 	{
 		allocSizeinGB = atoi(argv[1]);
 		if(argc >= 3)
 		{
 			csv_path = std::string(argv[2]);
+			if(argc >= 4)
+			{
+				device = atoi(argv[3]);
+			}
 		}
 	}
 
-	int device{0};
 	cudaSetDevice(device);
 	cudaDeviceProp prop;
 	cudaGetDeviceProperties(&prop, device);
+	std::cout << "Going to use " << prop.name << " " << prop.major << "." << prop.minor << "\n";
+	
 	PerfMeasure timing;
 	
 	auto start = std::chrono::steady_clock::now();

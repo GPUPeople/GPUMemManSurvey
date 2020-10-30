@@ -6,34 +6,33 @@ import shutil
 import time
 from datetime import datetime
 from timedprocess import Command
-from Helper import generateResultsFromFileAllocation
-from Helper import plotMean
+from Helper import generateResultsFromGraphUpdate
+# from Helper import plotMean
 import csv
 import argparse
 
-graphs = [
-	"144.mtx",  
-	"333SP.mtx",
-	"adaptive.mtx",
-	"caidaRouterLevel.mtx",
-	"coAuthorsCiteseer.mtx",
-	"delaunay_n20.mtx",
-	"fe_body.mtx",
-	"hugetric-00000.mtx",
-	"in2010.mtx",
-	"luxembourg_osm.mtx",
-	"rgg_n_2_20_s0.mtx",
-	"sc2010.mtx",
-	"vsp_mod2_pgp2_slptsk.mtx"
-]
-
 # graphs = [
+# 	"144.mtx",  
 # 	"333SP.mtx",
 # 	"adaptive.mtx",
-# 	"hugetric-00000.mtx"
+# 	"caidaRouterLevel.mtx",
+# 	"coAuthorsCiteseer.mtx",
+# 	"delaunay_n20.mtx",
+# 	"fe_body.mtx",
+# 	"hugetric-00000.mtx",
+# 	"in2010.mtx",
+# 	"luxembourg_osm.mtx",
+# 	"rgg_n_2_20_s0.mtx",
+# 	"sc2010.mtx",
+# 	"vsp_mod2_pgp2_slptsk.mtx"
 # ]
 
-path = "../../../graphs/"
+graphs = [
+	"email.mtx",
+	"1138_bus.mtx"
+]
+
+path = "data/"
 
 def main():
 	# Run all files from a directory
@@ -43,12 +42,15 @@ def main():
 
 	config_file = "config_update.json"
 	testcases = {}
-	build_path = "build/"
-	sync_build_path = "sync_build/"
+	if os.name == 'nt': # If on Windows
+		build_path = os.path.join("build", "Release")
+		sync_build_path = os.path.join("sync_build", "Release")
+	else:
+		build_path = "build/"
+		sync_build_path = "sync_build/"
 	filetype = "pdf"
 	time_out_val = 100
 	generate_results = True
-	generate_plots = True
 
 	parser = argparse.ArgumentParser(description='Test graph edge updates for various frameworks')
 	parser.add_argument('-t', type=str, help='Specify which frameworks to test, separated by +, e.g. o+s+h+c+f+r+x ---> c : cuda | s : scatteralloc | h : halloc | o : ouroboros | f : fdgmalloc | r : register-efficient | x : xmalloc')
@@ -60,35 +62,40 @@ def main():
 	parser.add_argument('-timeout', type=int, help='Timeout Value in Seconds, process will be killed after as many seconds')
 	parser.add_argument('-plotscale', type=str, help='log/linear')
 	parser.add_argument('-filetype', type=str, help='png or pdf')
+	parser.add_argument('-allocsize', type=int, help='How large is the manageable memory in GiB?', default=8)
+	parser.add_argument('-device', type=int, help='Which device to use', default=0)
 
 	args = parser.parse_args()
 
+	executable_extension = ""
+	if os.name == 'nt': # If on Windows
+		executable_extension = ".exe"
 	# Parse approaches
 	if(args.t):
 		if any("c" in s for s in args.t):
-			testcases["CUDA"] = build_path + str("c_graph_test")
+			testcases["CUDA"] = os.path.join(build_path, str("c_graph_test") + executable_extension)
 		if any("x" in s for s in args.t):
-			testcases["XMalloc"] = sync_build_path + str("x_graph_test")
+			testcases["XMalloc"] = os.path.join(sync_build_path, str("x_graph_test") + executable_extension)
 		if any("h" in s for s in args.t):
-			testcases["Halloc"] = sync_build_path + str("h_graph_test")
+			testcases["Halloc"] = os.path.join(sync_build_path, str("h_graph_test") + executable_extension)
 		if any("s" in s for s in args.t):
-			testcases["ScatterAlloc"] = sync_build_path + str("s_graph_test")
+			testcases["ScatterAlloc"] = os.path.join(sync_build_path, str("s_graph_test") + executable_extension)
 		if any("o" in s for s in args.t):
-			testcases["Ouroboros-P-S"] = build_path + str("o_graph_test_p")
-			testcases["Ouroboros-P-VA"] = build_path + str("o_graph_test_vap")
-			testcases["Ouroboros-P-VL"] = build_path + str("o_graph_test_vlp")
-			testcases["Ouroboros-C-S"] = build_path + str("o_graph_test_c")
-			testcases["Ouroboros-C-VA"] = build_path + str("o_graph_test_vac")
-			testcases["Ouroboros-C-VL"] = build_path + str("o_graph_test_vlc")
+			testcases["Ouroboros-P-S"] = os.path.join(build_path, str("o_graph_test_p") + executable_extension)
+			testcases["Ouroboros-P-VA"] = os.path.join(build_path, str("o_graph_test_vap") + executable_extension)
+			testcases["Ouroboros-P-VL"] = os.path.join(build_path, str("o_graph_test_vlp") + executable_extension)
+			testcases["Ouroboros-C-S"] = os.path.join(build_path, str("o_graph_test_c") + executable_extension)
+			testcases["Ouroboros-C-VA"] = os.path.join(build_path, str("o_graph_test_vac") + executable_extension)
+			testcases["Ouroboros-C-VL"] = os.path.join(build_path, str("o_graph_test_vlc") + executable_extension)
 		if any("f" in s for s in args.t):
-			testcases["FDGMalloc"] = sync_build_path + str("f_graph_test")
+			testcases["FDGMalloc"] = os.path.join(sync_build_path, str("f_graph_test") + executable_extension)
 		if any("r" in s for s in args.t):
-			# testcases["RegEff-A"] = sync_build_path + str("r_graph_test_a")
-			testcases["RegEff-AW"] = sync_build_path + str("r_graph_test_aw")
-			testcases["RegEff-C"] = sync_build_path + str("r_graph_test_c")
-			testcases["RegEff-CF"] = sync_build_path + str("r_graph_test_cf")
-			testcases["RegEff-CM"] = sync_build_path + str("r_graph_test_cm")
-			testcases["RegEff-CFM"] = sync_build_path + str("r_graph_test_cfm")
+			# testcases["RegEff-A"] = os.path.join(sync_build_path, str("r_graph_test_a") + executable_extension)
+			testcases["RegEff-AW"] = os.path.join(sync_build_path, str("r_graph_test_aw") + executable_extension)
+			testcases["RegEff-C"] = os.path.join(sync_build_path, str("r_graph_test_c") + executable_extension)
+			testcases["RegEff-CF"] = os.path.join(sync_build_path, str("r_graph_test_cf") + executable_extension)
+			testcases["RegEff-CM"] = os.path.join(sync_build_path, str("r_graph_test_cm") + executable_extension)
+			testcases["RegEff-CFM"] = os.path.join(sync_build_path, str("r_graph_test_cfm") + executable_extension)
 	
 	# Run Testcases
 	run_testcases = args.runtest
@@ -113,11 +120,16 @@ def main():
 	if(args.filetype):
 		filetype = args.filetype
 
+	ranged = ("range" in config_file)
+
 	# Sort graphs for consistent ordering
 	graphs.sort()
+
+	if not os.path.exists("results/aggregate"):
+		os.mkdir("results/aggregate")
 	
 	if(args.graphstats):
-		csv_path = "results/graph_stats.csv"
+		csv_path = "results/aggregate/graph_stats.csv"
 		if(os.path.isfile(csv_path)):
 			print("This file <" + csv_path + "> already exists, do you really want to OVERWRITE?")
 			inputfromconsole = input()
@@ -129,7 +141,7 @@ def main():
 			with open(csv_path, "a", newline='') as csv_file:
 				csv_file.write(graph + ",")
 			run_config = config_file + " " + path + graph + " " + str(1) + " " + csv_path
-			executecommand = "{0} {1}".format(build_path + str("c_graph_test"), run_config)
+			executecommand = "{0} {1}".format(os.path.join(build_path, str("c_graph_test") + executable_extension), run_config)
 			print("#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#")
 			print("Running command -> " + executecommand)
 			print("#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#")
@@ -171,7 +183,7 @@ def main():
 					csv_file.write(graph + ",")
 				with open(csv_path_delete, "a", newline='') as csv_file:
 					csv_file.write(graph + ",")
-				run_config = config_file + " " + path + graph + " " + str(0) + " init.csv " + csv_path_insert + " " + csv_path_delete
+				run_config = config_file + " " + path + graph + " " + str(0) + " init.csv " + csv_path_insert + " " + csv_path_delete + " " + str(args.allocsize) + " " + str(args.device)
 				executecommand = "{0} {1}".format(executable, run_config)
 				print("#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#")
 				print("Running " + name + " with command -> " + executecommand)
@@ -191,6 +203,13 @@ def main():
 					with open(csv_path_delete, "a", newline='') as csv_file:
 						csv_file.write("\n")
 
+	# ####################################################################################################
+	# ####################################################################################################
+	# # Generate new Results
+	# ####################################################################################################
+	# ####################################################################################################
+	if generate_results:
+		generateResultsFromGraphUpdate(testcases, "results", "Graphs", "update", 2, ranged)
 
 if __name__ == "__main__":
 	main()
