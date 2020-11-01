@@ -65,12 +65,12 @@ def main():
 		if any("s" in s for s in args.t):
 			testcases["ScatterAlloc"] = os.path.join(sync_build_path, str("s_alloc_test") + executable_extension)
 		if any("o" in s for s in args.t):
-			testcases["Ouroboros-P-S"] = os.path.join(build_path, str("o_alloc_test_p") + executable_extension)
-			testcases["Ouroboros-P-VA"] = os.path.join(build_path, str("o_alloc_test_vap") + executable_extension)
-			testcases["Ouroboros-P-VL"] = os.path.join(build_path, str("o_alloc_test_vlp") + executable_extension)
-			testcases["Ouroboros-C-S"] = os.path.join(build_path, str("o_alloc_test_c") + executable_extension)
+			# testcases["Ouroboros-P-S"] = os.path.join(build_path, str("o_alloc_test_p") + executable_extension)
+			# testcases["Ouroboros-P-VA"] = os.path.join(build_path, str("o_alloc_test_vap") + executable_extension)
+			# testcases["Ouroboros-P-VL"] = os.path.join(build_path, str("o_alloc_test_vlp") + executable_extension)
+			# testcases["Ouroboros-C-S"] = os.path.join(build_path, str("o_alloc_test_c") + executable_extension)
 			testcases["Ouroboros-C-VA"] = os.path.join(build_path, str("o_alloc_test_vac") + executable_extension)
-			testcases["Ouroboros-C-VL"] = os.path.join(build_path, str("o_alloc_test_vlc") + executable_extension)
+			# testcases["Ouroboros-C-VL"] = os.path.join(build_path, str("o_alloc_test_vlc") + executable_extension)
 		if any("f" in s for s in args.t):
 			testcases["FDGMalloc"] = os.path.join(sync_build_path, str("f_alloc_test") + executable_extension)
 		if any("r" in s for s in args.t):
