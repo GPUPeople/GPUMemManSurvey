@@ -10,6 +10,7 @@ from Helper import generateResultsFromFileAllocation
 # from Helper import plotMean
 import csv
 import argparse
+from sendEmail import EmailAlert
 
 def main():
 	print("##############################################################################")
@@ -48,6 +49,7 @@ def main():
 	parser.add_argument('-filetype', type=str, help='png or pdf')
 	parser.add_argument('-allocsize', type=int, help='How large is the manageable memory in GiB?', default=8)
 	parser.add_argument('-device', type=int, help='Which device to use', default=0)
+	parser.add_argument('-mailpass', type=str, help='Supply the mail password if you want to be notified', default=None)
 
 	args = parser.parse_args()
 
@@ -68,18 +70,18 @@ def main():
 			# testcases["Ouroboros-P-S"] = os.path.join(build_path, str("o_alloc_test_p") + executable_extension)
 			# testcases["Ouroboros-P-VA"] = os.path.join(build_path, str("o_alloc_test_vap") + executable_extension)
 			# testcases["Ouroboros-P-VL"] = os.path.join(build_path, str("o_alloc_test_vlp") + executable_extension)
-			# testcases["Ouroboros-C-S"] = os.path.join(build_path, str("o_alloc_test_c") + executable_extension)
-			testcases["Ouroboros-C-VA"] = os.path.join(build_path, str("o_alloc_test_vac") + executable_extension)
-			# testcases["Ouroboros-C-VL"] = os.path.join(build_path, str("o_alloc_test_vlc") + executable_extension)
+			testcases["Ouroboros-C-S"] = os.path.join(build_path, str("o_alloc_test_c") + executable_extension)
+			# testcases["Ouroboros-C-VA"] = os.path.join(build_path, str("o_alloc_test_vac") + executable_extension)
+			testcases["Ouroboros-C-VL"] = os.path.join(build_path, str("o_alloc_test_vlc") + executable_extension)
 		if any("f" in s for s in args.t):
 			testcases["FDGMalloc"] = os.path.join(sync_build_path, str("f_alloc_test") + executable_extension)
 		if any("r" in s for s in args.t):
 			# testcases["RegEff-A"] = os.path.join(sync_build_path, str("r_alloc_test_a") + executable_extension)
 			testcases["RegEff-AW"] = os.path.join(sync_build_path, str("r_alloc_test_aw") + executable_extension)
-			testcases["RegEff-C"] = os.path.join(sync_build_path, str("r_alloc_test_c") + executable_extension)
-			testcases["RegEff-CF"] = os.path.join(sync_build_path, str("r_alloc_test_cf") + executable_extension)
-			testcases["RegEff-CM"] = os.path.join(sync_build_path, str("r_alloc_test_cm") + executable_extension)
-			testcases["RegEff-CFM"] = os.path.join(sync_build_path, str("r_alloc_test_cfm") + executable_extension)
+			# testcases["RegEff-C"] = os.path.join(sync_build_path, str("r_alloc_test_c") + executable_extension)
+			# testcases["RegEff-CF"] = os.path.join(sync_build_path, str("r_alloc_test_cf") + executable_extension)
+			# testcases["RegEff-CM"] = os.path.join(sync_build_path, str("r_alloc_test_cm") + executable_extension)
+			# testcases["RegEff-CFM"] = os.path.join(sync_build_path, str("r_alloc_test_cfm") + executable_extension)
 	
 	# Parse num allocation
 	if(args.num):
@@ -136,6 +138,8 @@ def main():
 	if(args.filetype):
 		filetype = args.filetype
 
+	mailalert = EmailAlert(args.mailpass)
+
 	####################################################################################################
 	####################################################################################################
 	# Run testcases
@@ -176,6 +180,9 @@ def main():
 				else:
 					print("Success!")
 				allocation_size += 4
+			if args.mailpass:
+				message = "Testcase {0} run through!".format(str(name))
+				mailalert.sendAlert(message)
 
 	####################################################################################################
 	####################################################################################################
@@ -342,7 +349,9 @@ def main():
 	# 		if(os.path.isdir(filename)):
 	# 			continue
 	# 		os.remove(filename)
-
+	if args.mailpass:
+		message = "Test Allocation finished!"
+		mailalert.sendAlert(message)
 	print("Done")
 
 if __name__ == "__main__":
