@@ -77,11 +77,11 @@ def main():
 			testcases["FDGMalloc"] = os.path.join(sync_build_path, str("f_alloc_test") + executable_extension)
 		if any("r" in s for s in args.t):
 			# testcases["RegEff-A"] = os.path.join(sync_build_path, str("r_alloc_test_a") + executable_extension)
-			testcases["RegEff-AW"] = os.path.join(sync_build_path, str("r_alloc_test_aw") + executable_extension)
-			# testcases["RegEff-C"] = os.path.join(sync_build_path, str("r_alloc_test_c") + executable_extension)
-			# testcases["RegEff-CF"] = os.path.join(sync_build_path, str("r_alloc_test_cf") + executable_extension)
-			# testcases["RegEff-CM"] = os.path.join(sync_build_path, str("r_alloc_test_cm") + executable_extension)
-			# testcases["RegEff-CFM"] = os.path.join(sync_build_path, str("r_alloc_test_cfm") + executable_extension)
+			# testcases["RegEff-AW"] = os.path.join(sync_build_path, str("r_alloc_test_aw") + executable_extension)
+			testcases["RegEff-C"] = os.path.join(sync_build_path, str("r_alloc_test_c") + executable_extension)
+			testcases["RegEff-CF"] = os.path.join(sync_build_path, str("r_alloc_test_cf") + executable_extension)
+			testcases["RegEff-CM"] = os.path.join(sync_build_path, str("r_alloc_test_cm") + executable_extension)
+			testcases["RegEff-CFM"] = os.path.join(sync_build_path, str("r_alloc_test_cfm") + executable_extension)
 	
 	# Parse num allocation
 	if(args.num):
@@ -181,7 +181,7 @@ def main():
 					print("Success!")
 				allocation_size += 4
 			if args.mailpass:
-				message = "Testcase {0} run through!".format(str(name))
+				message = "Testcase {0} ran through! Testset: ({1})".format(str(name), " | ".join(testcases.keys()))
 				mailalert.sendAlert(message)
 
 	####################################################################################################

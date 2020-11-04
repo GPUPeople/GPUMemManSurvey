@@ -1,6 +1,6 @@
 {
   "iterations" : 1,
-  "update_iterations" : 10,
+  "update_iterations" : 100,
   "batch_size" : 10000,
   "range" : 0,
   "test_init" : false,

@@ -10,6 +10,7 @@ from Helper import generateResultsFromGraphUpdate
 # from Helper import plotMean
 import csv
 import argparse
+from sendEmail import EmailAlert
 
 # graphs = [
 # 	"144.mtx",  
@@ -64,6 +65,7 @@ def main():
 	parser.add_argument('-filetype', type=str, help='png or pdf')
 	parser.add_argument('-allocsize', type=int, help='How large is the manageable memory in GiB?', default=8)
 	parser.add_argument('-device', type=int, help='Which device to use', default=0)
+	parser.add_argument('-mailpass', type=str, help='Supply the mail password if you want to be notified', default=None)
 
 	args = parser.parse_args()
 
@@ -124,6 +126,8 @@ def main():
 
 	# Sort graphs for consistent ordering
 	graphs.sort()
+
+	mailalert = EmailAlert(args.mailpass)
 
 	if not os.path.exists("results/aggregate"):
 		os.mkdir("results/aggregate")
@@ -203,6 +207,10 @@ def main():
 					with open(csv_path_delete, "a", newline='') as csv_file:
 						csv_file.write("\n")
 
+			if args.mailpass:
+				message = "Testcase {0} ran through! Testset: ({1})".format(str(name), " | ".join(testcases.keys()))
+				mailalert.sendAlert(message)
+
 	# ####################################################################################################
 	# ####################################################################################################
 	# # Generate new Results
@@ -210,6 +218,10 @@ def main():
 	# ####################################################################################################
 	if generate_results:
 		generateResultsFromGraphUpdate(testcases, "results", "Graphs", "update", 2, ranged)
+
+	if args.mailpass:
+		message = "Test Graph Update finished!"
+		mailalert.sendAlert(message)
 
 if __name__ == "__main__":
 	main()

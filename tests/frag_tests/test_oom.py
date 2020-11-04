@@ -10,6 +10,7 @@ from Helper import generateResultsFromFileOOM
 # from Helper import plotLine
 import csv
 import argparse
+from sendEmail import EmailAlert
 
 def main():
 	# Run all files from a directory
@@ -49,6 +50,7 @@ def main():
 	parser.add_argument('-plotscale', type=str, help='log/linear')
 	parser.add_argument('-filetype', type=str, help='png or pdf')
 	parser.add_argument('-device', type=int, help='Which device to use', default=0)
+	parser.add_argument('-mailpass', type=str, help='Supply the mail password if you want to be notified', default=None)
 
 	args = parser.parse_args()
 
@@ -117,6 +119,8 @@ def main():
 	if(args.filetype):
 		filetype = args.filetype
 
+	mailalert = EmailAlert(args.mailpass)
+	
 	####################################################################################################
 	####################################################################################################
 	# Run testcases
@@ -155,6 +159,9 @@ def main():
 				else:
 					print("Success!")
 				allocation_size *= 2
+			if args.mailpass:
+				message = "Testcase {0} ran through! Testset: ({1})".format(str(name), " | ".join(testcases.keys()))
+				mailalert.sendAlert(message)
 
 	####################################################################################################
 	####################################################################################################
@@ -205,7 +212,9 @@ def main():
 	# 		str("results/plots/") + time_string + "_oom." + filetype,
 	# 		"log")
 
-
+	if args.mailpass:
+		message = "Test OOM finished!"
+		mailalert.sendAlert(message)
 	print("Done")
 
 if __name__ == "__main__":

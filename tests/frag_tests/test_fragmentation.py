@@ -10,6 +10,7 @@ from Helper import generateResultsFromFileFragmentation
 # from Helper import plotLineRange
 import csv
 import argparse
+from sendEmail import EmailAlert
 
 def main():
 	# Run all files from a directory
@@ -51,6 +52,7 @@ def main():
 	parser.add_argument('-filetype', type=str, help='png or pdf')
 	parser.add_argument('-allocsize', type=int, help='How large is the manageable memory in GiB?', default=8)
 	parser.add_argument('-device', type=int, help='Which device to use', default=0)
+	parser.add_argument('-mailpass', type=str, help='Supply the mail password if you want to be notified', default=None)
 
 	args = parser.parse_args()
 
@@ -68,21 +70,21 @@ def main():
 		if any("s" in s for s in args.t):
 			testcases["ScatterAlloc"] = os.path.join(sync_build_path, str("s_frag_test") + executable_extension)
 		if any("o" in s for s in args.t):
-			testcases["Ouroboros-P-S"] = os.path.join(build_path, str("o_frag_test_p") + executable_extension)
+			# testcases["Ouroboros-P-S"] = os.path.join(build_path, str("o_frag_test_p") + executable_extension)
 			testcases["Ouroboros-P-VA"] = os.path.join(build_path, str("o_frag_test_vap") + executable_extension)
-			testcases["Ouroboros-P-VL"] = os.path.join(build_path, str("o_frag_test_vlp") + executable_extension)
-			testcases["Ouroboros-C-S"] = os.path.join(build_path, str("o_frag_test_c") + executable_extension)
-			testcases["Ouroboros-C-VA"] = os.path.join(build_path, str("o_frag_test_vac") + executable_extension)
-			testcases["Ouroboros-C-VL"] = os.path.join(build_path, str("o_frag_test_vlc") + executable_extension)
+			# testcases["Ouroboros-P-VL"] = os.path.join(build_path, str("o_frag_test_vlp") + executable_extension)
+			# testcases["Ouroboros-C-S"] = os.path.join(build_path, str("o_frag_test_c") + executable_extension)
+			# testcases["Ouroboros-C-VA"] = os.path.join(build_path, str("o_frag_test_vac") + executable_extension)
+			# testcases["Ouroboros-C-VL"] = os.path.join(build_path, str("o_frag_test_vlc") + executable_extension)
 		if any("f" in s for s in args.t):
 			testcases["FDGMalloc"] = os.path.join(sync_build_path, str("f_frag_test") + executable_extension)
 		if any("r" in s for s in args.t):
 			# testcases["RegEff-A"] = os.path.join(sync_build_path, str("r_frag_test_a") + executable_extension)
 			testcases["RegEff-AW"] = os.path.join(sync_build_path, str("r_frag_test_aw") + executable_extension)
-			testcases["RegEff-C"] = os.path.join(sync_build_path, str("r_frag_test_c") + executable_extension)
-			testcases["RegEff-CF"] = os.path.join(sync_build_path, str("r_frag_test_cf") + executable_extension)
-			testcases["RegEff-CM"] = os.path.join(sync_build_path, str("r_frag_test_cm") + executable_extension)
-			testcases["RegEff-CFM"] = os.path.join(sync_build_path, str("r_frag_test_cfm") + executable_extension)
+			# testcases["RegEff-C"] = os.path.join(sync_build_path, str("r_frag_test_c") + executable_extension)
+			# testcases["RegEff-CF"] = os.path.join(sync_build_path, str("r_frag_test_cf") + executable_extension)
+			# testcases["RegEff-CM"] = os.path.join(sync_build_path, str("r_frag_test_cm") + executable_extension)
+			# testcases["RegEff-CFM"] = os.path.join(sync_build_path, str("r_frag_test_cfm") + executable_extension)
 
 	# Parse num allocation
 	if(args.num):
@@ -120,6 +122,8 @@ def main():
 	if(args.allocsize):
 		alloc_size = args.allocsize 
 
+	mailalert = EmailAlert(args.mailpass)
+
 	####################################################################################################
 	####################################################################################################
 	# Run testcases
@@ -155,6 +159,9 @@ def main():
 				else:
 					print("Success!")
 				allocation_size += 4
+			if args.mailpass:
+				message = "Testcase {0} ran through! Testset: ({1})".format(str(name), " | ".join(testcases.keys()))
+				mailalert.sendAlert(message)
 
 	####################################################################################################
 	####################################################################################################
@@ -215,8 +222,10 @@ def main():
 	# 		'Byte - Range',
 	# 		"Fragmentation: Byte-Range for " + str(num_allocations) + " allocations", 
 	# 		str("results/plots/") + time_string + "_frag_range." + filetype)
-
-	# print("Done")
+	if args.mailpass:
+		message = "Test Allocation finished!"
+		mailalert.sendAlert(message)
+	print("Done")
 
 if __name__ == "__main__":
 	main()

@@ -10,29 +10,30 @@ from Helper import generateResultsFromGraph
 # from Helper import plotMean
 import csv
 import argparse
-
-# graphs = [
-# 	"144.mtx",  
-# 	"333SP.mtx",
-# 	"adaptive.mtx",
-# 	"caidaRouterLevel.mtx",
-# 	"coAuthorsCiteseer.mtx",
-# 	"delaunay_n20.mtx",
-# 	"fe_body.mtx",
-# 	"hugetric-00000.mtx",
-# 	"in2010.mtx",
-# 	"luxembourg_osm.mtx",
-# 	"rgg_n_2_20_s0.mtx",
-# 	"sc2010.mtx",
-# 	"vsp_mod2_pgp2_slptsk.mtx"
-# ]
+from sendEmail import EmailAlert
 
 graphs = [
-	"email.mtx",
-	"1138_bus.mtx"
+	"144.mtx",  
+	"333SP.mtx",
+	"adaptive.mtx",
+	"caidaRouterLevel.mtx",
+	"coAuthorsCiteseer.mtx",
+	"delaunay_n20.mtx",
+	"fe_body.mtx",
+	"hugetric-00000.mtx",
+	"in2010.mtx",
+	"luxembourg_osm.mtx",
+	"rgg_n_2_20_s0.mtx",
+	"sc2010.mtx",
+	"vsp_mod2_pgp2_slptsk.mtx"
 ]
 
-path = "data/"
+# graphs = [
+# 	"email.mtx",
+# 	"1138_bus.mtx"
+# ]
+
+path = "../../data/"
 
 def main():
 	# Run all files from a directory
@@ -64,6 +65,7 @@ def main():
 	parser.add_argument('-filetype', type=str, help='png or pdf')
 	parser.add_argument('-allocsize', type=int, help='How large is the manageable memory in GiB?', default=8)
 	parser.add_argument('-device', type=int, help='Which device to use', default=0)
+	parser.add_argument('-mailpass', type=str, help='Supply the mail password if you want to be notified', default=None)
 
 	args = parser.parse_args()
 
@@ -81,7 +83,7 @@ def main():
 		if any("s" in s for s in args.t):
 			testcases["ScatterAlloc"] = os.path.join(sync_build_path, str("s_graph_test") + executable_extension)
 		if any("o" in s for s in args.t):
-			testcases["Ouroboros-P-S"] = os.path.join(build_path, str("o_graph_test_p") + executable_extension)
+			# testcases["Ouroboros-P-S"] = os.path.join(build_path, str("o_graph_test_p") + executable_extension)
 			testcases["Ouroboros-P-VA"] = os.path.join(build_path, str("o_graph_test_vap") + executable_extension)
 			testcases["Ouroboros-P-VL"] = os.path.join(build_path, str("o_graph_test_vlp") + executable_extension)
 			testcases["Ouroboros-C-S"] = os.path.join(build_path, str("o_graph_test_c") + executable_extension)
@@ -91,7 +93,7 @@ def main():
 			testcases["FDGMalloc"] = os.path.join(sync_build_path, str("f_graph_test") + executable_extension)
 		if any("r" in s for s in args.t):
 			# testcases["RegEff-A"] = os.path.join(sync_build_path, str("r_graph_test_a") + executable_extension)
-			testcases["RegEff-AW"] = os.path.join(sync_build_path, str("r_graph_test_aw") + executable_extension)
+			# testcases["RegEff-AW"] = os.path.join(sync_build_path, str("r_graph_test_aw") + executable_extension)
 			testcases["RegEff-C"] = os.path.join(sync_build_path, str("r_graph_test_c") + executable_extension)
 			testcases["RegEff-CF"] = os.path.join(sync_build_path, str("r_graph_test_cf") + executable_extension)
 			testcases["RegEff-CM"] = os.path.join(sync_build_path, str("r_graph_test_cm") + executable_extension)
@@ -122,6 +124,8 @@ def main():
 
 	# Sort graphs for consistent ordering
 	graphs.sort()
+
+	mailalert = EmailAlert(args.mailpass)
 
 	if not os.path.exists("results/aggregate"):
 		os.mkdir("results/aggregate")
@@ -188,6 +192,9 @@ def main():
 					print("Success!")
 					with open(csv_path, "a", newline='') as csv_file:
 						csv_file.write("\n")
+			if args.mailpass:
+				message = "Testcase {0} ran through! Testset: ({1})".format(str(name), " | ".join(testcases.keys()))
+				mailalert.sendAlert(message)
 
 	# ####################################################################################################
 	# ####################################################################################################
@@ -196,6 +203,10 @@ def main():
 	# ####################################################################################################
 	if generate_results:
 		generateResultsFromGraph(testcases, "results", "Graphs", "init", 2)
+
+	if args.mailpass:
+		message = "Test Graph Init finished!"
+		mailalert.sendAlert(message)
 
 
 if __name__ == "__main__":
