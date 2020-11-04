@@ -1,0 +1,8 @@
+Graph Update Testcase - Ouroboros-C-VL, mean(ms), std-dev(ms), min(ms), max(ms), median(ms), num iterations
+144.mtx,,0,0,0,0,0,0,-------------------> Ran longer than 180
+333SP.mtx,,0,0,0,0,0,0,-------------------> Ran longer than 180
+adaptive.mtx,6.89054,0.0380286,6.79322,7.00211,6.89558,100
+caidaRouterLevel.mtx,,0,0,0,0,0,0,-------------------> Ran longer than 180
+coAuthorsCiteseer.mtx,,0,0,0,0,0,0,-------------------> Ran longer than 180
+delaunay_n20.mtx,,0,0,0,0,0,0,-------------------> Ran longer than 180
+fe_body.mtx,

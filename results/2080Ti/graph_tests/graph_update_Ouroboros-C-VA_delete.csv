@@ -1,0 +1,14 @@
+Graph Update Testcase - Ouroboros-C-VA, mean(ms), std-dev(ms), min(ms), max(ms), median(ms), num iterations
+144.mtx,
+333SP.mtx,0.318825,0.0199439,0.237984,0.36128,0.319712,100
+adaptive.mtx,7.75469,0.0388177,7.66141,7.84182,7.75562,100
+caidaRouterLevel.mtx,
+coAuthorsCiteseer.mtx,
+delaunay_n20.mtx,0.74774,0.0461395,0.43536,0.826464,0.753888,100
+fe_body.mtx,
+hugetric-00000.mtx,0.0826829,0.00233722,0.079872,0.08848,0.08192,100
+in2010.mtx,
+luxembourg_osm.mtx,0.0779834,0.00839837,0.041632,0.105504,0.078976,100
+rgg_n_2_20_s0.mtx,
+sc2010.mtx,
+vsp_mod2_pgp2_slptsk.mtx,
