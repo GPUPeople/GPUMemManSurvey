@@ -2,8 +2,8 @@ Graph Init Testcase - Ouroboros-C-VL, mean(ms), std-dev(ms), min(ms), max(ms), m
 144.mtx,4.09576,0.176393,3.88464,4.74218,4.03312,25
 333SP.mtx,69.5552,2.25227,67.9898,80.1431,69.2711,25
 adaptive.mtx,103.265,4.91189,100.576,126.345,102.167,25
-caidaRouterLevel.mtx,,0,0,-------------------> Ran longer than 600
-coAuthorsCiteseer.mtx,,0,0,-------------------> Ran longer than 600
+caidaRouterLevel.mtx,4.26883,0.302803,3.56314,5.30832,4.27818,25
+coAuthorsCiteseer.mtx,3.90343,0.223668,3.39786,4.69677,3.89805,25
 delaunay_n20.mtx,19.0736,2.94249,15.0913,22.2116,20.8556,25
 fe_body.mtx,0.492477,0.167139,0.401664,1.30342,0.463968,25
 hugetric-00000.mtx,88.1339,5.07417,85.1089,112.004,87.0058,25
