@@ -1,5 +1,4 @@
 build/
-async_build/
 sync_build/
 scripts/__pycache__
 .vscode/

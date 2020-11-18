@@ -14,6 +14,17 @@ option(TEST_FDG "Test FDGMalloc" False)
 option(TEST_REG "Test Register-Efficient" True)
 option(TEST_XMALLOC "Test Xmalloc" True)
 
+if(CC70_ASYNC OR CC75_ASYNC)
+set(TEST_HALLOC OFF)
+set(TEST_SCATTERALLOC OFF)
+set(TEST_FDG OFF)
+set(TEST_REG OFF)
+set(TEST_XMALLOC OFF)
+else()
+set(TEST_CUDA OFF)
+set(TEST_OUROBOROS OFF)
+endif()
+
 ##########################################################################
 ##########################################################################
 ##########################################################################

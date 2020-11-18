@@ -7,3 +7,6 @@
 [submodule "frameworks/scatteralloc/repository"]
 	path = frameworks/scatteralloc/repository
 	url = https://github.com/ax3l/scatteralloc.git
+[submodule "externals/cub"]
+	path = externals/cub
+	url = https://github.com/NVlabs/cub.git

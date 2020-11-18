@@ -6,13 +6,24 @@ include(BaseCMake.cmake)
 set(BASE_PATH "")
 
 # Which frameworks to test
-option(TEST_CUDA "Test CUDA" True)
-option(TEST_HALLOC "Test Halloc" True)
-option(TEST_SCATTERALLOC "Test ScatterAlloc" True)
-option(TEST_OUROBOROS "Test Ouroboros" True)
-option(TEST_FDG "Test FDGMalloc" True)
-option(TEST_REG "Test Register-Efficient" True)
-option(TEST_XMALLOC "Test XMalloc" True)
+option(TEST_CUDA "Test CUDA" ON)
+option(TEST_HALLOC "Test Halloc" ON)
+option(TEST_SCATTERALLOC "Test ScatterAlloc" ON)
+option(TEST_OUROBOROS "Test Ouroboros" ON)
+option(TEST_FDG "Test FDGMalloc" OFF)
+option(TEST_REG "Test Register-Efficient" ON)
+option(TEST_XMALLOC "Test XMalloc" ON)
+
+if(CC70_ASYNC OR CC75_ASYNC)
+set(TEST_HALLOC OFF)
+set(TEST_SCATTERALLOC OFF)
+set(TEST_FDG OFF)
+set(TEST_REG OFF)
+set(TEST_XMALLOC OFF)
+else()
+set(TEST_CUDA OFF)
+set(TEST_OUROBOROS OFF)
+endif()
 
 ##########################################################################
 ##########################################################################
