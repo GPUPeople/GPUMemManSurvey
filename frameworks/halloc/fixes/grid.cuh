@@ -1,7 +1,9 @@
 /** @file grid.cuh implementation of superblock grid */
 #include <cstdint>
 
+#ifdef _WIN32
 using uint64 = uint64_t;
+#endif
 
 /** base address of the grid; this is the start address of the grid. It is
 		always aligned to superblock size boundary */

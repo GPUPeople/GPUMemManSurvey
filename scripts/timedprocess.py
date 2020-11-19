@@ -22,8 +22,8 @@ class Command(object):
         else:
             self.out = None
 
-    # set default timeout to 2 minutes
-    def run(self, capture = False, timeout = 120, working_directory = ""):
+    # set default timeout to 10 minutes
+    def run(self, capture = False, timeout = 600, working_directory = ""):
         thread = threading.Thread(target=self.run_command, args=(capture, working_directory))
         thread.start()
         thread.join(timeout)
