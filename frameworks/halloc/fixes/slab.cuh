@@ -2,10 +2,10 @@
 #include "size-info.h"
 
 /** block bits for all superblocks (content may change) */
-static uint * __constant__ block_bits_g;
+static __constant__ uint * block_bits_g;
 /** allocation size id's (content may change); size id for each allocation takes
 		1 byte, with size id "all set" meaning "no allocation" */
-static uint * __constant__ alloc_sizes_g;
+static __constant__ uint * alloc_sizes_g;
 /** number of block bit words per superblock */
 static __constant__ uint nsb_bit_words_g;
 /** shift for number of words per superblock */
@@ -125,21 +125,15 @@ __device__ __forceinline__ uint sb_ctr_inc
 	bool want_inc = true;
 	uint mask, old_counter, lid = lane_id(), leader_lid;
 	uint change;
+	//while(mask = __ballot_sync(0xFFFFFFFF, want_inc)) {
+	//	if(want_inc) {
 	while(want_inc) {
-		#if (__CUDA_ARCH__ >= 700)
-		mask = __ballot_sync(__activemask(), 1);
-		#else
-		mask = __ballot(1);
-		#endif
+		mask = __ballot_sync(0xFFFFFFFF, 1);
 		leader_lid = warp_leader(mask);
 		uint leader_sb_id = sb_id;
 		leader_sb_id = warp_bcast(leader_sb_id, leader_lid);
 		// allocation size is same for all superblocks
-		#if (__CUDA_ARCH__ >= 700)
-		uint group_mask = __ballot_sync(__activemask(), sb_id == leader_sb_id);
-		#else
-		uint group_mask = __ballot(sb_id == leader_sb_id);
-		#endif
+		uint group_mask = __ballot_sync(0xFFFFFFFF, sb_id == leader_sb_id);
 		change = nchunks * __popc(group_mask);
 		if(lid == leader_lid)
 			old_counter = sb_counter_inc(&sb_counters_g[sb_id], change);
@@ -167,11 +161,9 @@ __device__ __forceinline__ uint sb_ctr_inc
 __device__ __forceinline__ void sb_ctr_dec(uint sb_id, uint nchunks) {
 	bool want_inc = true;
 	uint mask, lid = lane_id();
-	#if (__CUDA_ARCH__ >= 700)
-	while(mask = __ballot_sync(__activemask(), want_inc)) {
-	#else
-	while(mask = __ballot(want_inc)) {
-	#endif
+	while(mask = __ballot_sync(0xFFFFFFFF, want_inc)) {
+		//while(want_inc) {
+		//mask = __ballot_sync(0xFFFFFFFF, want_inc);
 		uint leader_lid = warp_leader(mask), leader_sb_id = sb_id;
 		uint leader_nchunks = nchunks;
 		leader_sb_id = warp_bcast(leader_sb_id, leader_lid);
@@ -180,11 +172,7 @@ __device__ __forceinline__ void sb_ctr_dec(uint sb_id, uint nchunks) {
 		// TODO: handle the situation when different allocation sizes are 
 		// freed within the same slab, and do reduction for that
 		bool want_now = sb_id == leader_sb_id && nchunks == leader_nchunks;
-		#if (__CUDA_ARCH__ >= 700)
-		uint change = nchunks * __popc(__ballot_sync(__activemask(), want_now));
-		#else
-		uint change = nchunks * __popc(__ballot(want_now));
-		#endif
+		uint change = nchunks * __popc(__ballot_sync(0xFFFFFFFF, want_now));
 		if(lid == leader_lid) {
 			uint old_counter = sb_counter_dec(&sb_counters_g[sb_id], change);
 			if(!sb_is_head(old_counter)) {

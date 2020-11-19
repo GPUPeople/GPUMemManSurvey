@@ -1,3 +1,8 @@
+if(WIN32)
+set(BOOST_DIR "C:/dependencies/boost_1_66_0")
+include_directories(${BOOST_DIR})
+endif()
+
 ##########################################################################
 # Choose for which CC to build and if to enable Debug
 option(CC50 "Build with compute capability 5.0 support" FALSE)

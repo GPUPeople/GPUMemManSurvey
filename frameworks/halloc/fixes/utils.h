@@ -1,6 +1,12 @@
 #ifndef HALLOC_UTILS_H_
 #define HALLOC_UTILS_H_
 
+#include "cuda.h"
+#include "cuda_runtime.h"
+#include "cuda_runtime_api.h"
+
+using uint = unsigned int;
+
 /** @file utils.h some utility macros, functions and definitions */
 
 /** a macro for checking CUDA calls */
@@ -127,11 +133,7 @@ __device__ inline uint warp_id(void) {
 __device__ inline uint warp_bcast(uint v, uint root_lid) {
 #if __CUDA_ARCH__ >= 300
 	// use warp intrinsics
-	#if __CUDA_ARCH__ >= 700
-	return (uint) __shfl_sync(__activemask(), (int)v, root_lid);
-	#else
-	return (uint) __shfl((int)v, root_lid);
-	#endif
+	return (uint) __shfl_sync(0xFFFFFFFF, (int)v, root_lid);
 #else
 	// use shared memory
 	volatile __shared__ uint vs[MAX_NWARPS];
@@ -177,6 +179,22 @@ __device__ inline uint lanemask_lt() {
 }
 
 /** find the largest prime number below this one, and not dividing this one */
-uint max_prime_below(uint n, uint nb);
+uint max_prime_below(uint n, uint nb) {
+	for(uint p = n - 1; p >= 3; p--) {
+		uint max_d = (uint)floor(sqrt(p));
+		bool is_prime = true;
+		for(uint d = 2; d <= max_d; d++)
+			if(p % d == 0) {
+				is_prime = false;
+				break;
+			}
+		if(is_prime && n % p && nb % p)
+			return p;
+	}
+	// if we are here, we can't find prime; exit with failure
+	fprintf(stderr, "cannot find prime below %d not dividing %d\n", n, n);
+	exit(-1);
+	return ~0;
+}  // max_prime_below
 
 #endif

@@ -1,17 +1,32 @@
 # GPUMemManSurvey
 Evaluating different memory managers for dynamic GPU memory
 
+# Requirements
+Tested on Windows 10, Arch Linux <5.9.9> as well as Manjaro <5.4>
+* CUDA Toolkit
+  * Tested on `10.1`, `10.2`, `11.0` and `11.1`
+* C++ Compiler
+  * Tested on
+    * `gcc 9.0` and `gcc 10.2`
+    * `VS 2019`
+* boost (required for ScatterAlloc)
+  * Tested with boost `1.66`
+* Python
+  * Tested with `Python 3.8`
+  * Requires packages
+    * `argparse`
+
 # Setup Instructions
 * `git clone --recursive https://github.com/GPUPeople/GPUMemManSurvey.git <chosen_directory>`
 * `cd <chosen_directory>`
-* Linux
-  * `python setup.py --cc XX` set correct CC (tested with 61, 70 and 75)
-* Windows
-  * Create two folders `build` and `sync_build`
-  * Open CMake GUI
-    * Select a `sync` configuration and configure to `sync_build`
-    * Do the same with an `async` configuration to `build`
-* All tests follow the same procedure, just navigate to `tests/*_tests` and follow the same steps as for the general testcase
+* `python init.py`
+* Two options
+  * If you want to build everything, call `python setupAll.py --cc XX` set correct CC (tested with 61, 70 and 75)
+  * You can build each testcase, there is a `setup.py` in each tests folder, you can call each individually
+    * `python setup.py --cc XX` set correct CC tested with 61, 70, 75
+* On `Windows`
+  * Use the `Developer PowerShell for VS 20XX` (`msbuild` is needed) to call the scripts
+* To clean the build folders, simply call `python clean.py`
 
 | Framework | Status | Link to Paper | Code |
 |:---:|:---:|:---:| :---:|
