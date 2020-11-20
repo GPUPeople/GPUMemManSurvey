@@ -11,10 +11,13 @@ Tested on Windows 10, Arch Linux <5.9.9> as well as Manjaro <5.4>
     * `VS 2019`
 * boost (required for ScatterAlloc)
   * Tested with boost `1.66`
+* CMake
+  * Version `>= 3.16`, tested up until `3.18`
 * Python
   * Tested with `Python 3.8`
   * Requires packages
-    * `argparse`
+    * `argparse` (`python pip install argparse`)
+    * `numpy` (`python pip install numpy`)
 
 # Setup Instructions
 * `git clone --recursive https://github.com/GPUPeople/GPUMemManSurvey.git <chosen_directory>`

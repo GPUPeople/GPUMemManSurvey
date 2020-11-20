@@ -1,6 +1,6 @@
 import time
 import os
-import pandas
+# import pandas
 from datetime import datetime
 import csv
 import numpy as np
@@ -64,37 +64,73 @@ def generateResultsFromFileAllocation(testcases, folderpath, param1, param2, par
 		if approach_name not in testcases:
 			continue
 		print("Processing -> " + str(filename))
+		# with open(filename, newline='') as csv_file:
+		# 	dataframe = pandas.read_csv(csv_file)
+		# 	if "free" in filename:
+		# 		if not written_header_free:
+		# 			result_free.append(list(dataframe.iloc[:, 0]))
+		# 			result_free[-1].insert(0, dimension_name)
+		# 			written_header_free = True
+		# 		result_free.append(list(dataframe.iloc[:, 1]))
+		# 		result_free[-1].insert(0, approach_name + " - mean")
+		# 		result_free.append(list(dataframe.iloc[:, 2]))
+		# 		result_free[-1].insert(0, approach_name + " - std_dev")
+		# 		result_free.append(list(dataframe.iloc[:, 3]))
+		# 		result_free[-1].insert(0, approach_name + " - min")
+		# 		result_free.append(list(dataframe.iloc[:, 4]))
+		# 		result_free[-1].insert(0, approach_name + " - max")
+		# 		result_free.append(list(dataframe.iloc[:, 5]))
+		# 		result_free[-1].insert(0, approach_name + " - median")
+		# 	else:
+		# 		if not written_header_alloc:
+		# 			result_alloc.append(list(dataframe.iloc[:, 0]))
+		# 			result_alloc[-1].insert(0, dimension_name)
+		# 			written_header_alloc = True
+		# 		result_alloc.append(list(dataframe.iloc[:, 1]))
+		# 		result_alloc[-1].insert(0, approach_name + " - mean")
+		# 		result_alloc.append(list(dataframe.iloc[:, 2]))
+		# 		result_alloc[-1].insert(0, approach_name + " - std_dev")
+		# 		result_alloc.append(list(dataframe.iloc[:, 3]))
+		# 		result_alloc[-1].insert(0, approach_name + " - min")
+		# 		result_alloc.append(list(dataframe.iloc[:, 4]))
+		# 		result_alloc[-1].insert(0, approach_name + " - max")
+		# 		result_alloc.append(list(dataframe.iloc[:, 5]))
+		# 		result_alloc[-1].insert(0, approach_name + " - median")
 		with open(filename, newline='') as csv_file:
-			dataframe = pandas.read_csv(csv_file)
+			csvreader = list(csv.reader(csv_file, delimiter=',', quotechar='|'))
+			cols = list()
+			num_cols = 6
+			for i in range(num_cols):
+				cols.append([row[i] for row in csvreader])
 			if "free" in filename:
 				if not written_header_free:
-					result_free.append(list(dataframe.iloc[:, 0]))
+					result_free.append(cols[0])
 					result_free[-1].insert(0, dimension_name)
 					written_header_free = True
-				result_free.append(list(dataframe.iloc[:, 1]))
+				result_free.append(cols[1])
 				result_free[-1].insert(0, approach_name + " - mean")
-				result_free.append(list(dataframe.iloc[:, 2]))
+				result_free.append(cols[2])
 				result_free[-1].insert(0, approach_name + " - std_dev")
-				result_free.append(list(dataframe.iloc[:, 3]))
+				result_free.append(cols[3])
 				result_free[-1].insert(0, approach_name + " - min")
-				result_free.append(list(dataframe.iloc[:, 4]))
+				result_free.append(cols[4])
 				result_free[-1].insert(0, approach_name + " - max")
-				result_free.append(list(dataframe.iloc[:, 5]))
+				result_free.append(cols[5])
 				result_free[-1].insert(0, approach_name + " - median")
 			else:
 				if not written_header_alloc:
-					result_alloc.append(list(dataframe.iloc[:, 0]))
+					result_alloc.append(cols[0])
 					result_alloc[-1].insert(0, dimension_name)
 					written_header_alloc = True
-				result_alloc.append(list(dataframe.iloc[:, 1]))
+				result_alloc.append(cols[1])
 				result_alloc[-1].insert(0, approach_name + " - mean")
-				result_alloc.append(list(dataframe.iloc[:, 2]))
+				result_alloc.append(cols[2])
 				result_alloc[-1].insert(0, approach_name + " - std_dev")
-				result_alloc.append(list(dataframe.iloc[:, 3]))
+				result_alloc.append(cols[3])
 				result_alloc[-1].insert(0, approach_name + " - min")
-				result_alloc.append(list(dataframe.iloc[:, 4]))
+				result_alloc.append(cols[4])
 				result_alloc[-1].insert(0, approach_name + " - max")
-				result_alloc.append(list(dataframe.iloc[:, 5]))
+				result_alloc.append(cols[5])
 				result_alloc[-1].insert(0, approach_name + " - median")
 
 	# Get Timestring
