@@ -28,7 +28,7 @@ def main():
 	build_path = "build/"
 	sync_build_path = "sync_build/"
 
-	parser = argparse.ArgumentParser(description='Test fragmentation for various frameworks')
+	parser = argparse.ArgumentParser(description='Test register requirements for various frameworks')
 	parser.add_argument('-t', type=str, help='Specify which frameworks to test, separated by +, e.g. o+s+h+c+f+r+x+b ---> c : cuda | s : scatteralloc | h : halloc | o : ouroboros | f : fdgmalloc | r : register-efficient | x : xmalloc')
 	parser.add_argument('-runtest', action='store_true', default=False, help='Run testcases')
 	parser.add_argument('-genres', action='store_true', default=False, help='Generate results')

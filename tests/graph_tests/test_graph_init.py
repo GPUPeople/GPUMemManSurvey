@@ -49,7 +49,7 @@ def main():
 	generate_results = True
 	generate_plots = True
 
-	parser = argparse.ArgumentParser(description='Test fragmentation for various frameworks')
+	parser = argparse.ArgumentParser(description='Test graph initialization for various frameworks')
 	parser.add_argument('-t', type=str, help='Specify which frameworks to test, separated by +, e.g. o+s+h+c+f+r+x ---> c : cuda | s : scatteralloc | h : halloc | o : ouroboros | f : fdgmalloc | r : register-efficient | x : xmalloc')
 	parser.add_argument('-configfile', type=str, help='Specify the config file: config.json')
 	parser.add_argument('-graphstats', action='store_true', default=False, help='Just write graph stats and do not run testcases')
@@ -73,21 +73,21 @@ def main():
 		if any("s" in s for s in args.t):
 			testcases["ScatterAlloc"] = sync_build_path + str("s_graph_test")
 		if any("o" in s for s in args.t):
-			# testcases["Ouroboros-P-S"] = build_path + str("o_graph_test_p")
-			# testcases["Ouroboros-P-VA"] = build_path + str("o_graph_test_vap")
+			testcases["Ouroboros-P-S"] = build_path + str("o_graph_test_p")
+			testcases["Ouroboros-P-VA"] = build_path + str("o_graph_test_vap")
 			testcases["Ouroboros-P-VL"] = build_path + str("o_graph_test_vlp")
-			# testcases["Ouroboros-C-S"] = build_path + str("o_graph_test_c")
-			# testcases["Ouroboros-C-VA"] = build_path + str("o_graph_test_vac")
-			# testcases["Ouroboros-C-VL"] = build_path + str("o_graph_test_vlc")
+			testcases["Ouroboros-C-S"] = build_path + str("o_graph_test_c")
+			testcases["Ouroboros-C-VA"] = build_path + str("o_graph_test_vac")
+			testcases["Ouroboros-C-VL"] = build_path + str("o_graph_test_vlc")
 		if any("f" in s for s in args.t):
 			testcases["FDGMalloc"] = sync_build_path + str("f_graph_test")
 		if any("r" in s for s in args.t):
 			# testcases["RegEff-A"] = sync_build_path + str("r_graph_test_a")
-			# testcases["RegEff-AW"] = sync_build_path + str("r_graph_test_aw")
+			testcases["RegEff-AW"] = sync_build_path + str("r_graph_test_aw")
 			testcases["RegEff-C"] = sync_build_path + str("r_graph_test_c")
 			testcases["RegEff-CF"] = sync_build_path + str("r_graph_test_cf")
-			# testcases["RegEff-CM"] = sync_build_path + str("r_graph_test_cm")
-			# testcases["RegEff-CFM"] = sync_build_path + str("r_graph_test_cfm")
+			testcases["RegEff-CM"] = sync_build_path + str("r_graph_test_cm")
+			testcases["RegEff-CFM"] = sync_build_path + str("r_graph_test_cfm")
 	
 	# Run Testcases
 	run_testcases = args.runtest

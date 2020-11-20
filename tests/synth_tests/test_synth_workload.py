@@ -36,7 +36,7 @@ def main():
 	build_path = "build/"
 	sync_build_path = "sync_build/"
 
-	parser = argparse.ArgumentParser(description='Test fragmentation for various frameworks')
+	parser = argparse.ArgumentParser(description='Test workload for various frameworks')
 	parser.add_argument('-t', type=str, help='Specify which frameworks to test, separated by +, e.g. o+s+h+c+f+r+x+b ---> c : cuda | s : scatteralloc | h : halloc | o : ouroboros | f : fdgmalloc | r : register-efficient | x : xmalloc')
 	parser.add_argument('-threadrange', type=str, help='Specify number of threads, given as powers of two, e.g. 0-5 -> results in 1-32')
 	parser.add_argument('-range', type=str, help='Sepcify Allocation Range, e.g. 4-1024')
@@ -44,6 +44,7 @@ def main():
 	parser.add_argument('-runtest', action='store_true', default=False, help='Run testcases')
 	parser.add_argument('-genres', action='store_true', default=False, help='Generate results')
 	parser.add_argument('-genplot', action='store_true', default=False, help='Generate results file and plot')
+	parser.add_argument('-testwrite', action='store_true', default=False, help='If set tests write performance, not allocation performance')
 	parser.add_argument('-timeout', type=int, help='Timeout Value in Seconds, process will be killed after as many seconds')
 	parser.add_argument('-plotscale', type=str, help='log/linear')
 	parser.add_argument('-filetype', type=str, help='png or pdf')
@@ -124,6 +125,9 @@ def main():
 	####################################################################################################
 	####################################################################################################
 	if run_testcases:
+		testwritestr = "0"
+		if args.testwrite:
+			testwritestr = "1"
 		for name, executable in testcases.items():
 			csv_path = "results/synth_" + name + "_" + str(smallest_num_threads)+ "-" + str(largest_num_threads) + "_" + str(smallest_allocation_size) + "-" + str(largest_allocation_size) + ".csv"
 			if(os.path.isfile(csv_path)):
@@ -137,7 +141,7 @@ def main():
 			while num_threads <= largest_num_threads:
 				with open(csv_path, "a", newline='') as csv_file:
 					csv_file.write(str(num_threads) + ", ")
-				run_config = str(num_threads) + " " + str(smallest_allocation_size) + " " + str(largest_allocation_size) + " " + str(num_iterations) + " 0 " + csv_path + " " + str(alloc_size)
+				run_config = str(num_threads) + " " + str(smallest_allocation_size) + " " + str(largest_allocation_size) + " " + str(num_iterations) + " 0 " + csv_path + " " + str(alloc_size) + " " + testwritestr
 				executecommand = "{0} {1}".format(executable, run_config)
 				print("#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#")
 				print("Running " + name + " with command -> " + executecommand)
