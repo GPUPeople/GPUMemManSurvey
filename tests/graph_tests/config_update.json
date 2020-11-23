@@ -6,6 +6,5 @@
   "range" : 0,
   "test_init" : false,
   "verify" : false,
-  "realistic_deletion": false,
-  "manageable_memory_mb" : 8192
+  "realistic_deletion": false
 }

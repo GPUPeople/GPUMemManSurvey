@@ -38,7 +38,7 @@ def main():
 	parser.add_argument('-t', type=str, help='Specify which frameworks to test, separated by +, e.g. o+s+h+c+f+r+x ---> c : cuda | s : scatteralloc | h : halloc | o : ouroboros | f : fdgmalloc | r : register-efficient | x : xmalloc')
 	parser.add_argument('-num', type=int, help='How many allocations to perform')
 	parser.add_argument('-range', type=str, help='Sepcify Allocation Range, e.g. 4-1024')
-	parser.add_argument('-allocsize', type=int, help='How large is the manageable memory in GiB?')
+	parser.add_argument('-allocsize', type=int, help='How large is the manageable memory in GiB?', default=8)
 	parser.add_argument('-runtest', action='store_true', default=False, help='Run testcases')
 	parser.add_argument('-genres', action='store_true', default=False, help='Generate results')
 	parser.add_argument('-genplot', action='store_true', default=False, help='Generate results file and plot')

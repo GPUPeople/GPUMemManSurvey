@@ -46,7 +46,7 @@ def main():
 	parser.add_argument('-timeout', type=int, help='Timeout Value in Seconds, process will be killed after as many seconds')
 	parser.add_argument('-plotscale', type=str, help='log/linear')
 	parser.add_argument('-filetype', type=str, help='png or pdf')
-	parser.add_argument('-allocsize', type=int, help='How large is the manageable memory in GiB?')
+	parser.add_argument('-allocsize', type=int, help='How large is the manageable memory in GiB?', default=8)
 
 	args = parser.parse_args()
 

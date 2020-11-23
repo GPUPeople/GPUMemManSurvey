@@ -11,29 +11,27 @@ from Helper import plotMean
 import csv
 import argparse
 
-graphs = [
-	"144.mtx",  
-	"333SP.mtx",
-	"adaptive.mtx",
-	"caidaRouterLevel.mtx",
-	"coAuthorsCiteseer.mtx",
-	"delaunay_n20.mtx",
-	"fe_body.mtx",
-	"hugetric-00000.mtx",
-	"in2010.mtx",
-	"luxembourg_osm.mtx",
-	"rgg_n_2_20_s0.mtx",
-	"sc2010.mtx",
-	"vsp_mod2_pgp2_slptsk.mtx"
-]
-
 # graphs = [
+# 	"144.mtx",  
 # 	"333SP.mtx",
 # 	"adaptive.mtx",
-# 	"hugetric-00000.mtx"
+# 	"caidaRouterLevel.mtx",
+# 	"coAuthorsCiteseer.mtx",
+# 	"delaunay_n20.mtx",
+# 	"fe_body.mtx",
+# 	"hugetric-00000.mtx",
+# 	"in2010.mtx",
+# 	"luxembourg_osm.mtx",
+# 	"rgg_n_2_20_s0.mtx",
+# 	"sc2010.mtx",
+# 	"vsp_mod2_pgp2_slptsk.mtx"
 # ]
 
-path = "../../../graphs/"
+graphs = [
+	"email.mtx"
+]
+
+path = "../graphs/"
 
 def main():
 	# Run all files from a directory
@@ -60,6 +58,7 @@ def main():
 	parser.add_argument('-timeout', type=int, help='Timeout Value in Seconds, process will be killed after as many seconds')
 	parser.add_argument('-plotscale', type=str, help='log/linear')
 	parser.add_argument('-filetype', type=str, help='png or pdf')
+	parser.add_argument('-allocsize', type=int, help='How large is the manageable memory in GiB?', default=8)
 
 	args = parser.parse_args()
 
@@ -171,7 +170,7 @@ def main():
 					csv_file.write(graph + ",")
 				with open(csv_path_delete, "a", newline='') as csv_file:
 					csv_file.write(graph + ",")
-				run_config = config_file + " " + path + graph + " " + str(0) + " init.csv " + csv_path_insert + " " + csv_path_delete
+				run_config = config_file + " " + path + graph + " " + str(0) + " init.csv " + csv_path_insert + " " + csv_path_delete + " " + str(args.allocsize)
 				executecommand = "{0} {1}".format(executable, run_config)
 				print("#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#")
 				print("Running " + name + " with command -> " + executecommand)

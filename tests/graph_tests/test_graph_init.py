@@ -28,11 +28,10 @@ import argparse
 # ]
 
 graphs = [
-	"adaptive.mtx",
-	"hugetric-00000.mtx"
+	"email.mtx"
 ]
 
-path = "../../../graphs/"
+path = "../graphs/"
 
 def main():
 	# Run all files from a directory
@@ -59,6 +58,7 @@ def main():
 	parser.add_argument('-timeout', type=int, help='Timeout Value in Seconds, process will be killed after as many seconds')
 	parser.add_argument('-plotscale', type=str, help='log/linear')
 	parser.add_argument('-filetype', type=str, help='png or pdf')
+	parser.add_argument('-allocsize', type=int, help='How large is the manageable memory in GiB?', default=8)
 
 	args = parser.parse_args()
 
@@ -162,7 +162,7 @@ def main():
 			for graph in graphs:
 				with open(csv_path, "a", newline='') as csv_file:
 					csv_file.write(graph + ",")
-				run_config = config_file + " " + path + graph + " " + str(0) + " " + csv_path
+				run_config = config_file + " " + path + graph + " " + str(0) + " " + csv_path + " insert.csv delete.csv" + " " + str(args.allocsize)
 				executecommand = "{0} {1}".format(executable, run_config)
 				print("#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#")
 				print("Running " + name + " with command -> " + executecommand)

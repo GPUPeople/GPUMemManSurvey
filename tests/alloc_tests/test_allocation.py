@@ -42,6 +42,7 @@ def main():
 	parser.add_argument('-plotscale', type=str, help='log/linear')
 	parser.add_argument('-timeout', type=int, help='Timeout Value in Seconds, process will be killed after as many seconds')
 	parser.add_argument('-filetype', type=str, help='png or pdf')
+	parser.add_argument('-allocsize', type=int, help='How large is the manageable memory in GiB?', default=8)
 
 	args = parser.parse_args()
 
@@ -152,7 +153,7 @@ def main():
 					csv_file.write("\n" + str(allocation_size) + ",")
 				with open(csv_path_free, "a", newline='') as csv_file:
 					csv_file.write("\n" + str(allocation_size) + ",")
-				run_config = str(num_allocations) + " " + str(allocation_size) + " " + str(num_iterations) + " " + str(measure_on_device) + " " + str(test_warp_based) + " 1 " + str(free_memory) + " " + csv_path_alloc + " " + csv_path_free
+				run_config = str(num_allocations) + " " + str(allocation_size) + " " + str(num_iterations) + " " + str(measure_on_device) + " " + str(test_warp_based) + " 1 " + str(free_memory) + " " + csv_path_alloc + " " + csv_path_free + " " + str(args.allocsize)
 				executecommand = "{0} {1}".format(path, run_config)
 				print("#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#")
 				print("Running " + name + " with command -> " + executecommand)

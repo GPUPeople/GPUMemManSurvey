@@ -205,6 +205,7 @@ int main(int argc, char* argv[])
 	bool free_memory{true};
 	std::string alloc_csv_path{"../results/tmp/"};
 	std::string free_csv_path{"../results/tmp/"};
+	int allocSizeinGB{8};
 	if(argc >= 2)
 	{
 		num_allocations = atoi(argv[1]);
@@ -237,6 +238,10 @@ int main(int argc, char* argv[])
 									if(argc >= 10)
 									{
 										free_csv_path = std::string(argv[9]);
+										if(argc >= 11)
+										{
+											allocSizeinGB = atoi(argv[10]);
+										}
 									}
 								}
 							}
@@ -256,7 +261,7 @@ int main(int argc, char* argv[])
 	cudaGetDeviceProperties(&prop, device);
 
 	std::cout << "--- " << mem_name << "---\n";
-	MemoryManager memory_manager(8192ULL * 1024ULL * 1024ULL);
+	MemoryManager memory_manager(allocSizeinGB * 1024ULL * 1024ULL * 1024ULL);
 
 	int** d_memory{nullptr};
 	CHECK_ERROR(cudaMalloc(&d_memory, sizeof(int*) * num_allocations));

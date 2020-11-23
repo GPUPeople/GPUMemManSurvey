@@ -203,6 +203,7 @@ int main(int argc, char* argv[])
 	bool free_memory{true};
 	std::string alloc_csv_path{"../results/tmp/"};
 	std::string free_csv_path{"../results/tmp/"};
+	int allocSizeinGB{8};
 	if(argc >= 11)
 	{
 		num_allocations = atoi(argv[1]);
@@ -215,6 +216,7 @@ int main(int argc, char* argv[])
 		free_memory = static_cast<bool>(atoi(argv[8]));
 		alloc_csv_path = std::string(argv[9]);
 		free_csv_path = std::string(argv[10]);
+		allocSizeinGB = atoi(argv[11]);
 	}
 	else
 	{
@@ -225,7 +227,7 @@ int main(int argc, char* argv[])
 	}
 			
 	std::cout << "--- " << mem_name << "---\n";
-	MemoryManager memory_manager(8192ULL * 1024ULL * 1024ULL);
+	MemoryManager memory_manager(allocSizeinGB * 1024ULL * 1024ULL * 1024ULL);
 
 	std::vector<unsigned int> allocation_sizes(num_allocations);
 	unsigned int* d_allocation_sizes{nullptr};
