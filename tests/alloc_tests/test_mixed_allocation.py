@@ -173,7 +173,9 @@ def main():
 	####################################################################################################
 	####################################################################################################
 	if generate_results:
-		generateResultsFromFileAllocation("results/mixed_performance", num_allocations, smallest_allocation_size, largest_allocation_size, "Byte-Range", "perf_mixed", 4)
+		if not os.path.exists("results/mixed_performance/aggregate"):
+			os.mkdir("results/mixed_performance/aggregate")
+		generateResultsFromFileAllocation(testcases, "results/mixed_performance", num_allocations, smallest_allocation_size, largest_allocation_size, "Byte-Range", "perf_mixed", 4)
 
 	####################################################################################################
 	####################################################################################################

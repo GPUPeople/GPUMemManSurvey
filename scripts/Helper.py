@@ -101,7 +101,13 @@ def generateResultsFromFileAllocation(testcases, folderpath, param1, param2, par
 			cols = list()
 			num_cols = 6
 			for i in range(num_cols):
-				cols.append([row[i] for row in csvreader])
+				cols.append([row[i] if len(row) > i else "" for row in csvreader])
+				# cols[i] = list()
+				# for row in csvreader:
+				# 	if len(row) >= i:
+				# 		cols[i].append(row[i])
+				# 	else:
+				# 		cols[i].append("")
 			if "free" in filename:
 				if not written_header_free:
 					result_free.append(cols[0])
@@ -445,6 +451,8 @@ def generateResultsFromFileInit(folderpath, param1, dimension_name, approach_pos
 	for file in os.listdir(folderpath):
 		filename = folderpath + str("/") + os.fsdecode(file)
 		if(os.path.isdir(filename)):
+			continue
+		if str("init") != filename.split('_')[0].split("/")[1]:
 			continue
 		if str(param1) != filename.split('_')[approach_pos+1].split(".")[0]:
 			continue

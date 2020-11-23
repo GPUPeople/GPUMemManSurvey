@@ -176,9 +176,11 @@ def main():
 	####################################################################################################
 	####################################################################################################
 	if generate_results:
+		if not os.path.exists("results/scaling/aggregate"):
+			os.mkdir("results/scaling/aggregate")
 		allocation_size = smallest_allocation_size
 		while allocation_size <= largest_allocation_size:
-			generateResultsFromFileAllocation("results/scaling", allocation_size, smallest_num_threads, largest_allocation_size, "Threads", "scale", 2)
+			generateResultsFromFileAllocation(testcases, "results/scaling", allocation_size, smallest_num_threads, largest_num_threads, "Threads", "scale", 2)
 			allocation_size *= 2
 
 	####################################################################################################

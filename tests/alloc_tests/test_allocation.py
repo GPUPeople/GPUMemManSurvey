@@ -175,6 +175,8 @@ def main():
 	####################################################################################################
 	####################################################################################################
 	if generate_results:
+		if not os.path.exists("results/performance/aggregate"):
+			os.mkdir("results/performance/aggregate")
 		generateResultsFromFileAllocation(testcases, "results/performance", num_allocations, smallest_allocation_size, largest_allocation_size, "Bytes", "perf", 2)
 	
 	####################################################################################################
