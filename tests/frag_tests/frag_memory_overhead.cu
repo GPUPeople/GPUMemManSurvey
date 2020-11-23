@@ -243,13 +243,13 @@ int main(int argc, char* argv[])
 			auto max_ptr = *max_element(verification_pointers.begin(), verification_pointers.end());
 			static_min_ptr = std::min(static_min_ptr, min_ptr);
 			static_max_ptr = std::max(static_max_ptr, max_ptr);
-			printf("%llu | %llu | %llu MB | %llu | %llu | %llu B\n", 
-			reinterpret_cast<unsigned long long>(min_ptr), 
-			reinterpret_cast<unsigned long long>(max_ptr), 
-			(reinterpret_cast<unsigned long long>(max_ptr) - reinterpret_cast<unsigned long long>(min_ptr)) / (1024*1024),
-			reinterpret_cast<unsigned long long>(static_min_ptr), 
-			reinterpret_cast<unsigned long long>(static_max_ptr), 
-			(reinterpret_cast<unsigned long long>(static_max_ptr) - reinterpret_cast<unsigned long long>(static_min_ptr)));
+			// printf("%llu | %llu | %llu MB | %llu | %llu | %llu B\n", 
+			// reinterpret_cast<unsigned long long>(min_ptr), 
+			// reinterpret_cast<unsigned long long>(max_ptr), 
+			// (reinterpret_cast<unsigned long long>(max_ptr) - reinterpret_cast<unsigned long long>(min_ptr)) / (1024*1024),
+			// reinterpret_cast<unsigned long long>(static_min_ptr), 
+			// reinterpret_cast<unsigned long long>(static_max_ptr), 
+			// (reinterpret_cast<unsigned long long>(static_max_ptr) - reinterpret_cast<unsigned long long>(static_min_ptr)));
 			results_frag << "," << (reinterpret_cast<unsigned long long>(max_ptr) - reinterpret_cast<unsigned long long>(min_ptr)) 
 				<< "," 
 				<<(reinterpret_cast<unsigned long long>(static_max_ptr) - reinterpret_cast<unsigned long long>(static_min_ptr));

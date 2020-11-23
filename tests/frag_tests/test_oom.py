@@ -155,6 +155,8 @@ def main():
 	####################################################################################################
 	####################################################################################################
 	if generate_results:
+		if not os.path.exists("results/aggregate"):
+			os.mkdir("results/aggregate")
 		generateResultsFromFileOOM("results", testcases, num_allocations, smallest_allocation_size, largest_allocation_size, "Bytes", 1, alloc_size * 1024 * 1024 * 1024)
 
 	####################################################################################################

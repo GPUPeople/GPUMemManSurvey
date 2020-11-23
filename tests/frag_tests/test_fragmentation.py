@@ -155,6 +155,8 @@ def main():
 	####################################################################################################
 	####################################################################################################
 	if generate_results:
+		if not os.path.exists("results/aggregate"):
+			os.mkdir("results/aggregate")
 		generateResultsFromFileFragmentation("results", num_allocations, smallest_allocation_size, largest_allocation_size, "Bytes", 1, num_iterations)
 
 	####################################################################################################

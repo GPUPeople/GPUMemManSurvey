@@ -30,21 +30,21 @@ def main():
 		# 	# ["python test_mixed_allocation.py -t o+s+h+c+r+x -num 10000 -range 4-32 -iter 50 {0} {1} -timeout 60 -allocsize {2}".format(runteststr, genresstr, str(args.mem_size)), "mixed_performance"],
 		# 	# ["python test_scaling.py -t o+s+h+c+r+x -byterange 16-32 -threadrange 0-10 -iter 50 {0} {1} -timeout 60 -allocsize {2}".format(runteststr, genresstr, str(args.mem_size)), "scaling"]
 		# ],
-		# "frag_tests"  : [
-			["python test_fragmentation.py -t o+s+h+c+r+x -num 10000 -range 4-16 -iter 50 {0} {1} -timeout 60 -allocsize {2}".format(runteststr, genresstr, str(args.mem_size)), ""],
-		# 	["python test_oom.py -t o+s+h+c+r+x -num 10000 -range 4-16 {0} {1} -timeout 60 -allocsize {2}".format(runteststr, genresstr, str(args.mem_size)), ""]
-		# ],
+		"frag_tests"  : [
+			# ["python test_fragmentation.py -t o+s+h+c+r+x -num 10000 -range 4-32 -iter 50 {0} {1} -timeout 60 -allocsize {2}".format(runteststr, genresstr, str(args.mem_size)), ""],
+			["python test_oom.py -t o+s+h+c+r+x -num 10000 -range 512-512 {0} {1} -timeout 60 -allocsize 2".format(runteststr, genresstr), ""]
+		],
 		# "graph_tests" : [
 		# 	["python test_graph_init.py -t o+s+h+c+r+x -configfile config_init.json {0} {1} -timeout 120", ""],
 		# 	["python test_graph_update.py -t o+s+h+c+r+x -configfile config_update.json {0} {1} -timeout 120", ""],
 		# 	["python test_graph_update.py -t o+s+h+c+r+x -configfile config_update_range.json {0} {1} -timeout 120", ""]
 		# ],
-		"synth_tests" : [
-			# ["python test_registers.py -t o+s+h+c+r+x {0} {1} -allocsize {2}".format(runteststr, genresstr, str(args.mem_size)), ""],
-			# ["python test_synth_init.py -t o+s+h+c+r+x {0} {1} -allocsize {2}".format(runteststr, genresstr, str(args.mem_size)), ""],
-			# ["python test_synth_workload.py -t o+s+h+c+r+x -threadrange 0-10 -range 4-32 -iter 50 {0} {1} -timeout 60 -allocsize {2}".format(runteststr, genresstr, str(args.mem_size)), ""],
-			# ["python test_synth_workload.py -t o+s+h+c+r+x -threadrange 0-10 -range 4-32 -iter 5 {0} {1} -testwrite -timeout 60 -allocsize {2}".format(runteststr, genresstr, str(args.mem_size)), ""]
-		]
+		# "synth_tests" : [
+		# 	# ["python test_registers.py -t o+s+h+c+r+x {0} {1} -allocsize {2}".format(runteststr, genresstr, str(args.mem_size)), ""],
+		# 	# ["python test_synth_init.py -t o+s+h+c+r+x {0} {1} -allocsize {2}".format(runteststr, genresstr, str(args.mem_size)), ""],
+		# 	# ["python test_synth_workload.py -t o+s+h+c+r+x -threadrange 0-10 -range 4-32 -iter 50 {0} {1} -timeout 60 -allocsize {2}".format(runteststr, genresstr, str(args.mem_size)), ""],
+		# 	# ["python test_synth_workload.py -t o+s+h+c+r+x -threadrange 0-10 -range 4-32 -iter 5 {0} {1} -testwrite -timeout 60 -allocsize {2}".format(runteststr, genresstr, str(args.mem_size)), ""]
+		# ]
 	}
 
 	for path, commands in tests.items():
