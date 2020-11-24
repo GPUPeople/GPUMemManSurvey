@@ -37,6 +37,7 @@ def main():
 	parser.add_argument('-plotscale', type=str, help='log/linear')
 	parser.add_argument('-filetype', type=str, help='png or pdf')
 	parser.add_argument('-allocsize', type=int, help='How large is the manageable memory in GiB?')
+	parser.add_argument('-device', type=int, help='Which device to use', default=0)
 
 	args = parser.parse_args()
 
@@ -104,7 +105,7 @@ def main():
 					continue
 			with open(csv_path, "w", newline='') as csv_file:
 				csv_file.write("Malloc-Kernel Registers, Free-Kernel Registers\n")
-			run_config = csv_path
+			run_config = csv_path + " " + str(args.device)
 			executecommand = "{0} {1}".format(executable, run_config)
 			print("#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#")
 			print("Running " + name + " with command -> " + executecommand)

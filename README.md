@@ -1,5 +1,5 @@
 # GPUMemManSurvey
-Evaluating different memory managers for dynamic GPU memory
+Evaluating different memory managers for dynamic GPU memory allocation.
 
 # Requirements
 The framework was tested on Windows 10, Arch Linux <5.9.9> as well as Manjaro <5.4>
@@ -12,7 +12,7 @@ The framework was tested on Windows 10, Arch Linux <5.9.9> as well as Manjaro <5
 * **boost** (required for ScatterAlloc)
   * Tested with boost `1.66`
 * **CMake**
-  * Version `>= 3.16`, tested up until `3.18`
+  * Version `>= 3.16`, tested with `3.18`
 * **Python**
   * Tested with `Python 3.8`
   * Requires packages
@@ -31,20 +31,37 @@ The framework was tested on Windows 10, Arch Linux <5.9.9> as well as Manjaro <5
 * On `Windows`
   * Use the `Developer PowerShell for VS 20XX` (`msbuild` is needed) to call the scripts
 * To clean the build folders, simply call `python clean.py`
+  * Once again, there is a separate `clean.py` in every test subfolder
 
-# Run Time
-These runtime measures were measured for the limited testcase as setup in `testAll.py`.
+# Testcase Instructions
+To run a representative testsuite, simply call
+* `python testAll.py -mem_size 8 -device 0 -runtest -genres`
+  * The memory size is in GB
+  * The device ID of the device to use (has to match with the CC passed in build stage)
+  
+These runtime measures were measured for the limited testcase as setup in `testAll.py` on a TITAN V and an Intel Core i7-8700X.
+
 | Task | Time (min:sec) - Linux| Time (min:sec) - Windows|
 |:---:|:---:|:---:|
-|Overall|||
+|Overall|28 min 28 sec||
 |Build | 9 min 45 sec | 28 min 15 sec |
-|Test All |||
+|Test All |18 min 43 sec||
 |-|-|-|
-|Test Allocation||
-|Graph Init| 0 min 5 sec| |
+| Allocation|1 min 48 sec| |
+| Mixed Allocation | 0 min 35 sec | |
+| Scaling | 2 min 52 sec | |
+| Fragmentation | 1 min 47 sec | |
+| Out-of-Memory | 7 min 15 sec | |
+|Graph Init| 0 min 11 sec| |
+| Graph Update | 0 min 11 sec | |
+| Graph Update Range | 0 min 11 sec | |
+| Register Footprint | 0 min 03 sec | | 
+| Initialization | 0 min 05 sec | |
+| Synthetic Workload | 1 min 58 sec | |
+| Synthetic Workload Write | 1 min 57 sec | |
 
-
-| Framework | Status | Link to Paper | Code |
+# Frameworks
+| Framework | Status | Paper | Code |
 |:---:|:---:|:---:| :---:|
 | CUDA Device Allocator 		| :heavy_check_mark: | - | - |
 | XMalloc (2010)				| :heavy_check_mark: | [Webpage](http://hdl.handle.net/2142/16137) | - |
@@ -53,7 +70,7 @@ These runtime measures were measured for the limited testcase as setup in `testA
 | Register Efficient (2014)	    | :heavy_check_mark: | [Webpage](https://diglib.eg.org/bitstream/handle/10.2312/hpg.20141090.019-027/019-027.pdf?sequence=1&isAllowed=y) | [Webpage](http://decibel.fi.muni.cz/~xvinkl/CMalloc/) |
 | Halloc (2014)				    | :heavy_check_mark: | [Presentation](http://on-demand.gputechconf.com/gtc/2014/presentations/S4271-halloc-high-throughput-dynamic-memory-allocator.pdf) | [GitHub - Repository](https://github.com/canonizer/halloc) |
 | DynaSOAr (2019)               | :x: 	 | [Webpage](https://drops.dagstuhl.de/opus/volltexte/2019/10809/pdf/LIPIcs-ECOOP-2019-17.pdf) | [GitHub - Repository](https://github.com/prg-titech/dynasoar)|
-| Bulk-Sempaphore (2019)		| :watch: 			 | [Webpage](https://research.nvidia.com/publication/2019-02_Throughput-oriented-GPU-memory) | - |
+| Bulk-Sempaphore (2019)		| :x: 			 | [Webpage](https://research.nvidia.com/publication/2019-02_Throughput-oriented-GPU-memory) | - |
 | Ouroboros (2020)			    | :heavy_check_mark: | [Paper](https://dl.acm.org/doi/pdf/10.1145/3392717.3392742) | [GitHub - Repository](https://github.com/GPUPeople/Ouroboros) |
 
 # Testcases

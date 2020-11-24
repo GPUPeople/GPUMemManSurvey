@@ -154,6 +154,7 @@ int main(int argc, char* argv[])
 	std::string csv_path{"../results/tmp/"};
 	bool writeToMemory{false};
 	bool testWrite{false};
+	int device{0};
 	if(argc >= 2)
 	{
 		num_allocations = atoi(argv[1]);
@@ -179,6 +180,10 @@ int main(int argc, char* argv[])
 								if(argc >= 9)
 								{
 									testWrite = static_cast<bool>(atoi(argv[8]));
+									if(argc >= 10)
+									{
+										device = atoi(argv[9]);
+									}
 								}
 							}
 						}
@@ -192,10 +197,10 @@ int main(int argc, char* argv[])
 	allocation_size_range_upper = Utils::alignment(allocation_size_range_upper, sizeof(int));
 	std::cout << "Number of Allocations: " << num_allocations << " | Allocation Range: " << allocation_size_range_lower << " - " << allocation_size_range_upper << std::endl;
 
-	int device{0};
 	cudaSetDevice(device);
 	cudaDeviceProp prop;
 	cudaGetDeviceProperties(&prop, device);
+	std::cout << "Going to use " << prop.name << " " << prop.major << "." << prop.minor << "\n";
 	
 	#ifndef TEST_BASELINE
 	MemoryManager memory_manager(allocSizeinGB * 1024ULL * 1024ULL * 1024ULL);

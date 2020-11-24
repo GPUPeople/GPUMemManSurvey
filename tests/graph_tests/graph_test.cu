@@ -112,6 +112,7 @@ int main(int argc, char* argv[])
 	std::string delete_file;
 	int allocSizeinGB{8};
 	bool writeMatrixStats{false};
+	int device{0};
     if(argc >= 2)
 	{
 		config_file = std::string(argv[1]);
@@ -133,6 +134,10 @@ int main(int argc, char* argv[])
 							if(argc >= 8)
 							{
 								allocSizeinGB = atoi(argv[7]);
+								if(argc >= 9)
+								{
+									device = atoi(argv[8]);
+								}
 							}
 						}
 					}
@@ -155,7 +160,6 @@ int main(int argc, char* argv[])
 	json config;
     json_input >> config;
 
-    const auto device{config.find("device").value().get<int>()};
 	cudaSetDevice(device);
 	cudaDeviceProp prop;
 	cudaGetDeviceProperties(&prop, device);

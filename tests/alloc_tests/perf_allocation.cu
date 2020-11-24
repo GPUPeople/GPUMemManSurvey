@@ -206,6 +206,7 @@ int main(int argc, char* argv[])
 	std::string alloc_csv_path{"../results/tmp/"};
 	std::string free_csv_path{"../results/tmp/"};
 	int allocSizeinGB{8};
+	int device{0};
 	if(argc >= 2)
 	{
 		num_allocations = atoi(argv[1]);
@@ -241,6 +242,10 @@ int main(int argc, char* argv[])
 										if(argc >= 11)
 										{
 											allocSizeinGB = atoi(argv[10]);
+											if(argc >= 12)
+											{
+												device = atoi(argv[11]);
+											}
 										}
 									}
 								}
@@ -255,10 +260,10 @@ int main(int argc, char* argv[])
 	if(print_output)
 		std::cout << "Number of Allocations: " << num_allocations << " | Allocation Size: " << allocation_size_byte << std::endl;
 
-	int device{0};
 	cudaSetDevice(device);
 	cudaDeviceProp prop;
 	cudaGetDeviceProperties(&prop, device);
+	std::cout << "Going to use " << prop.name << " " << prop.major << "." << prop.minor << "\n";
 
 	std::cout << "--- " << mem_name << "---\n";
 	MemoryManager memory_manager(allocSizeinGB * 1024ULL * 1024ULL * 1024ULL);

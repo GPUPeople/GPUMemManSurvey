@@ -59,6 +59,7 @@ def main():
 	parser.add_argument('-plotscale', type=str, help='log/linear')
 	parser.add_argument('-filetype', type=str, help='png or pdf')
 	parser.add_argument('-allocsize', type=int, help='How large is the manageable memory in GiB?', default=8)
+	parser.add_argument('-device', type=int, help='Which device to use', default=0)
 
 	args = parser.parse_args()
 
@@ -116,7 +117,7 @@ def main():
 	graphs.sort()
 	
 	if(args.graphstats):
-		csv_path = "results/graph_stats.csv"
+		csv_path = "results/aggregate/graph_stats.csv"
 		if(os.path.isfile(csv_path)):
 			print("This file <" + csv_path + "> already exists, do you really want to OVERWRITE?")
 			inputfromconsole = input()
@@ -162,7 +163,7 @@ def main():
 			for graph in graphs:
 				with open(csv_path, "a", newline='') as csv_file:
 					csv_file.write(graph + ",")
-				run_config = config_file + " " + path + graph + " " + str(0) + " " + csv_path + " insert.csv delete.csv" + " " + str(args.allocsize)
+				run_config = config_file + " " + path + graph + " " + str(0) + " " + csv_path + " insert.csv delete.csv" + " " + str(args.allocsize)  + " " + str(args.device)
 				executecommand = "{0} {1}".format(executable, run_config)
 				print("#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#")
 				print("Running " + name + " with command -> " + executecommand)
