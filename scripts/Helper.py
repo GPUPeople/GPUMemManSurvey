@@ -64,79 +64,41 @@ def generateResultsFromFileAllocation(testcases, folderpath, param1, param2, par
 		if approach_name not in testcases:
 			continue
 		print("Processing -> " + str(filename))
-		# with open(filename, newline='') as csv_file:
-		# 	dataframe = pandas.read_csv(csv_file)
-		# 	if "free" in filename:
-		# 		if not written_header_free:
-		# 			result_free.append(list(dataframe.iloc[:, 0]))
-		# 			result_free[-1].insert(0, dimension_name)
-		# 			written_header_free = True
-		# 		result_free.append(list(dataframe.iloc[:, 1]))
-		# 		result_free[-1].insert(0, approach_name + " - mean")
-		# 		result_free.append(list(dataframe.iloc[:, 2]))
-		# 		result_free[-1].insert(0, approach_name + " - std_dev")
-		# 		result_free.append(list(dataframe.iloc[:, 3]))
-		# 		result_free[-1].insert(0, approach_name + " - min")
-		# 		result_free.append(list(dataframe.iloc[:, 4]))
-		# 		result_free[-1].insert(0, approach_name + " - max")
-		# 		result_free.append(list(dataframe.iloc[:, 5]))
-		# 		result_free[-1].insert(0, approach_name + " - median")
-		# 	else:
-		# 		if not written_header_alloc:
-		# 			result_alloc.append(list(dataframe.iloc[:, 0]))
-		# 			result_alloc[-1].insert(0, dimension_name)
-		# 			written_header_alloc = True
-		# 		result_alloc.append(list(dataframe.iloc[:, 1]))
-		# 		result_alloc[-1].insert(0, approach_name + " - mean")
-		# 		result_alloc.append(list(dataframe.iloc[:, 2]))
-		# 		result_alloc[-1].insert(0, approach_name + " - std_dev")
-		# 		result_alloc.append(list(dataframe.iloc[:, 3]))
-		# 		result_alloc[-1].insert(0, approach_name + " - min")
-		# 		result_alloc.append(list(dataframe.iloc[:, 4]))
-		# 		result_alloc[-1].insert(0, approach_name + " - max")
-		# 		result_alloc.append(list(dataframe.iloc[:, 5]))
-		# 		result_alloc[-1].insert(0, approach_name + " - median")
 		with open(filename, newline='') as csv_file:
 			csvreader = list(csv.reader(csv_file, delimiter=',', quotechar='|'))
 			cols = list()
 			num_cols = 6
 			for i in range(num_cols):
 				cols.append([row[i] if len(row) > i else "" for row in csvreader])
-				# cols[i] = list()
-				# for row in csvreader:
-				# 	if len(row) >= i:
-				# 		cols[i].append(row[i])
-				# 	else:
-				# 		cols[i].append("")
 			if "free" in filename:
 				if not written_header_free:
-					result_free.append(cols[0])
+					result_free.append(cols[0][1:])
 					result_free[-1].insert(0, dimension_name)
 					written_header_free = True
-				result_free.append(cols[1])
+				result_free.append(cols[1][1:])
 				result_free[-1].insert(0, approach_name + " - mean")
-				result_free.append(cols[2])
+				result_free.append(cols[2][1:])
 				result_free[-1].insert(0, approach_name + " - std_dev")
-				result_free.append(cols[3])
+				result_free.append(cols[3][1:])
 				result_free[-1].insert(0, approach_name + " - min")
-				result_free.append(cols[4])
+				result_free.append(cols[4][1:])
 				result_free[-1].insert(0, approach_name + " - max")
-				result_free.append(cols[5])
+				result_free.append(cols[5][1:])
 				result_free[-1].insert(0, approach_name + " - median")
 			else:
 				if not written_header_alloc:
-					result_alloc.append(cols[0])
+					result_alloc.append(cols[0][1:])
 					result_alloc[-1].insert(0, dimension_name)
 					written_header_alloc = True
-				result_alloc.append(cols[1])
+				result_alloc.append(cols[1][1:])
 				result_alloc[-1].insert(0, approach_name + " - mean")
-				result_alloc.append(cols[2])
+				result_alloc.append(cols[2][1:])
 				result_alloc[-1].insert(0, approach_name + " - std_dev")
-				result_alloc.append(cols[3])
+				result_alloc.append(cols[3][1:])
 				result_alloc[-1].insert(0, approach_name + " - min")
-				result_alloc.append(cols[4])
+				result_alloc.append(cols[4][1:])
 				result_alloc[-1].insert(0, approach_name + " - max")
-				result_alloc.append(cols[5])
+				result_alloc.append(cols[5][1:])
 				result_alloc[-1].insert(0, approach_name + " - median")
 
 	# Get Timestring
@@ -605,3 +567,229 @@ def plotRegisters(results, testcases, plotscale, xlabel, ylabel, title, filename
 
 	# Clear Figure
 	plt.clf()
+
+####################################################################################################
+####################################################################################################
+# Generate new Results
+####################################################################################################
+####################################################################################################
+def generateResultsFromSynthetic(testcases, folderpath, smallThread, largeThread, smallByte, largeByte, dimension_name, output_name_short, approach_pos, generateFull=False):
+	print("Generate Results for identifier " + str(smallThread) + "-" + str(largeThread) + "_" + str(smallByte) + "-" + str(largeByte))
+	# Gather results
+	results = list(list())
+
+	# Go over files, read data and generate new
+	written_header = False
+	for file in os.listdir(folderpath):
+		filename = folderpath + str("/") + os.fsdecode(file)
+		if(os.path.isdir(filename)):
+			continue
+		if output_name_short == "synth":
+			if str("synth") != filename.split('_')[0].split('/')[1]:
+				continue
+		else:
+			if str("synth") != filename.split('_')[0].split('/')[1] or str("write") != filename.split('_')[1]:
+				continue
+		if str(smallThread) + "-" + str(largeThread) != filename.split('_')[approach_pos+1] or str(smallByte) + "-" + str(largeByte) != filename.split('_')[approach_pos+2].split(".")[0]:
+			continue
+		approach_name = filename.split('_')[approach_pos]
+		if approach_name not in testcases:
+			continue
+		print("Processing -> " + str(filename))
+		
+		with open(filename, newline='') as csv_file:
+			csvreader = list(csv.reader(csv_file, delimiter=',', quotechar='|'))
+			cols = list()
+			num_cols = 6
+			for i in range(num_cols):
+				cols.append([row[i] if len(row) > i else "" for row in csvreader])
+			if not written_header:
+				results.append(cols[0][1:])
+				results[-1].insert(0, dimension_name)
+				written_header = True
+			results.append(cols[1][1:])
+			results[-1].insert(0, approach_name + (" - mean") if generateFull else approach_name)
+			if generateFull:
+				results.append(cols[2][1:])
+				results[-1].insert(0, approach_name + " - std_dev")
+				results.append(cols[3][1:])
+				results[-1].insert(0, approach_name + " - min")
+				results.append(cols[4][1:])
+				results[-1].insert(0, approach_name + " - max")
+				results.append(cols[5][1:])
+				results[-1].insert(0, approach_name + " - median")
+
+	# Get Timestring
+	now = datetime.now()
+	time_string = now.strftime("%Y-%m-%d_%H-%M-%S")
+
+	# Generate output file
+	print("------------------")
+	outputstr = time_string + str("_") + output_name_short + str("_") + str(smallThread) + "-" + str(largeThread) + "_" + str(smallByte) + "-" + str(largeByte) + str(".csv")
+	print("Generating -> " + outputstr)
+	filename = folderpath + str("/aggregate/") + outputstr
+	with(open(filename, "w")) as f:
+		writer = csv.writer(f, delimiter=',')
+		for row in results:
+			writer.writerow(row)
+
+	print("####################")
+
+####################################################################################################
+####################################################################################################
+# Generate new Results
+####################################################################################################
+####################################################################################################
+def generateResultsFromGraph(testcases, folderpath, dimension_name, output_name_short, approach_pos, generateFull=False):
+	print("Generate Results for graph " + output_name_short)
+	# Gather results
+	results = list(list())
+
+	# Go over files, read data and generate new
+	written_header = False
+	for file in os.listdir(folderpath):
+		filename = folderpath + str("/") + os.fsdecode(file)
+		if(os.path.isdir(filename)):
+			continue
+		if str("init") != filename.split('_')[1]:
+			print(filename.split('_')[1])
+			continue
+		approach_name = filename.split('_')[approach_pos].split(".")[0]
+		if approach_name not in testcases:
+			continue
+		print("Processing -> " + str(filename))
+		
+		with open(filename, newline='') as csv_file:
+			csvreader = list(csv.reader(csv_file, delimiter=',', quotechar='|'))
+			cols = list()
+			num_cols = 6
+			for i in range(num_cols):
+				cols.append([row[i] if len(row) > i else "" for row in csvreader])
+			if not written_header:
+				results.append(cols[0][1:])
+				results[-1].insert(0, dimension_name)
+				written_header = True
+			results.append(cols[1][1:])
+			results[-1].insert(0, approach_name + (" - mean") if generateFull else approach_name)
+			if generateFull:
+				results.append(cols[2][1:])
+				results[-1].insert(0, approach_name + " - std_dev")
+				results.append(cols[3][1:])
+				results[-1].insert(0, approach_name + " - min")
+				results.append(cols[4][1:])
+				results[-1].insert(0, approach_name + " - max")
+				results.append(cols[5][1:])
+				results[-1].insert(0, approach_name + " - median")
+
+	# Get Timestring
+	now = datetime.now()
+	time_string = now.strftime("%Y-%m-%d_%H-%M-%S")
+
+	# Generate output file
+	print("------------------")
+	outputstr = time_string + str("_graph_") + output_name_short + str(".csv")
+	print("Generating -> " + outputstr)
+	filename = folderpath + str("/aggregate/") + outputstr
+	with(open(filename, "w")) as f:
+		writer = csv.writer(f, delimiter=',')
+		for row in results:
+			writer.writerow(row)
+
+	print("####################")
+
+####################################################################################################
+####################################################################################################
+# Generate new Results
+####################################################################################################
+####################################################################################################
+def generateResultsFromGraphUpdate(testcases, folderpath, dimension_name, output_name_short, approach_pos, ranged, generateFull=False):
+	print("Generate Results for graph " + output_name_short)
+	# Gather results
+	results_insert = list(list())
+	results_delete = list(list())
+
+	# Go over files, read data and generate new
+	written_header_insert = False
+	written_header_delete = False
+	for file in os.listdir(folderpath):
+		filename = folderpath + str("/") + os.fsdecode(file)
+		if(os.path.isdir(filename)):
+			continue
+		if str("update") != filename.split('_')[1]:
+				continue
+		if ranged:
+			if str("range") != filename.split('_')[-1].split(".")[0]:
+				continue
+		else:
+			if str("range") == filename.split('_')[-1].split(".")[0]:
+				continue
+		approach_name = filename.split('_')[approach_pos].split(".")[0]
+		if approach_name not in testcases:
+			continue
+		print("Processing -> " + str(filename))
+		
+		with open(filename, newline='') as csv_file:
+			csvreader = list(csv.reader(csv_file, delimiter=',', quotechar='|'))
+			cols = list()
+			num_cols = 6
+			for i in range(num_cols):
+				cols.append([row[i] if len(row) > i else "" for row in csvreader])
+			if "delete" in filename:
+				if not written_header_delete:
+					results_delete.append(cols[0][1:])
+					results_delete[-1].insert(0, dimension_name)
+					written_header_delete = True
+				results_delete.append(cols[1][1:])
+				results_delete[-1].insert(0, approach_name + (" - mean") if generateFull else approach_name)
+				if generateFull:
+					results_delete.append(cols[2][1:])
+					results_delete[-1].insert(0, approach_name + " - std_dev")
+					results_delete.append(cols[3][1:])
+					results_delete[-1].insert(0, approach_name + " - min")
+					results_delete.append(cols[4][1:])
+					results_delete[-1].insert(0, approach_name + " - max")
+					results_delete.append(cols[5][1:])
+					results_delete[-1].insert(0, approach_name + " - median")
+			else:
+				if not written_header_insert:
+					results_insert.append(cols[0][1:])
+					results_insert[-1].insert(0, dimension_name)
+					written_header_insert = True
+				results_insert.append(cols[1][1:])
+				results_insert[-1].insert(0, approach_name + (" - mean") if generateFull else approach_name)
+				if generateFull:
+					results_insert.append(cols[2][1:])
+					results_insert[-1].insert(0, approach_name + " - std_dev")
+					results_insert.append(cols[3][1:])
+					results_insert[-1].insert(0, approach_name + " - min")
+					results_insert.append(cols[4][1:])
+					results_insert[-1].insert(0, approach_name + " - max")
+					results_insert.append(cols[5][1:])
+					results_insert[-1].insert(0, approach_name + " - median")
+
+	# Get Timestring
+	now = datetime.now()
+	time_string = now.strftime("%Y-%m-%d_%H-%M-%S")
+
+	# Generate output file
+	print("------------------")
+	suffix = ".csv"
+	if ranged:
+		suffix = "_range.csv"
+	outputstr = time_string + str("_graph_") + output_name_short + str("_insert") + suffix
+	print("Generating -> " + outputstr)
+	filename = folderpath + str("/aggregate/") + outputstr
+	with(open(filename, "w")) as f:
+		writer = csv.writer(f, delimiter=',')
+		for row in results_insert:
+			writer.writerow(row)
+
+	outputstr = time_string + str("_graph_") + output_name_short + str("_delete") + suffix
+	print("Generating -> " + outputstr)
+	filename = folderpath + str("/aggregate/") + outputstr
+	with(open(filename, "w")) as f:
+		writer = csv.writer(f, delimiter=',')
+		for row in results_delete:
+			writer.writerow(row)
+
+	print("####################")

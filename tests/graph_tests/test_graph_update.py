@@ -6,7 +6,7 @@ import shutil
 import time
 from datetime import datetime
 from timedprocess import Command
-from Helper import generateResultsFromFileAllocation
+from Helper import generateResultsFromGraphUpdate
 from Helper import plotMean
 import csv
 import argparse
@@ -28,10 +28,11 @@ import argparse
 # ]
 
 graphs = [
-	"email.mtx"
+	"email.mtx",
+	"1138_bus.mtx"
 ]
 
-path = "../graphs/"
+path = "data/"
 
 def main():
 	# Run all files from a directory
@@ -46,7 +47,6 @@ def main():
 	filetype = "pdf"
 	time_out_val = 100
 	generate_results = True
-	generate_plots = True
 
 	parser = argparse.ArgumentParser(description='Test graph edge updates for various frameworks')
 	parser.add_argument('-t', type=str, help='Specify which frameworks to test, separated by +, e.g. o+s+h+c+f+r+x ---> c : cuda | s : scatteralloc | h : halloc | o : ouroboros | f : fdgmalloc | r : register-efficient | x : xmalloc')
@@ -111,6 +111,8 @@ def main():
 
 	if(args.filetype):
 		filetype = args.filetype
+
+	ranged = ("range" in config_file)
 
 	# Sort graphs for consistent ordering
 	graphs.sort()
@@ -190,6 +192,15 @@ def main():
 					with open(csv_path_delete, "a", newline='') as csv_file:
 						csv_file.write("\n")
 
+	# ####################################################################################################
+	# ####################################################################################################
+	# # Generate new Results
+	# ####################################################################################################
+	# ####################################################################################################
+	if generate_results:
+		if not os.path.exists("results/aggregate"):
+			os.mkdir("results/aggregate")
+		generateResultsFromGraphUpdate(testcases, "results", "Graphs", "update", 2, ranged)
 
 if __name__ == "__main__":
 	main()

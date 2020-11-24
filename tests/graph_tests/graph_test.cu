@@ -95,7 +95,7 @@ const std::string mem_name("FDGMalloc");
 using DataType = float;
 
 template <typename MemoryManagerType, typename DataType>
-void testrun(CSR<DataType>& input_graph, const json& config, const std::string& init_csv, const std::string& insert_csv, const std::string& delete_csv);
+void testrun(CSR<DataType>& input_graph, const json& config, const std::string& init_csv, const std::string& insert_csv, const std::string& delete_csv, int allocSizeinGB);
 
 int main(int argc, char* argv[])
 {

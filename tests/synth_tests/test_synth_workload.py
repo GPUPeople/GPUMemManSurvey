@@ -6,8 +6,7 @@ import shutil
 import time
 from datetime import datetime
 from timedprocess import Command
-from Helper import generateResultsFromFileAllocation
-from Helper import generateResultsFromFileFragmentation
+from Helper import generateResultsFromSynthetic
 from Helper import plotMean
 import csv
 import argparse
@@ -165,59 +164,13 @@ def main():
 	# # Generate new Results
 	# ####################################################################################################
 	# ####################################################################################################
-	# if generate_results:
-	# 	generateResultsFromFileFragmentation("results", num_allocations, smallest_allocation_size, largest_allocation_size, "Bytes", 1, num_iterations)
-
-	# ####################################################################################################
-	# ####################################################################################################
-	# # Generate new plots
-	# ####################################################################################################
-	# ####################################################################################################
-	# if generate_plots:
-	# 	result_frag = list()
-	# 	# Get Timestring
-	# 	now = datetime.now()
-	# 	time_string = now.strftime("%b-%d-%Y_%H-%M-%S")
-
-	# 	if plotscale == "log":
-	# 		time_string += "_log"
-	# 	else:
-	# 		time_string += "_lin"
-
-	# 	for file in os.listdir("results/aggregate"):
-	# 		filename = str("results/aggregate/") + os.fsdecode(file)
-	# 		if(os.path.isdir(filename)):
-	# 			continue
-	# 		if filename.split("_")[2] != "frag" or str(num_allocations) != filename.split('_')[3] or str(smallest_allocation_size) + "-" + str(largest_allocation_size) != filename.split('_')[4].split(".")[0]:
-	# 			continue
-	# 		# We want the one matching our input
-	# 		with open(filename) as f:
-	# 			reader = csv.reader(f)
-	# 			result_frag = list(reader)
-
-	# 	####################################################################################################
-	# 	# Lineplot
-	# 	####################################################################################################
-	# 	plotFrag(result_frag, 
-	# 		testcases,
-	# 		plotscale,
-	# 		False, 
-	# 		'Bytes', 
-	# 		'Byte - Range', 
-	# 		"Fragmentation: Byte-Range for " + str(num_allocations) + " allocations", 
-	# 		str("results/plots/") + time_string + "_frag." + filetype)
-
-	# 	####################################################################################################
-	# 	# Lineplot with range
-	# 	####################################################################################################
-	# 	plotFrag(result_frag, 
-	# 		testcases,
-	# 		plotscale,
-	# 		True, 
-	# 		'Bytes', 
-	# 		'Byte - Range',
-	# 		"Fragmentation: Byte-Range for " + str(num_allocations) + " allocations", 
-	# 		str("results/plots/") + time_string + "_frag_range." + filetype)
+	if generate_results:
+		if not os.path.exists("results/aggregate"):
+			os.mkdir("results/aggregate")
+		if args.testwrite:
+			generateResultsFromSynthetic(testcases, "results", smallest_num_threads, largest_num_threads, smallest_allocation_size, largest_allocation_size, "Num Threads", "synth_write", 2)
+		else:
+			generateResultsFromSynthetic(testcases, "results", smallest_num_threads, largest_num_threads, smallest_allocation_size, largest_allocation_size, "Num Threads", "synth", 1)
 
 	print("Done")
 

@@ -32,6 +32,18 @@ The framework was tested on Windows 10, Arch Linux <5.9.9> as well as Manjaro <5
   * Use the `Developer PowerShell for VS 20XX` (`msbuild` is needed) to call the scripts
 * To clean the build folders, simply call `python clean.py`
 
+# Run Time
+These runtime measures were measured for the limited testcase as setup in `testAll.py`.
+| Task | Time (min:sec) - Linux| Time (min:sec) - Windows|
+|:---:|:---:|:---:|
+|Overall|||
+|Build | 9 min 45 sec | 28 min 15 sec |
+|Test All |||
+|-|-|-|
+|Test Allocation||
+|Graph Init| 0 min 5 sec| |
+
+
 | Framework | Status | Link to Paper | Code |
 |:---:|:---:|:---:| :---:|
 | CUDA Device Allocator 		| :heavy_check_mark: | - | - |
@@ -159,7 +171,7 @@ Graph testcases require a `config.json` file, which has the following parameters
 |`realistic_deletion`|`false`|If this is set to `false`, the deletion operation will delete exactly the same edges that where introduced during the insertion opertion. Otherwise, random edges will be selected from the graph.|
 |`manageable_memory_mb`|`8192`|The size of the manageable memory given in `MB`|
 
-The testcase can handle `.mtx` (Matrix Market Format) files which can be downloaded from the [SuiteSparse Collection](https://sparse.tamu.edu/) and will automatically convert each file into a more efficient binary format, which greatly improves load times for multiple runs.
+The testcase can handle `.mtx` (Matrix Market Format) files, which can be downloaded from the [SuiteSparse Collection](https://sparse.tamu.edu/), and will automatically convert each file into a more efficient binary format, which greatly improves load times for multiple runs.
 
 ### Graph Initialization
 This testcase will test dynamic graph initialization. One has to pass a configfile as described above, the list of graphs to test is given at the top of `test_graph_init.py`. 
