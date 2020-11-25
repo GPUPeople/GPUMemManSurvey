@@ -44,10 +44,10 @@ def main():
 		# 	["python test_graph_update.py -t o+s+h+c+r+x -configfile config_update_range.json {0} {1} -timeout 10 -allocsize {2} -device {3}".format(runteststr, genresstr, str(args.mem_size), str(args.device)), ""]
 		# ],
 		"synth_tests" : [
-			# ["python test_registers.py -t o+s+h+c+r+x {0} {1} -allocsize {2} -device {3}".format(runteststr, genresstr, str(args.mem_size), str(args.device)), ""],
+			["python test_registers.py -t o+s+h+c+r+x {0} {1} -allocsize {2} -device {3}".format(runteststr, genresstr, str(args.mem_size), str(args.device)), ""],
 			# ["python test_synth_init.py -t o+s+h+c+r+x {0} {1} -allocsize {2} -device {3}".format(runteststr, genresstr, str(args.mem_size), str(args.device)), ""],
 			# ["python test_synth_workload.py -t b+o+s+h+c+r+x -threadrange 0-10 -range 16-32 -iter 50 {0} {1} -timeout 10 -allocsize {2} -device {3}".format(runteststr, genresstr, str(args.mem_size), str(args.device)), ""],
-			["python test_synth_workload.py -t b+o+s+h+c+r+x -threadrange 0-10 -range 16-32 -iter 5 {0} {1} -testwrite -timeout 10 -allocsize {2} -device {3}".format(runteststr, genresstr, str(args.mem_size), str(args.device)), ""]
+			# ["python test_synth_workload.py -t b+o+s+h+c+r+x -threadrange 0-10 -range 16-32 -iter 5 {0} {1} -testwrite -timeout 10 -allocsize {2} -device {3}".format(runteststr, genresstr, str(args.mem_size), str(args.device)), ""]
 		]
 	}
 

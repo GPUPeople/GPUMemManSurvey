@@ -108,14 +108,14 @@ def generateResultsFromFileAllocation(testcases, folderpath, param1, param2, par
 	print("------------------")
 	print("Generating -> " + time_string + str("_") + output_name_short + str("_alloc_") + str(param1) + "_" + str(param2) + "-" + str(param3) + str(".csv"))
 	alloc_name = folderpath + str("/aggregate/") + time_string + str("_") + output_name_short + str("_alloc_") + str(param1) + "_" + str(param2) + "-" + str(param3) + str(".csv")
-	with(open(alloc_name, "w")) as f:
+	with(open(alloc_name, "w", newline='')) as f:
 		writer = csv.writer(f, delimiter=',')
 		for row in result_alloc:
 			writer.writerow(row)
 
 	print("Generating -> " + time_string + str("_") + output_name_short + str("_free_") + str(param1) + "_" + str(param2) + "-" + str(param3) + str(".csv"))
 	free_name = folderpath + str("/aggregate/")  + time_string + str("_") + output_name_short + str("_free_") + str(param1) + "_" + str(param2) + "-" + str(param3) + str(".csv")
-	with(open(free_name, "w")) as f:
+	with(open(free_name, "w", newline='')) as f:
 		writer = csv.writer(f, delimiter=',')
 		for row in result_free:
 			writer.writerow(row)
@@ -162,7 +162,7 @@ def generateResultsFromFileFragmentation(folderpath, param1, param2, param3, dim
 	print("------------------")
 	print("Generating -> " + time_string + str("_frag_") + str(param1) + "_" + str(param2) + "-" + str(param3) + str(".csv"))
 	frag_name = folderpath + str("/aggregate/") + time_string +  str("_frag_") + str(param1) + "_" + str(param2) + "-" + str(param3) + str(".csv")
-	with(open(frag_name, "w")) as f:
+	with(open(frag_name, "w", newline='')) as f:
 		writer = csv.writer(f, delimiter=',')
 		for row in result_frag:
 			writer.writerow(row)
@@ -221,7 +221,7 @@ def generateResultsFromFileOOM(folderpath, testcases, param1, param2, param3, di
 	print("------------------")
 	print("Generating -> " + time_string + str("_oom_") + str(param1) + "_" + str(param2) + "-" + str(param3) + str(".csv"))
 	frag_name = folderpath + str("/aggregate/") + time_string +  str("_oom_") + str(param1) + "_" + str(param2) + "-" + str(param3) + str(".csv")
-	with(open(frag_name, "w")) as f:
+	with(open(frag_name, "w", newline='')) as f:
 		writer = csv.writer(f, delimiter=',')
 		for row in result_oom:
 			writer.writerow(row)
@@ -261,7 +261,7 @@ def generateResultsFromFileInit(folderpath, param1, dimension_name, approach_pos
 	print("------------------")
 	print("Generating -> " + time_string + str("_init_") + str(param1) + str(".csv"))
 	init_name = folderpath + str("/aggregate/") + time_string +  str("_init_") + str(param1) + str(".csv")
-	with(open(init_name, "w")) as f:
+	with(open(init_name, "w", newline='')) as f:
 		writer = csv.writer(f, delimiter=',')
 		for row in result_init:
 			writer.writerow(row)
@@ -298,7 +298,7 @@ def generateResultsFromFileRegisters(folderpath, dimension_name, approach_pos):
 	print("------------------")
 	print("Generating -> " + time_string + str("_reg") + str(".csv"))
 	init_name = folderpath + str("/aggregate/") + time_string +  str("_reg") + str(".csv")
-	with(open(init_name, "w")) as f:
+	with(open(init_name, "w", newline='')) as f:
 		writer = csv.writer(f, delimiter=',')
 		for row in result_init:
 			writer.writerow(row)
@@ -359,7 +359,7 @@ def generateResultsFromSynthetic(testcases, folderpath, smallThread, largeThread
 	outputstr = time_string + str("_") + output_name_short + str("_") + str(smallThread) + "-" + str(largeThread) + "_" + str(smallByte) + "-" + str(largeByte) + str(".csv")
 	print("Generating -> " + outputstr)
 	filename = folderpath + str("/aggregate/") + outputstr
-	with(open(filename, "w")) as f:
+	with(open(filename, "w", newline='')) as f:
 		writer = csv.writer(f, delimiter=',')
 		for row in results:
 			writer.writerow(row)
@@ -415,7 +415,7 @@ def generateResultsFromGraph(testcases, folderpath, dimension_name, output_name_
 	outputstr = time_string + str("_graph_") + output_name_short + str(".csv")
 	print("Generating -> " + outputstr)
 	filename = folderpath + str("/aggregate/") + outputstr
-	with(open(filename, "w")) as f:
+	with(open(filename, "w", newline='')) as f:
 		writer = csv.writer(f, delimiter=',')
 		for row in results:
 			writer.writerow(row)
@@ -499,7 +499,7 @@ def generateResultsFromGraphUpdate(testcases, folderpath, dimension_name, output
 	outputstr = time_string + str("_graph_") + output_name_short + str("_insert") + suffix
 	print("Generating -> " + outputstr)
 	filename = folderpath + str("/aggregate/") + outputstr
-	with(open(filename, "w")) as f:
+	with(open(filename, "w", newline='')) as f:
 		writer = csv.writer(f, delimiter=',')
 		for row in results_insert:
 			writer.writerow(row)
@@ -507,7 +507,7 @@ def generateResultsFromGraphUpdate(testcases, folderpath, dimension_name, output
 	outputstr = time_string + str("_graph_") + output_name_short + str("_delete") + suffix
 	print("Generating -> " + outputstr)
 	filename = folderpath + str("/aggregate/") + outputstr
-	with(open(filename, "w")) as f:
+	with(open(filename, "w", newline='')) as f:
 		writer = csv.writer(f, delimiter=',')
 		for row in results_delete:
 			writer.writerow(row)
