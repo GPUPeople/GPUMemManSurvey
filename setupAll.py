@@ -15,27 +15,27 @@ def main():
 
 	# Build general testcase
 	Command("python clean.py".format()).run()
-	Command("python setup.py --cc {}".format(str(args.cc))).run()
+	Command("python setup.py --cc {}".format(str(args.cc))).run(timeout=3600)
 
 	# Build allocation testcases
 	os.chdir(os.path.join(current_dir, "tests/alloc_tests"))
 	Command("python clean.py".format()).run()
-	Command("python setup.py --cc {}".format(str(args.cc))).run()
+	Command("python setup.py --cc {}".format(str(args.cc))).run(timeout=3600)
 
 	# Build fragmentation testcases
 	os.chdir(os.path.join(current_dir, "tests/frag_tests"))
 	Command("python clean.py".format()).run()
-	Command("python setup.py --cc {}".format(str(args.cc))).run()
+	Command("python setup.py --cc {}".format(str(args.cc))).run(timeout=3600)
 
 	# Build graph testcases
 	os.chdir(os.path.join(current_dir, "tests/graph_tests"))
 	Command("python clean.py".format()).run()
-	Command("python setup.py --cc {}".format(str(args.cc))).run()
+	Command("python setup.py --cc {}".format(str(args.cc))).run(timeout=3600)
 
 	# Build synthetic testcases
 	os.chdir(os.path.join(current_dir, "tests/synth_tests"))
 	Command("python clean.py".format()).run()
-	Command("python setup.py --cc {}".format(str(args.cc))).run()
+	Command("python setup.py --cc {}".format(str(args.cc))).run(timeout=3600)
 
 	end = time.time()
 	timing = end - start
