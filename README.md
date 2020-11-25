@@ -60,6 +60,26 @@ These runtime measures were measured for the limited testcase as setup in `testA
 | Synthetic Workload | 1 min 58 sec | |
 | Synthetic Workload Write | 1 min 57 sec | |
 
+# Folder Structure
+* `frameworks` -> includes code for all frameworks
+* `externals` -> not all CUDA versions have CUB yet
+* `include` / `src` / `scripts` -> framework code
+* `tests` -> all test implementations
+  * `alloc_test` -> all allocation tests
+    * `test_allocation.py`
+    * `test_mixed_allocation.py`
+    * `test_scaling.py`
+  * `frag_test` -> all memory/fragmentation tests
+    * `test_fragmenation.py`
+    * `test_oom.py`
+  * `graph_test` -> all graph tests
+    * `test_graph_init.py`
+    * `test_graph_update.py`
+  * `synth_test` -> all synthetic tests
+    * `test_registers.py`
+    * `test_synth_init.py`
+    * `test_synth_workload.py`
+
 # Frameworks
 | Framework | Status | Paper | Code |
 |:---:|:---:|:---:| :---:|
@@ -76,6 +96,7 @@ These runtime measures were measured for the limited testcase as setup in `testA
 # Testcases
 Each testcase is controlled and executed via python scripts, a commonality of all scripts is that to run the testcase, one has to pass `-runtest` to the script, to gather all results into one file one can pass `-genres`.
 Pass `-h` to print a help screen with all parameters.
+All testcases get a `-device` parameter to control which device should execute the GPU code (e.g. `0`) and how much memory on this device should be reserved for the memory manager, specified via `-allocsize` (size on GB).
 ## Allocation Testcases
 ### Single Threaded / Single Warp Allocation Performance
 To test single threaded or single warp performance, navigate to `tests/alloc_tests` and call the script `test_allocation.py`
@@ -115,7 +136,7 @@ To generate one file with all approaches already executed, pass option `-genres`
 |`-warp`||Pass this flag to start 1 warp instead of 1 warp per allocation|
 |`-timeout`|`120`|Timeout in seconds, each individual testcase run will be canceled after this timeout, **default** is `600`|
 
-### Performanc Scaling
+### Performance Scaling
 To test performance scaling over a changing number of threads, navigate to `tests/alloc_tests` and call the script `test_scaling.py`
 * `python test_scaling.py -t o+s+h+c+r+x -byterange 4-64 -threadrange 0-10 -iter 50 -runtest -timeout 60`
   * This will start with `2⁰` threads up to `2¹⁰` threads, testing all powers of 2 in-between, and for each number of threads test the range `4-64` Bytes

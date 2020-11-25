@@ -7,7 +7,7 @@ import time
 from datetime import datetime
 from timedprocess import Command
 from Helper import generateResultsFromFileOOM
-from Helper import plotLine
+# from Helper import plotLine
 import csv
 import argparse
 import numpy as np
@@ -31,8 +31,12 @@ def main():
 	test_warp_based = False
 	filetype = "pdf"
 	time_out_val = 100
-	build_path = "build/"
-	sync_build_path = "sync_build/"
+	if os.name == 'nt': # If on Windows
+		build_path = os.path.join("build", "Release")
+		sync_build_path = os.path.join("sync_build", "Release")
+	else:
+		build_path = "build/"
+		sync_build_path = "sync_build/"
 
 	parser = argparse.ArgumentParser(description='Test fragmentation for various frameworks')
 	parser.add_argument('-t', type=str, help='Specify which frameworks to test, separated by +, e.g. o+s+h+c+f+r+x ---> c : cuda | s : scatteralloc | h : halloc | o : ouroboros | f : fdgmalloc | r : register-efficient | x : xmalloc')
@@ -49,32 +53,35 @@ def main():
 
 	args = parser.parse_args()
 
+	executable_extension = ""
+	if os.name == 'nt': # If on Windows
+		executable_extension = ".exe"
 	# Parse approaches
 	if(args.t):
 		if any("c" in s for s in args.t):
-			testcases["CUDA"] = build_path + str("c_frag_test")
+			testcases["CUDA"] = os.path.join(build_path, str("c_frag_test") + executable_extension)
 		if any("x" in s for s in args.t):
-			testcases["XMalloc"] = sync_build_path + str("x_frag_test")
+			testcases["XMalloc"] = os.path.join(sync_build_path, str("x_frag_test") + executable_extension)
 		if any("h" in s for s in args.t):
-			testcases["Halloc"] = sync_build_path + str("h_frag_test")
+			testcases["Halloc"] = os.path.join(sync_build_path, str("h_frag_test") + executable_extension)
 		if any("s" in s for s in args.t):
-			testcases["ScatterAlloc"] = sync_build_path + str("s_frag_test")
+			testcases["ScatterAlloc"] = os.path.join(sync_build_path, str("s_frag_test") + executable_extension)
 		if any("o" in s for s in args.t):
-			testcases["Ouroboros-P-S"] = build_path + str("o_frag_test_p")
-			testcases["Ouroboros-P-VA"] = build_path + str("o_frag_test_vap")
-			testcases["Ouroboros-P-VL"] = build_path + str("o_frag_test_vlp")
-			testcases["Ouroboros-C-S"] = build_path + str("o_frag_test_c")
-			testcases["Ouroboros-C-VA"] = build_path + str("o_frag_test_vac")
-			testcases["Ouroboros-C-VL"] = build_path + str("o_frag_test_vlc")
+			testcases["Ouroboros-P-S"] = os.path.join(build_path, str("o_frag_test_p") + executable_extension)
+			testcases["Ouroboros-P-VA"] = os.path.join(build_path, str("o_frag_test_vap") + executable_extension)
+			testcases["Ouroboros-P-VL"] = os.path.join(build_path, str("o_frag_test_vlp") + executable_extension)
+			testcases["Ouroboros-C-S"] = os.path.join(build_path, str("o_frag_test_c") + executable_extension)
+			testcases["Ouroboros-C-VA"] = os.path.join(build_path, str("o_frag_test_vac") + executable_extension)
+			testcases["Ouroboros-C-VL"] = os.path.join(build_path, str("o_frag_test_vlc") + executable_extension)
 		if any("f" in s for s in args.t):
-			testcases["FDGMalloc"] = sync_build_path + str("f_frag_test")
+			testcases["FDGMalloc"] = os.path.join(sync_build_path, str("f_frag_test") + executable_extension)
 		if any("r" in s for s in args.t):
-			# testcases["RegEff-A"] = sync_build_path + str("r_frag_test_a")
-			testcases["RegEff-AW"] = sync_build_path + str("r_frag_test_aw")
-			testcases["RegEff-C"] = sync_build_path + str("r_frag_test_c")
-			testcases["RegEff-CF"] = sync_build_path + str("r_frag_test_cf")
-			testcases["RegEff-CM"] = sync_build_path + str("r_frag_test_cm")
-			testcases["RegEff-CFM"] = sync_build_path + str("r_frag_test_cfm")
+			# testcases["RegEff-A"] = os.path.join(sync_build_path, str("r_frag_test_a") + executable_extension)
+			testcases["RegEff-AW"] = os.path.join(sync_build_path, str("r_frag_test_aw") + executable_extension)
+			testcases["RegEff-C"] = os.path.join(sync_build_path, str("r_frag_test_c") + executable_extension)
+			testcases["RegEff-CF"] = os.path.join(sync_build_path, str("r_frag_test_cf") + executable_extension)
+			testcases["RegEff-CM"] = os.path.join(sync_build_path, str("r_frag_test_cm") + executable_extension)
+			testcases["RegEff-CFM"] = os.path.join(sync_build_path, str("r_frag_test_cfm") + executable_extension)
 		if any("b" in s for s in args.t):
 			testcases["BaseLine"] = str("xx")
 	
@@ -165,39 +172,39 @@ def main():
 	# Generate new plots
 	####################################################################################################
 	####################################################################################################
-	if generate_plots:
-		result_oom = list()
-		# Get Timestring
-		now = datetime.now()
-		time_string = now.strftime("%b-%d-%Y_%H-%M-%S")
+	# if generate_plots:
+	# 	result_oom = list()
+	# 	# Get Timestring
+	# 	now = datetime.now()
+	# 	time_string = now.strftime("%b-%d-%Y_%H-%M-%S")
 
-		if plotscale == "log":
-			time_string += "_log"
-		else:
-			time_string += "_lin"
+	# 	if plotscale == "log":
+	# 		time_string += "_log"
+	# 	else:
+	# 		time_string += "_lin"
 
-		for file in os.listdir("results/aggregate"):
-			filename = str("results/aggregate/") + os.fsdecode(file)
-			if(os.path.isdir(filename)):
-				continue
-			if filename.split("_")[2] != "oom" or str(num_allocations) != filename.split('_')[3] or str(smallest_allocation_size) + "-" + str(largest_allocation_size) != filename.split('_')[4].split(".")[0]:
-				continue
-			# We want the one matching our input
-			with open(filename) as f:
-				reader = csv.reader(f)
-				result_oom = list(reader)
+	# 	for file in os.listdir("results/aggregate"):
+	# 		filename = str("results/aggregate/") + os.fsdecode(file)
+	# 		if(os.path.isdir(filename)):
+	# 			continue
+	# 		if filename.split("_")[2] != "oom" or str(num_allocations) != filename.split('_')[3] or str(smallest_allocation_size) + "-" + str(largest_allocation_size) != filename.split('_')[4].split(".")[0]:
+	# 			continue
+	# 		# We want the one matching our input
+	# 		with open(filename) as f:
+	# 			reader = csv.reader(f)
+	# 			result_oom = list(reader)
 
-		####################################################################################################
-		# Lineplot
-		####################################################################################################
-		plotLine(result_oom, 
-			testcases,
-			plotscale,
-			'Bytes', 
-			'% of Maximum', 
-			"Perform " + str(num_allocations) + " allocations until out-of-memory is reported", 
-			str("results/plots/") + time_string + "_oom." + filetype,
-			"log")
+	# 	####################################################################################################
+	# 	# Lineplot
+	# 	####################################################################################################
+	# 	plotLine(result_oom, 
+	# 		testcases,
+	# 		plotscale,
+	# 		'Bytes', 
+	# 		'% of Maximum', 
+	# 		"Perform " + str(num_allocations) + " allocations until out-of-memory is reported", 
+	# 		str("results/plots/") + time_string + "_oom." + filetype,
+	# 		"log")
 
 
 	print("Done")

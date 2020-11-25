@@ -7,7 +7,7 @@ import time
 from datetime import datetime
 from timedprocess import Command
 from Helper import generateResultsFromGraph
-from Helper import plotMean
+# from Helper import plotMean
 import csv
 import argparse
 
@@ -42,8 +42,12 @@ def main():
 
 	config_file = "config_init.json"
 	testcases = {}
-	build_path = "build/"
-	sync_build_path = "sync_build/"
+	if os.name == 'nt': # If on Windows
+		build_path = os.path.join("build", "Release")
+		sync_build_path = os.path.join("sync_build", "Release")
+	else:
+		build_path = "build/"
+		sync_build_path = "sync_build/"
 	filetype = "pdf"
 	time_out_val = 100
 	generate_results = True
@@ -63,33 +67,36 @@ def main():
 
 	args = parser.parse_args()
 
+	executable_extension = ""
+	if os.name == 'nt': # If on Windows
+		executable_extension = ".exe"
 	# Parse approaches
 	if(args.t):
 		if any("c" in s for s in args.t):
-			testcases["CUDA"] = build_path + str("c_graph_test")
+			testcases["CUDA"] = os.path.join(build_path, str("c_graph_test") + executable_extension)
 		if any("x" in s for s in args.t):
-			testcases["XMalloc"] = sync_build_path + str("x_graph_test")
+			testcases["XMalloc"] = os.path.join(sync_build_path, str("x_graph_test") + executable_extension)
 		if any("h" in s for s in args.t):
-			testcases["Halloc"] = sync_build_path + str("h_graph_test")
+			testcases["Halloc"] = os.path.join(sync_build_path, str("h_graph_test") + executable_extension)
 		if any("s" in s for s in args.t):
-			testcases["ScatterAlloc"] = sync_build_path + str("s_graph_test")
+			testcases["ScatterAlloc"] = os.path.join(sync_build_path, str("s_graph_test") + executable_extension)
 		if any("o" in s for s in args.t):
-			testcases["Ouroboros-P-S"] = build_path + str("o_graph_test_p")
-			testcases["Ouroboros-P-VA"] = build_path + str("o_graph_test_vap")
-			testcases["Ouroboros-P-VL"] = build_path + str("o_graph_test_vlp")
-			testcases["Ouroboros-C-S"] = build_path + str("o_graph_test_c")
-			testcases["Ouroboros-C-VA"] = build_path + str("o_graph_test_vac")
-			testcases["Ouroboros-C-VL"] = build_path + str("o_graph_test_vlc")
+			testcases["Ouroboros-P-S"] = os.path.join(build_path, str("o_graph_test_p") + executable_extension)
+			testcases["Ouroboros-P-VA"] = os.path.join(build_path, str("o_graph_test_vap") + executable_extension)
+			testcases["Ouroboros-P-VL"] = os.path.join(build_path, str("o_graph_test_vlp") + executable_extension)
+			testcases["Ouroboros-C-S"] = os.path.join(build_path, str("o_graph_test_c") + executable_extension)
+			testcases["Ouroboros-C-VA"] = os.path.join(build_path, str("o_graph_test_vac") + executable_extension)
+			testcases["Ouroboros-C-VL"] = os.path.join(build_path, str("o_graph_test_vlc") + executable_extension)
 		if any("f" in s for s in args.t):
-			testcases["FDGMalloc"] = sync_build_path + str("f_graph_test")
+			testcases["FDGMalloc"] = os.path.join(sync_build_path, str("f_graph_test") + executable_extension)
 		if any("r" in s for s in args.t):
-			# testcases["RegEff-A"] = sync_build_path + str("r_graph_test_a")
-			testcases["RegEff-AW"] = sync_build_path + str("r_graph_test_aw")
-			testcases["RegEff-C"] = sync_build_path + str("r_graph_test_c")
-			testcases["RegEff-CF"] = sync_build_path + str("r_graph_test_cf")
-			testcases["RegEff-CM"] = sync_build_path + str("r_graph_test_cm")
-			testcases["RegEff-CFM"] = sync_build_path + str("r_graph_test_cfm")
-	
+			# testcases["RegEff-A"] = os.path.join(sync_build_path, str("r_graph_test_a") + executable_extension)
+			testcases["RegEff-AW"] = os.path.join(sync_build_path, str("r_graph_test_aw") + executable_extension)
+			testcases["RegEff-C"] = os.path.join(sync_build_path, str("r_graph_test_c") + executable_extension)
+			testcases["RegEff-CF"] = os.path.join(sync_build_path, str("r_graph_test_cf") + executable_extension)
+			testcases["RegEff-CM"] = os.path.join(sync_build_path, str("r_graph_test_cm") + executable_extension)
+			testcases["RegEff-CFM"] = os.path.join(sync_build_path, str("r_graph_test_cfm") + executable_extension)
+
 	# Run Testcases
 	run_testcases = args.runtest
 	

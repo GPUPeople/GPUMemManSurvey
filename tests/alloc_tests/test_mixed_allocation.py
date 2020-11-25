@@ -7,7 +7,7 @@ import time
 from datetime import datetime
 from timedprocess import Command
 from Helper import generateResultsFromFileAllocation
-from Helper import plotBars
+# from Helper import plotBars
 import csv
 import argparse
 
@@ -25,8 +25,12 @@ def main():
 	free_memory = 1
 	filetype = "pdf"
 	time_out_val = 10
-	build_path = "build/"
-	sync_build_path = "sync_build/"
+	if os.name == 'nt': # If on Windows
+		build_path = os.path.join("build", "Release")
+		sync_build_path = os.path.join("sync_build", "Release")
+	else:
+		build_path = "build/"
+		sync_build_path = "sync_build/"
 
 	parser = argparse.ArgumentParser(description='Test allocation performance for various frameworks')
 	parser.add_argument('-t', type=str, help='Specify which frameworks to test, separated by +, e.g. o+s+h+c+f+r+x ---> c : cuda | s : scatteralloc | h : halloc | o : ouroboros | f : fdgmalloc | r : register-efficient | x : xmalloc')
@@ -47,33 +51,36 @@ def main():
 
 	args = parser.parse_args()
 
+	executable_extension = ""
+	if os.name == 'nt': # If on Windows
+		executable_extension = ".exe"
 	# Parse approaches
 	if(args.t):
 		if any("c" in s for s in args.t):
-			testcases["CUDA"] = build_path + str("c_mixed_alloc_test")
+			testcases["CUDA"] = os.path.join(build_path, str("c_mixed_alloc_test") + executable_extension)
 		if any("x" in s for s in args.t):
-			testcases["XMalloc"] = sync_build_path + str("x_mixed_alloc_test")
+			testcases["XMalloc"] = os.path.join(sync_build_path, str("x_mixed_alloc_test") + executable_extension)
 		if any("h" in s for s in args.t):
-			testcases["Halloc"] = sync_build_path + str("h_mixed_alloc_test")
+			testcases["Halloc"] = os.path.join(sync_build_path, str("h_mixed_alloc_test") + executable_extension)
 		if any("s" in s for s in args.t):
-			testcases["ScatterAlloc"] = sync_build_path + str("s_mixed_alloc_test")
+			testcases["ScatterAlloc"] = os.path.join(sync_build_path, str("s_mixed_alloc_test") + executable_extension)
 		if any("o" in s for s in args.t):
-			testcases["Ouroboros-P-S"] = build_path + str("o_mixed_alloc_test_p")
-			testcases["Ouroboros-C-S"] = build_path + str("o_mixed_alloc_test_c")
-			testcases["Ouroboros-P-VA"] = build_path + str("o_mixed_alloc_test_vap")
-			testcases["Ouroboros-C-VA"] = build_path + str("o_mixed_alloc_test_vac")
-			testcases["Ouroboros-P-VL"] = build_path + str("o_mixed_alloc_test_vlp")
-			testcases["Ouroboros-C-VL"] = build_path + str("o_mixed_alloc_test_vlc")
+			testcases["Ouroboros-P-S"] = os.path.join(build_path, str("o_mixed_alloc_test_p") + executable_extension)
+			testcases["Ouroboros-P-VA"] = os.path.join(build_path, str("o_mixed_alloc_test_vap") + executable_extension)
+			testcases["Ouroboros-P-VL"] = os.path.join(build_path, str("o_mixed_alloc_test_vlp") + executable_extension)
+			testcases["Ouroboros-C-S"] = os.path.join(build_path, str("o_mixed_alloc_test_c") + executable_extension)
+			testcases["Ouroboros-C-VA"] = os.path.join(build_path, str("o_mixed_alloc_test_vac") + executable_extension)
+			testcases["Ouroboros-C-VL"] = os.path.join(build_path, str("o_mixed_alloc_test_vlc") + executable_extension)
 		if any("f" in s for s in args.t):
-			testcases["FDGMalloc"] = sync_build_path + str("f_mixed_alloc_test")
+			testcases["FDGMalloc"] = os.path.join(sync_build_path, str("f_mixed_alloc_test") + executable_extension)
 		if any("r" in s for s in args.t):
-			testcases["RegEff-A"] = sync_build_path + str("r_mixed_alloc_test_a")
-			testcases["RegEff-AW"] = sync_build_path + str("r_mixed_alloc_test_aw")
-			testcases["RegEff-C"] = sync_build_path + str("r_mixed_alloc_test_c")
-			testcases["RegEff-CF"] = sync_build_path + str("r_mixed_alloc_test_cf")
-			testcases["RegEff-CM"] = sync_build_path + str("r_mixed_alloc_test_cm")
-			testcases["RegEff-CFM"] = sync_build_path + str("r_mixed_alloc_test_cfm")
-	
+			# testcases["RegEff-A"] = os.path.join(sync_build_path, str("r_mixed_alloc_test_a") + executable_extension)
+			testcases["RegEff-AW"] = os.path.join(sync_build_path, str("r_mixed_alloc_test_aw") + executable_extension)
+			testcases["RegEff-C"] = os.path.join(sync_build_path, str("r_mixed_alloc_test_c") + executable_extension)
+			testcases["RegEff-CF"] = os.path.join(sync_build_path, str("r_mixed_alloc_test_cf") + executable_extension)
+			testcases["RegEff-CM"] = os.path.join(sync_build_path, str("r_mixed_alloc_test_cm") + executable_extension)
+			testcases["RegEff-CFM"] = os.path.join(sync_build_path, str("r_mixed_alloc_test_cfm") + executable_extension)
+
 	# Parse num allocation
 	if(args.num):
 		num_allocations = args.num
@@ -178,132 +185,132 @@ def main():
 			os.mkdir("results/mixed_performance/aggregate")
 		generateResultsFromFileAllocation(testcases, "results/mixed_performance", num_allocations, smallest_allocation_size, largest_allocation_size, "Byte-Range", "perf_mixed", 4)
 
-	####################################################################################################
-	####################################################################################################
-	# Generate new plots
-	####################################################################################################
-	####################################################################################################
-	if generate_plots:
-		result_alloc = list(list())
-		result_free = list(list())
-		# Get Timestring
-		now = datetime.now()
-		time_string = now.strftime("%b-%d-%Y_%H-%M-%S")
+	# ####################################################################################################
+	# ####################################################################################################
+	# # Generate new plots
+	# ####################################################################################################
+	# ####################################################################################################
+	# if generate_plots:
+	# 	result_alloc = list(list())
+	# 	result_free = list(list())
+	# 	# Get Timestring
+	# 	now = datetime.now()
+	# 	time_string = now.strftime("%b-%d-%Y_%H-%M-%S")
 
-		if plotscale == "log":
-			time_string += "_log"
-		else:
-			time_string += "_lin"
+	# 	if plotscale == "log":
+	# 		time_string += "_log"
+	# 	else:
+	# 		time_string += "_lin"
 
-		for file in os.listdir("results/mixed_performance/aggregate"):
-			filename = str("results/mixed_performance/aggregate/") + os.fsdecode(file)
-			if(os.path.isdir(filename)):
-				continue
-			if str(num_allocations) != filename.split('_')[6] or str(smallest_allocation_size) + "-" + str(largest_allocation_size) != filename.split('_')[7].split(".")[0]:
-				continue
-			# We want the one matching our input
-			with open(filename) as f:
-				reader = csv.reader(f)
-				if "free" in filename:
-					result_free = list(reader)
-				else:
-					result_alloc = list(reader)
+	# 	for file in os.listdir("results/mixed_performance/aggregate"):
+	# 		filename = str("results/mixed_performance/aggregate/") + os.fsdecode(file)
+	# 		if(os.path.isdir(filename)):
+	# 			continue
+	# 		if str(num_allocations) != filename.split('_')[6] or str(smallest_allocation_size) + "-" + str(largest_allocation_size) != filename.split('_')[7].split(".")[0]:
+	# 			continue
+	# 		# We want the one matching our input
+	# 		with open(filename) as f:
+	# 			reader = csv.reader(f)
+	# 			if "free" in filename:
+	# 				result_free = list(reader)
+	# 			else:
+	# 				result_alloc = list(reader)
 		
-		####################################################################################################
-		# Alloc - Mean - Std-dev
-		####################################################################################################
-		plotBars(result_alloc, 
-			testcases,
-			plotscale,
-			False, 
-			'Bytes', 
-			'ms', 
-			"Allocation performance for mixed " + str(num_allocations) + " allocations (mean)", 
-			str("results/plots/mixed_performance/") + time_string + "_alloc." + filetype,
-			"stddev")
-		plotBars(result_alloc, 
-			testcases,
-			plotscale,
-			True, 
-			'Bytes', 
-			'ms', 
-			"Allocation performance for mixed " + str(num_allocations) + " allocations (mean + stddev)", 
-			str("results/plots/mixed_performance/") + time_string + "_alloc_stddev." + filetype,
-			"stddev")
+	# 	####################################################################################################
+	# 	# Alloc - Mean - Std-dev
+	# 	####################################################################################################
+	# 	plotBars(result_alloc, 
+	# 		testcases,
+	# 		plotscale,
+	# 		False, 
+	# 		'Bytes', 
+	# 		'ms', 
+	# 		"Allocation performance for mixed " + str(num_allocations) + " allocations (mean)", 
+	# 		str("results/plots/mixed_performance/") + time_string + "_alloc." + filetype,
+	# 		"stddev")
+	# 	plotBars(result_alloc, 
+	# 		testcases,
+	# 		plotscale,
+	# 		True, 
+	# 		'Bytes', 
+	# 		'ms', 
+	# 		"Allocation performance for mixed " + str(num_allocations) + " allocations (mean + stddev)", 
+	# 		str("results/plots/mixed_performance/") + time_string + "_alloc_stddev." + filetype,
+	# 		"stddev")
 
-		####################################################################################################
-		# Free - Mean - Std-dev
-		####################################################################################################
-		plotBars(result_free, 
-			testcases,
-			plotscale,
-			False, 
-			'Bytes', 
-			'ms', 
-			"Free performance for mixed " + str(num_allocations) + " allocations (mean)", 
-			str("results/plots/mixed_performance/") + time_string + "_free." + filetype,
-			"stddev")
-		plotBars(result_free, 
-			testcases,
-			plotscale,
-			True, 
-			'Bytes', 
-			'ms', 
-			"Free performance for mixed " + str(num_allocations) + " allocations (mean + stddev)", 
-			str("results/plots/mixed_performance/") + time_string + "_free_stddev." + filetype,
-			"stddev")
+	# 	####################################################################################################
+	# 	# Free - Mean - Std-dev
+	# 	####################################################################################################
+	# 	plotBars(result_free, 
+	# 		testcases,
+	# 		plotscale,
+	# 		False, 
+	# 		'Bytes', 
+	# 		'ms', 
+	# 		"Free performance for mixed " + str(num_allocations) + " allocations (mean)", 
+	# 		str("results/plots/mixed_performance/") + time_string + "_free." + filetype,
+	# 		"stddev")
+	# 	plotBars(result_free, 
+	# 		testcases,
+	# 		plotscale,
+	# 		True, 
+	# 		'Bytes', 
+	# 		'ms', 
+	# 		"Free performance for mixed " + str(num_allocations) + " allocations (mean + stddev)", 
+	# 		str("results/plots/mixed_performance/") + time_string + "_free_stddev." + filetype,
+	# 		"stddev")
 		
-		####################################################################################################
-		# Alloc - Mean - Min/Max
-		####################################################################################################
-		plotBars(result_alloc, 
-			testcases,
-			plotscale,
-			True, 
-			'Bytes', 
-			'ms', 
-			"Allocation performance for mixed " + str(num_allocations) + " allocations (mean + min/max)", 
-			str("results/plots/mixed_performance/") + time_string + "_alloc_min_max." + filetype,
-			"minmax")
+	# 	####################################################################################################
+	# 	# Alloc - Mean - Min/Max
+	# 	####################################################################################################
+	# 	plotBars(result_alloc, 
+	# 		testcases,
+	# 		plotscale,
+	# 		True, 
+	# 		'Bytes', 
+	# 		'ms', 
+	# 		"Allocation performance for mixed " + str(num_allocations) + " allocations (mean + min/max)", 
+	# 		str("results/plots/mixed_performance/") + time_string + "_alloc_min_max." + filetype,
+	# 		"minmax")
 
-		####################################################################################################
-		# Free - Mean - Min/Max
-		####################################################################################################
-		plotBars(result_free, 
-			testcases,
-			plotscale,
-			True, 
-			'Bytes', 
-			'ms', 
-			"Free performance for mixed " + str(num_allocations) + " allocations (mean + min/max)", 
-			str("results/plots/mixed_performance/") + time_string + "_free_min_max." + filetype,
-			"minmax")
+	# 	####################################################################################################
+	# 	# Free - Mean - Min/Max
+	# 	####################################################################################################
+	# 	plotBars(result_free, 
+	# 		testcases,
+	# 		plotscale,
+	# 		True, 
+	# 		'Bytes', 
+	# 		'ms', 
+	# 		"Free performance for mixed " + str(num_allocations) + " allocations (mean + min/max)", 
+	# 		str("results/plots/mixed_performance/") + time_string + "_free_min_max." + filetype,
+	# 		"minmax")
 
-		####################################################################################################
-		# Alloc - Median
-		####################################################################################################
-		plotBars(result_alloc, 
-			testcases,
-			plotscale,
-			False, 
-			'Bytes', 
-			'ms', 
-			"Allocation performance for mixed " + str(num_allocations) + " allocations (median)", 
-			str("results/plots/mixed_performance/") + time_string + "_alloc_median." + filetype,
-			"median")
+	# 	####################################################################################################
+	# 	# Alloc - Median
+	# 	####################################################################################################
+	# 	plotBars(result_alloc, 
+	# 		testcases,
+	# 		plotscale,
+	# 		False, 
+	# 		'Bytes', 
+	# 		'ms', 
+	# 		"Allocation performance for mixed " + str(num_allocations) + " allocations (median)", 
+	# 		str("results/plots/mixed_performance/") + time_string + "_alloc_median." + filetype,
+	# 		"median")
 
-		####################################################################################################
-		# Free - Median
-		####################################################################################################
-		plotBars(result_free, 
-			testcases,
-			plotscale,
-			False, 
-			'Bytes', 
-			'ms', 
-			"Free performance for mixed " + str(num_allocations) + " allocations (median)", 
-			str("results/plots/mixed_performance/") + time_string + "_free_median." + filetype,
-			"median")
+	# 	####################################################################################################
+	# 	# Free - Median
+	# 	####################################################################################################
+	# 	plotBars(result_free, 
+	# 		testcases,
+	# 		plotscale,
+	# 		False, 
+	# 		'Bytes', 
+	# 		'ms', 
+	# 		"Free performance for mixed " + str(num_allocations) + " allocations (median)", 
+	# 		str("results/plots/mixed_performance/") + time_string + "_free_median." + filetype,
+	# 		"median")
 
 
 if __name__ == "__main__":
