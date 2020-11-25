@@ -10,7 +10,6 @@ from Helper import generateResultsFromSynthetic
 # from Helper import plotMean
 import csv
 import argparse
-import numpy as np
 
 def main():
 	# Run all files from a directory

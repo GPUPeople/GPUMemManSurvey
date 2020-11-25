@@ -10,7 +10,6 @@ from Helper import generateResultsFromFileOOM
 # from Helper import plotLine
 import csv
 import argparse
-import numpy as np
 
 def main():
 	# Run all files from a directory

@@ -122,6 +122,9 @@ def main():
 
 	# Sort graphs for consistent ordering
 	graphs.sort()
+
+	if not os.path.exists("results/aggregate"):
+		os.mkdir("results/aggregate")
 	
 	if(args.graphstats):
 		csv_path = "results/aggregate/graph_stats.csv"
@@ -136,7 +139,7 @@ def main():
 			with open(csv_path, "a", newline='') as csv_file:
 				csv_file.write(graph + ",")
 			run_config = config_file + " " + path + graph + " " + str(1) + " " + csv_path
-			executecommand = "{0} {1}".format(build_path + str("c_graph_test"), run_config)
+			executecommand = "{0} {1}".format(os.path.join(build_path, str("c_graph_test") + executable_extension), run_config)
 			print("#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#")
 			print("Running command -> " + executecommand)
 			print("#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#")
@@ -192,8 +195,6 @@ def main():
 	# ####################################################################################################
 	# ####################################################################################################
 	if generate_results:
-		if not os.path.exists("results/aggregate"):
-			os.mkdir("results/aggregate")
 		generateResultsFromGraph(testcases, "results", "Graphs", "init", 2)
 
 

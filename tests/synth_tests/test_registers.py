@@ -10,7 +10,6 @@ from Helper import generateResultsFromFileRegisters
 # from Helper import plotRegisters
 import csv
 import argparse
-import numpy as np
 
 def main():
 	# Run all files from a directory

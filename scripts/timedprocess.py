@@ -1,5 +1,7 @@
 import subprocess
 import threading
+import signal
+import os
 
 """ Run system commands with timeout
 """
@@ -30,7 +32,14 @@ class Command(object):
         thread_killed = False
         if thread.is_alive():
             print('Command timeout, kill it: ' + self.cmd)
-            self.process.terminate()
+            if os.name == 'nt': # If on Windows
+                os.system("TASKKILL /F /T /PID {0}".format(self.process.pid))
+                # os.system("TASKKILL /F /PID {0}".format(self.process.pid))
+                # os.kill(self.process.pid, signal.CTRL_C_EVENT)
+                # os.kill(self.process.pid, signal.CTRL_BREAK_EVENT)
+                # self.process.terminate()
+            else:
+                self.process.terminate()
             thread.join()
             thread_killed = True
         return self.out, thread_killed

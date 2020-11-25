@@ -378,7 +378,6 @@ def generateResultsFromGraph(testcases, folderpath, dimension_name, output_name_
 		if(os.path.isdir(filename)):
 			continue
 		if str("init") != filename.split('_')[1]:
-			print(filename.split('_')[1])
 			continue
 		approach_name = filename.split('_')[approach_pos].split(".")[0]
 		if approach_name not in testcases:

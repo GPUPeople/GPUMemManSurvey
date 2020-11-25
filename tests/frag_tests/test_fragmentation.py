@@ -10,7 +10,6 @@ from Helper import generateResultsFromFileFragmentation
 # from Helper import plotLineRange
 import csv
 import argparse
-import numpy as np
 
 def main():
 	# Run all files from a directory

@@ -14,7 +14,7 @@ The framework was tested on Windows 10, Arch Linux <5.9.9> as well as Manjaro <5
 * **CMake**
   * Version `>= 3.16`, tested with `3.18`
 * **Python**
-  * Tested with `Python 3.8`
+  * Tested with `Python 3.8` and `Python 3.9`
   * Requires packages
     * `argparse` (`python pip install argparse`)
     * `numpy` (`python pip install numpy`)
@@ -43,22 +43,24 @@ These runtime measures were measured for the limited testcase as setup in `testA
 
 | Task | Time (min:sec) - Linux| Time (min:sec) - Windows|
 |:---:|:---:|:---:|
-|Overall|28 min 28 sec||
+|Overall|28 min 28 sec|1 h 3 min 47 sec|
 |Build | 9 min 45 sec | 28 min 15 sec |
-|Test All |18 min 43 sec||
+|Test All |18 min 43 sec| 35 min 32 sec|
 |-|-|-|
-| Allocation|1 min 48 sec| |
-| Mixed Allocation | 0 min 35 sec | |
-| Scaling | 2 min 52 sec | |
-| Fragmentation | 1 min 47 sec | |
-| Out-of-Memory | 7 min 15 sec | |
-|Graph Init| 0 min 11 sec| |
-| Graph Update | 0 min 11 sec | |
-| Graph Update Range | 0 min 11 sec | |
-| Register Footprint | 0 min 03 sec | | 
-| Initialization | 0 min 05 sec | |
-| Synthetic Workload | 1 min 58 sec | |
-| Synthetic Workload Write | 1 min 57 sec | |
+| Allocation|1 min 48 sec| 2 min 39 sec |
+| Mixed Allocation | 0 min 35 sec | 2 min 46 sec |
+| Scaling | 2 min 52 sec | 4 min 03 sec |
+| Fragmentation | 1 min 47 sec | 2 min 36 sec |
+| Out-of-Memory | 7 min 15 sec | 8 min 21 sec |
+|Graph Init| 0 min 11 sec | 1 min 44 sec |
+| Graph Update | 0 min 11 sec | 1 min 44 sec |
+| Graph Update Range | 0 min 11 sec | 1 min 44 sec|
+| Register Footprint | 0 min 03 sec | 0 min 05 sec| 
+| Initialization | 0 min 05 sec | 0 min 12 sec |
+| Synthetic Workload | 1 min 58 sec | 4 min 50 sec |
+| Synthetic Workload Write | 1 min 57 sec | 4 min 48 sec |
+
+The framework does **not** perform many sanity checks, please read the documentation first if something is not working as expected if some parameter was not configured correctly for example.
 
 # Folder Structure
 * `frameworks` -> includes code for all frameworks
