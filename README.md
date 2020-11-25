@@ -102,7 +102,7 @@ All testcases get a `-device` parameter to control which device should execute t
 ## Allocation Testcases
 ### Single Threaded / Single Warp Allocation Performance
 To test single threaded or single warp performance, navigate to `tests/alloc_tests` and call the script `test_allocation.py`
-* `python test_allocation.py -t o+s+h+c+r+x -num 10000 -range 4-64 -iter 50 -runtest -timeout 60`
+* `python test_allocation.py -t o+s+h+c+r+x -num 10000 -range 4-64 -iter 50 -runtest -timeout 60 -allocsize 8 - device 0`
   * This will start `10000` threads, each of them will start by allocating `4` Bytes and then increase linearly up to `64` Bytes
 
 This will generate one csv file for each approach with `mean`, `min`, `max`, `median` performance averaged over the number of iterations.
@@ -118,10 +118,12 @@ To generate one file with all approaches already executed, pass option `-genres`
 |`-genres`||Pass this flag to gather all results from existing csv files into one|
 |`-warp`||Pass this flag to start 1 warp instead of 1 warp per allocation|
 |`-timeout`|`120`|Timeout in seconds, each individual testcase run will be canceled after this timeout, **default** is `600`|
+|`-allocsize`|`8`|How large the manageable memory ares per memory manager should be in `GB`|
+|`-device`|`0`|Which GPU device to use|
 
 ### Mixed Range Allocation Performance
 To test allocation performance when threads are allocating with different sizes (constrained by a maximum/minimum allocation size), navigate to `tests/alloc_tests` and call the script `test_mixed_allocation.py`
-* `python test_mixed_allocation.py -t o+s+h+c+r+x -num 10000 -range 4-64 -iter 50 -runtest -timeout 60`
+* `python test_mixed_allocation.py -t o+s+h+c+r+x -num 10000 -range 4-64 -iter 50 -runtest -timeout 60 -allocsize 8 - device 0`
 	* This will start `10000` threads, each of them will allocate in the range of `4-64` Bytes
 
 This will generate one csv file for each approach with `mean`, `min`, `max`, `median` performance averaged over the number of iterations.
@@ -137,10 +139,12 @@ To generate one file with all approaches already executed, pass option `-genres`
 |`-genres`||Pass this flag to gather all results from existing csv files into one|
 |`-warp`||Pass this flag to start 1 warp instead of 1 warp per allocation|
 |`-timeout`|`120`|Timeout in seconds, each individual testcase run will be canceled after this timeout, **default** is `600`|
+|`-allocsize`|`8`|How large the manageable memory ares per memory manager should be in `GB`|
+|`-device`|`0`|Which GPU device to use|
 
 ### Performance Scaling
 To test performance scaling over a changing number of threads, navigate to `tests/alloc_tests` and call the script `test_scaling.py`
-* `python test_scaling.py -t o+s+h+c+r+x -byterange 4-64 -threadrange 0-10 -iter 50 -runtest -timeout 60`
+* `python test_scaling.py -t o+s+h+c+r+x -byterange 4-64 -threadrange 0-10 -iter 50 -runtest -timeout 60 -allocsize 8 - device 0`
   * This will start with `2⁰` threads up to `2¹⁰` threads, testing all powers of 2 in-between, and for each number of threads test the range `4-64` Bytes
 
 This will generate one csv file for each approach and for each number of threads with `mean`, `min`, `max`, `median` performance averaged over the number of iterations.
@@ -157,12 +161,14 @@ Can also be started with one warp per allocation by passing `-warp`.
 |`-genres`||Pass this flag to gather all results from existing csv files into one|
 |`-warp`||Pass this flag to start 1 warp instead of 1 warp per allocation|
 |`-timeout`|`120`|Timeout in seconds, each individual testcase run will be canceled after this timeout, **default** is `600`|
+|`-allocsize`|`8`|How large the manageable memory ares per memory manager should be in `GB`|
+|`-device`|`0`|Which GPU device to use|
 
 ## Fragmentation Testcases
 ### Memory Fragmentation Testcase
 This testcase tests the fragmentation of the returned addresses of a given allocation by reporting the maximum address range returned by each allocating thread. It also tracks the static maximum over a number of iterations.
 It continues to allocate and free a number of allocations for the number of `-iter` and returns those ranges.
-* `python test_fragmentation.py -t o+s+h+c+r+x -num 10000 -range 4-64 -iter 50 -runtest -timeout 60 -allocsize 8`
+* `python test_fragmentation.py -t o+s+h+c+r+x -num 10000 -range 4-64 -iter 50 -runtest -timeout 60 -allocsize 8 - device 0`
   * This will start `10000` threads, each of them will start by allocating `4` Bytes and then increase linearly up to `64` Bytes, reporting the current range and static maximum range
 
 This will generate one csv file for each approach with `min address range`, `max address range`, `min address range (static)` and `max address range (max)`.
@@ -176,12 +182,13 @@ To generate one file with all approaches already executed, pass option `-genres`
 |`-iter`|`50`|How often to run test and average over runs, e.g. `50`|
 |`-runtest`||Pass this flag to execute the testcase and run the approaches|
 |`-genres`||Pass this flag to gather all results from existing csv files into one|
-|`-allocsize`|`8`|How large the manageable memory ares per memory manager should be in `GB`|
 |`-timeout`|`120`|Timeout in seconds, each individual testcase run will be canceled after this timeout, **default** is `600`|
+|`-allocsize`|`8`|How large the manageable memory ares per memory manager should be in `GB`|
+|`-device`|`0`|Which GPU device to use|
 
 ### Out-of-Memory Testcase
 Tests out-of-memory behavior for a range of allocation sizes, hence how efficient the memory is utilized. The range will be sampled for each power of 2 in-between the given `-range`
-* `python test_oom.py -t o+s+h+c+r+x -num 10000 -range 4-64 -runtest -timeout 60 -allocsize 8`
+* `python test_oom.py -t o+s+h+c+r+x -num 10000 -range 4-64 -runtest -timeout 60 -allocsize 8 - device 0`
   * This starts `10000` allocating threads, tests powers of 2 in the range `4-64` and continues to allocate until out-of-memory is reported, recording the number of iterations in the csv file
 
 This will generate one csv file for each approach and records the number of successful iterations. 
@@ -194,14 +201,14 @@ To generate one file with all approaches already executed, pass option `-genres`
 |`-range`|`4-64`|Which allocation range to test, e.g. `4-64` Bytes|
 |`-runtest`||Pass this flag to execute the testcase and run the approaches|
 |`-genres`||Pass this flag to gather all results from existing csv files into one|
-|`-allocsize`|`8`|How large the manageable memory ares per memory manager should be in `GB`|
 |`-timeout`|`120`|Timeout in seconds, each individual testcase run will be canceled after this timeout, **default** is `600`|
+|`-allocsize`|`8`|How large the manageable memory ares per memory manager should be in `GB`|
+|`-device`|`0`|Which GPU device to use|
 
 ## Dynamic Graph Testcases
 Graph testcases require a `config.json` file, which has the following parameters
 | Parameter | Value-Example | Description |
 |:---:|:---:|:---:|
-|`device`|`0`|On which device to execute, e.g. `0`|
 |`iterations`|`10`| How many iterations to do, in which the graph is initialized new, e.g. `10`|
 |`update_iterations`|`10`| How many edge update iterations to perform|
 |`batch_size`|`10000`| How many edges to insert each iteration|
@@ -209,13 +216,12 @@ Graph testcases require a `config.json` file, which has the following parameters
 |`test_init`|`true`|If this is set to true, only initialization will be measured.|
 |`verify`|`false`|If this is set to true, then each operation will be verified against a host dynamic graph `-> takes quite a long time`|
 |`realistic_deletion`|`false`|If this is set to `false`, the deletion operation will delete exactly the same edges that where introduced during the insertion opertion. Otherwise, random edges will be selected from the graph.|
-|`manageable_memory_mb`|`8192`|The size of the manageable memory given in `MB`|
 
 The testcase can handle `.mtx` (Matrix Market Format) files, which can be downloaded from the [SuiteSparse Collection](https://sparse.tamu.edu/), and will automatically convert each file into a more efficient binary format, which greatly improves load times for multiple runs.
 
 ### Graph Initialization
 This testcase will test dynamic graph initialization. One has to pass a configfile as described above, the list of graphs to test is given at the top of `test_graph_init.py`. 
-* `python test_graph_init.py -t o+s+h+c+r+x -configfile config_init.json -runtest -timeout 120`
+* `python test_graph_init.py -t o+s+h+c+r+x -configfile config_init.json -runtest -timeout 120 -allocsize 8 - device 0`
   * Tests initialization performance for all graphs noted in `test_graph_init.py`, configured according to `config_init.json`
 
 | Option | Parameter-Example | Description |
@@ -226,12 +232,14 @@ This testcase will test dynamic graph initialization. One has to pass a configfi
 |`-runtest`||Pass this flag to execute the testcase and run the approaches|
 |`-genres`||Pass this flag to gather all results from existing csv files into one|
 |`-timeout`|`120`|Timeout in seconds, each individual testcase run will be canceled after this timeout, **default** is `600`|
+|`-allocsize`|`8`|How large the manageable memory ares per memory manager should be in `GB`|
+|`-device`|`0`|Which GPU device to use|
 
 ### Graph Edge Updates
 This testcase will test dynamic graph updates. One has to pass a configfile as described above, the list of graphs to test is given at the top of `test_graph_update.py`. 
-* `python test_graph_update.py -t o+s+h+c+r+x -configfile config_update.json -runtest -timeout 120`
+* `python test_graph_update.py -t o+s+h+c+r+x -configfile config_update.json -runtest -timeout 120 -allocsize 8 - device 0`
   * Tests edge update performance for all graphs noted in `test_graph_update.py`, configured according to `config_update.json`, this will test random edge updates
-* `python test_graph_update.py -t o+s+h+c+r+x -configfile config_update_range.json -runtest -timeout 120`
+* `python test_graph_update.py -t o+s+h+c+r+x -configfile config_update_range.json -runtest -timeout 120 -allocsize 8 - device 0`
   * Tests edge update performance for all graphs noted in `test_graph_update.py`, configured according to `config_update_range.json`, this will test pressured edge updates with a given range of source vertices shifted over the graph
 
 | Option | Parameter-Example | Description |
@@ -242,11 +250,13 @@ This testcase will test dynamic graph updates. One has to pass a configfile as d
 |`-runtest`||Pass this flag to execute the testcase and run the approaches|
 |`-genres`||Pass this flag to gather all results from existing csv files into one|
 |`-timeout`|`120`|Timeout in seconds, each individual testcase run will be canceled after this timeout, **default** is `600`|
+|`-allocsize`|`8`|How large the manageable memory ares per memory manager should be in `GB`|
+|`-device`|`0`|Which GPU device to use|
 
 ## Synthetic Testcases
 ### Register Requirements
 This testcase will report the number of registers required for a respective call to `malloc` or `free`.
-* `python test_registers.py -t o+s+h+c+r+x -runtest -allocsize 8`
+* `python test_registers.py -t o+s+h+c+r+x -runtest -allocsize 8 - device 0`
 
 | Option | Parameter-Example | Description |
 |:---:|:---:|:---:|
@@ -254,10 +264,11 @@ This testcase will report the number of registers required for a respective call
 |`-runtest`||Pass this flag to execute the testcase and run the approaches|
 |`-genres`||Pass this flag to gather all results from existing csv files into one|
 |`-allocsize`|`8`|How large the manageable memory ares per memory manager should be in `GB`|
+|`-device`|`0`|Which GPU device to use|
 
 ### Memory Manager Initialization
 This testcase will test how long it takes to initialize each memory manager.
-* `python test_synth_init.py -t o+s+h+c+r+x -runtest -allocsize 8`
+* `python test_synth_init.py -t o+s+h+c+r+x -runtest -allocsize 8 - device 0`
 
 | Option | Parameter-Example | Description |
 |:---:|:---:|:---:|
@@ -265,10 +276,11 @@ This testcase will test how long it takes to initialize each memory manager.
 |`-runtest`||Pass this flag to execute the testcase and run the approaches|
 |`-genres`||Pass this flag to gather all results from existing csv files into one|
 |`-allocsize`|`8`|How large the manageable memory ares per memory manager should be in `GB`|
+|`-device`|`0`|Which GPU device to use|
 
 ### Workload Testcase
 This testcase will test the classic case of a number of threads producing varying numbers of output elements and compares it to a baseline implemented with an `CUB::ExclusiveSum`.
-* `python test_synth_workload.py -t o+s+h+c+r+x -threadrange 0-10 -range 4-64 -iter 50 -runtest -timeout 60 -allocsize 8`
+* `python test_synth_workload.py -t o+s+h+c+r+x -threadrange 0-10 -range 4-64 -iter 50 -runtest -timeout 60 -allocsize 8 - device 0`
   * This will start with `2⁰` threads up to `2¹⁰` threads, testing all powers of 2 in-between, and for each number of threads test the range `4-64` Bytes
   * The option `-testwrite` will test write performance to this memory area
 
@@ -281,6 +293,7 @@ This testcase will test the classic case of a number of threads producing varyin
 |`-runtest`||Pass this flag to execute the testcase and run the approaches|
 |`-genres`||Pass this flag to gather all results from existing csv files into one|
 |`-allocsize`|`8`|How large the manageable memory ares per memory manager should be in `GB`|
+|`-device`|`0`|Which GPU device to use|
 |`-testwrite`||If parameter is passed, not the allocation performance is measured but the write performance to these allocations|
 
 # Test table TITAN V
