@@ -109,10 +109,32 @@ The framework does **not** perform many sanity checks, please read the documenta
 Each testcase is controlled and executed via python scripts, a commonality of all scripts is that to run the testcase, one has to pass `-runtest` to the script, to gather all results into one file one can pass `-genres`.
 Pass `-h` to print a help screen with all parameters.
 All testcases get a `-device` parameter to control which device should execute the GPU code (e.g. `0`) and how much memory on this device should be reserved for the memory manager, specified via `-allocsize` (size on GB).
+
+## Data to Plot - Map
+This table shows which test file can be used to generate which plot used in the paper.
+
+| Figure/Section | Script | Command |
+|:---:|:---:|:---:|
+|Sec. `4.1`|`test_registers.py`|`python test_registers.py -t o+s+h+c+r+x -runtest -genres -allocsize 8 -device 0`|
+|Sec. `4.1`|`test_synth_init.py`|`python test_synth_init.py -t o+s+h+c+r+x -runtest -genres -allocsize 8 -device 0`|
+|Fig. `9.a`|`test_allocation.py`|`python test_allocation.py -t o+s+h+c+r+x -num 100000 -range 4-8192 -iter 100 -runtest -genres -timeout 120 -allocsize 8 -device 0`|
+|Fig. `9.b`|`test_allocation.py`|`python test_allocation.py -t o+s+h+c+r+x -num 100000 -range 4-8192 -iter 100 -runtest -genres -timeout 120 -allocsize 8 -device 0`|
+|Fig. `9.c`|`test_allocation.py`|`python test_allocation.py -t o+s+h+c+r+x -num 10000 -range 4-8192 -iter 100 -runtest -genres -warp -timeout 120 -allocsize 8 -device 0`|
+|Fig. `9.d`|`test_mixed_allocation.py`|`python test_mixed_allocation.py -t o+s+h+c+r+x -num 10000 -range 4-8192 -iter 100 -runtest -genres -timeout 120 -allocsize 8 -device 0`|
+|Fig. `10.x`|`test_scaling.py`|`python test_scaling.py -t o+s+h+c+r+x -byterange 4-8192 -threadrange 0-20 -iter 100 -runtest -genres -timeout 300 -allocsize 8 -device 0`|
+|Fig. `11.a`|`test_fragmentation.py`|`python test_fragmentation.py -t o+s+h+c+r+x -num 100000 -range 4-8192 -iter 100 -runtest -genres -timeout 60 -allocsize 8 -device 0`|
+|Fig. `11.b`|`test_oom.py`|`python test_oom.py -t o+s+h+c+r+x -num 100000 -range 4-8192 -runtest -genres -timeout 3600 -allocsize 8 -device 0`|
+|Fig. `11.c`|`test_synth_workload.py`|`python test_synth_workload.py -t o+s+h+c+r+x -threadrange 0-20 -range 4-64 -iter 100 -runtest -genres -timeout 300 -allocsize 8 -device 0`|
+|Fig. `11.d`|`test_synth_workload.py`|`python test_synth_workload.py -t o+s+h+c+r+x -threadrange 0-20 -range 4-4096 -iter 100 -runtest -genres -timeout 300 -allocsize 8 -device 0`|
+|Fig. `11.e`|`test_synth_workload.py`|`python test_synth_workload.py -t o+s+h+c+r+x -threadrange 0-20 -range 4-64 -iter 100 -runtest -genres -timeout 300 -allocsize 8 -device 0 -testwrite`|
+|Fig. `11.f`|`test_graph_init.py`|`python test_graph_init.py -t o+s+h+c+r+x -configfile config_init.json -runtest -genres -timeout 600 -allocsize 8 -device 0`|
+|Fig. `11.g`|`test_graph_update.py`|`python test_graph_update.py -t o+s+h+c+r+x -configfile config_update_range.json -runtest -genres -timeout 600 -allocsize 8 -device 0`|
+
+
 ## Allocation Testcases
 ### Single Threaded / Single Warp Allocation Performance
 To test single threaded or single warp performance, navigate to `tests/alloc_tests` and call the script `test_allocation.py`
-* `python test_allocation.py -t o+s+h+c+r+x -num 10000 -range 4-64 -iter 50 -runtest -timeout 60 -allocsize 8 - device 0`
+* `python test_allocation.py -t o+s+h+c+r+x -num 10000 -range 4-64 -iter 50 -runtest -timeout 60 -allocsize 8 -device 0`
   * This will start `10000` threads, each of them will start by allocating `4` Bytes and then increase linearly up to `64` Bytes
 
 This will generate one csv file for each approach with `mean`, `min`, `max`, `median` performance averaged over the number of iterations.
@@ -133,7 +155,7 @@ To generate one file with all approaches already executed, pass option `-genres`
 
 ### Mixed Range Allocation Performance
 To test allocation performance when threads are allocating with different sizes (constrained by a maximum/minimum allocation size), navigate to `tests/alloc_tests` and call the script `test_mixed_allocation.py`
-* `python test_mixed_allocation.py -t o+s+h+c+r+x -num 10000 -range 4-64 -iter 50 -runtest -timeout 60 -allocsize 8 - device 0`
+* `python test_mixed_allocation.py -t o+s+h+c+r+x -num 10000 -range 4-64 -iter 50 -runtest -timeout 60 -allocsize 8 -device 0`
 	* This will start `10000` threads, each of them will allocate in the range of `4-64` Bytes
 
 This will generate one csv file for each approach with `mean`, `min`, `max`, `median` performance averaged over the number of iterations.
@@ -154,7 +176,7 @@ To generate one file with all approaches already executed, pass option `-genres`
 
 ### Performance Scaling
 To test performance scaling over a changing number of threads, navigate to `tests/alloc_tests` and call the script `test_scaling.py`
-* `python test_scaling.py -t o+s+h+c+r+x -byterange 4-64 -threadrange 0-10 -iter 50 -runtest -timeout 60 -allocsize 8 - device 0`
+* `python test_scaling.py -t o+s+h+c+r+x -byterange 4-64 -threadrange 0-10 -iter 50 -runtest -timeout 60 -allocsize 8 -device 0`
   * This will start with `2⁰` threads up to `2¹⁰` threads, testing all powers of 2 in-between, and for each number of threads test the range `4-64` Bytes
 
 This will generate one csv file for each approach and for each number of threads with `mean`, `min`, `max`, `median` performance averaged over the number of iterations.
@@ -178,7 +200,7 @@ Can also be started with one warp per allocation by passing `-warp`.
 ### Memory Fragmentation Testcase
 This testcase tests the fragmentation of the returned addresses of a given allocation by reporting the maximum address range returned by each allocating thread. It also tracks the static maximum over a number of iterations.
 It continues to allocate and free a number of allocations for the number of `-iter` and returns those ranges.
-* `python test_fragmentation.py -t o+s+h+c+r+x -num 10000 -range 4-64 -iter 50 -runtest -timeout 60 -allocsize 8 - device 0`
+* `python test_fragmentation.py -t o+s+h+c+r+x -num 10000 -range 4-64 -iter 50 -runtest -timeout 60 -allocsize 8 -device 0`
   * This will start `10000` threads, each of them will start by allocating `4` Bytes and then increase linearly up to `64` Bytes, reporting the current range and static maximum range
 
 This will generate one csv file for each approach with `min address range`, `max address range`, `min address range (static)` and `max address range (max)`.
@@ -198,7 +220,7 @@ To generate one file with all approaches already executed, pass option `-genres`
 
 ### Out-of-Memory Testcase
 Tests out-of-memory behavior for a range of allocation sizes, hence how efficient the memory is utilized. The range will be sampled for each power of 2 in-between the given `-range`
-* `python test_oom.py -t o+s+h+c+r+x -num 10000 -range 4-64 -runtest -timeout 60 -allocsize 8 - device 0`
+* `python test_oom.py -t o+s+h+c+r+x -num 10000 -range 4-64 -runtest -timeout 60 -allocsize 8 -device 0`
   * This starts `10000` allocating threads, tests powers of 2 in the range `4-64` and continues to allocate until out-of-memory is reported, recording the number of iterations in the csv file
 
 This will generate one csv file for each approach and records the number of successful iterations. 
@@ -231,7 +253,7 @@ The testcase can handle `.mtx` (Matrix Market Format) files, which can be downlo
 
 ### Graph Initialization
 This testcase will test dynamic graph initialization. One has to pass a configfile as described above, the list of graphs to test is given at the top of `test_graph_init.py`. 
-* `python test_graph_init.py -t o+s+h+c+r+x -configfile config_init.json -runtest -timeout 120 -allocsize 8 - device 0`
+* `python test_graph_init.py -t o+s+h+c+r+x -configfile config_init.json -runtest -timeout 120 -allocsize 8 -device 0`
   * Tests initialization performance for all graphs noted in `test_graph_init.py`, configured according to `config_init.json`
 
 | Option | Parameter-Example | Description |
@@ -247,9 +269,9 @@ This testcase will test dynamic graph initialization. One has to pass a configfi
 
 ### Graph Edge Updates
 This testcase will test dynamic graph updates. One has to pass a configfile as described above, the list of graphs to test is given at the top of `test_graph_update.py`. 
-* `python test_graph_update.py -t o+s+h+c+r+x -configfile config_update.json -runtest -timeout 120 -allocsize 8 - device 0`
+* `python test_graph_update.py -t o+s+h+c+r+x -configfile config_update.json -runtest -timeout 120 -allocsize 8 -device 0`
   * Tests edge update performance for all graphs noted in `test_graph_update.py`, configured according to `config_update.json`, this will test random edge updates
-* `python test_graph_update.py -t o+s+h+c+r+x -configfile config_update_range.json -runtest -timeout 120 -allocsize 8 - device 0`
+* `python test_graph_update.py -t o+s+h+c+r+x -configfile config_update_range.json -runtest -timeout 120 -allocsize 8 -device 0`
   * Tests edge update performance for all graphs noted in `test_graph_update.py`, configured according to `config_update_range.json`, this will test pressured edge updates with a given range of source vertices shifted over the graph
 
 | Option | Parameter-Example | Description |
@@ -266,7 +288,7 @@ This testcase will test dynamic graph updates. One has to pass a configfile as d
 ## Synthetic Testcases
 ### Register Requirements
 This testcase will report the number of registers required for a respective call to `malloc` or `free`.
-* `python test_registers.py -t o+s+h+c+r+x -runtest -allocsize 8 - device 0`
+* `python test_registers.py -t o+s+h+c+r+x -runtest -allocsize 8 -device 0`
 
 | Option | Parameter-Example | Description |
 |:---:|:---:|:---:|
@@ -278,7 +300,7 @@ This testcase will report the number of registers required for a respective call
 
 ### Memory Manager Initialization
 This testcase will test how long it takes to initialize each memory manager.
-* `python test_synth_init.py -t o+s+h+c+r+x -runtest -allocsize 8 - device 0`
+* `python test_synth_init.py -t o+s+h+c+r+x -runtest -allocsize 8 -device 0`
 
 | Option | Parameter-Example | Description |
 |:---:|:---:|:---:|
@@ -290,7 +312,7 @@ This testcase will test how long it takes to initialize each memory manager.
 
 ### Workload Testcase
 This testcase will test the classic case of a number of threads producing varying numbers of output elements and compares it to a baseline implemented with an `CUB::ExclusiveSum`.
-* `python test_synth_workload.py -t o+s+h+c+r+x -threadrange 0-10 -range 4-64 -iter 50 -runtest -timeout 60 -allocsize 8 - device 0`
+* `python test_synth_workload.py -t o+s+h+c+r+x -threadrange 0-10 -range 4-64 -iter 50 -runtest -timeout 60 -allocsize 8 -device 0`
   * This will start with `2⁰` threads up to `2¹⁰` threads, testing all powers of 2 in-between, and for each number of threads test the range `4-64` Bytes
   * The option `-testwrite` will test write performance to this memory area
 
