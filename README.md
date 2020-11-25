@@ -5,16 +5,27 @@ Evaluating different memory managers for dynamic GPU memory allocation.
 The framework was tested on Windows 10, Arch Linux <5.9.9> as well as Manjaro <5.4>
 * **CUDA Toolkit**
   * Tested on `10.1`, `10.2`, `11.0` and `11.1`
+    * Windows [Download](https://developer.nvidia.com/cuda-downloads)
+    * Arch Linux (`pacman -S cuda`)
 * **C++ Compiler**
   * Tested on
     * `gcc 9.0` and `gcc 10.2`
+      * Arch Linux (`pacman -S gcc`)
     * `VS 2019`
+      * [Download](https://visualstudio.microsoft.com/vs/community/)
 * **boost** (required for ScatterAlloc)
   * Tested with boost `1.66`
+    * Windows [Download](https://www.boost.org/users/download/)
+    * Arch Linux (`pacman -S boost`)
 * **CMake**
   * Version `>= 3.16`, tested with `3.18`
+    * Windows [Download](https://cmake.org/download/)
+    * Arch Linux (`pacman -S cmake`)
+
 * **Python**
   * Tested with `Python 3.8` and `Python 3.9`
+    * Windows [Download](https://www.python.org/downloads/release/python-390/) or download via Windows Store
+    * Arch Linux (`pacman -S python`)
   * Requires packages
     * `argparse` (`python pip -m install argparse`)
 
