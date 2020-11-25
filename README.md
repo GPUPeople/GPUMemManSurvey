@@ -14,7 +14,7 @@ The framework was tested on Windows 10, Arch Linux <5.9.9> as well as Manjaro <5
     * `VS 2019`
       * [Download](https://visualstudio.microsoft.com/vs/community/)
 * **boost** (required for ScatterAlloc)
-  * Tested with boost `1.66`
+  * Tested with boost `1.66` and `1.72`
     * Windows [Download](https://www.boost.org/users/download/)
     * Arch Linux (`pacman -S boost`)
 * **CMake**
