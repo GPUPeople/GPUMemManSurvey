@@ -16,9 +16,7 @@ The framework was tested on Windows 10, Arch Linux <5.9.9> as well as Manjaro <5
 * **Python**
   * Tested with `Python 3.8` and `Python 3.9`
   * Requires packages
-    * `argparse` (`python pip install argparse`)
-    * `numpy` (`python pip install numpy`)
-    * `matplotlib` (`python pip install matplotlib`)
+    * `argparse` (`python pip -m install argparse`)
 
 # Setup Instructions
 * `git clone --recursive -b AEsubmission https://github.com/GPUPeople/GPUMemManSurvey.git <chosen_directory>`
