@@ -21,16 +21,17 @@ The framework was tested on Windows 10, Arch Linux <5.9.9> as well as Manjaro <5
     * `matplotlib` (`python pip install matplotlib`)
 
 # Setup Instructions
-* `git clone --recursive https://github.com/GPUPeople/GPUMemManSurvey.git <chosen_directory>`
+* `git clone --recursive -b AEsubmission https://github.com/GPUPeople/GPUMemManSurvey.git <chosen_directory>`
 * `cd <chosen_directory>`
 * `python init.py`
+* On `Windows`
+  * Use the `Developer PowerShell for VS 20XX` (`msbuild` is needed) to call the scripts
 * Two options
   * If you want to build everything, call `python setupAll.py --cc XX` set correct CC (tested with 61, 70 and 75)
   * You can build each testcase, there is a `setup.py` in each tests folder, you can call each individually
     * `python setup.py --cc XX` set correct CC tested with 61, 70, 75
-* On `Windows`
-  * Use the `Developer PowerShell for VS 20XX` (`msbuild` is needed) to call the scripts
-* To clean the build folders, simply call `python clean.py`
+
+* To clean/reset the build folders, simply call `python clean.py`
   * Once again, there is a separate `clean.py` in every test subfolder
 
 # Testcase Instructions
