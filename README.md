@@ -14,7 +14,7 @@ The framework was tested on Windows 10, Arch Linux <5.9.9> as well as Manjaro <5
     * `VS 2019`
       * [Download](https://visualstudio.microsoft.com/vs/community/)
 * **boost** (required for ScatterAlloc)
-  * Tested with boost `1.66` and `1.72`
+  * Tested with boost `1.66` and `1.74`
     * Windows [Download](https://www.boost.org/users/download/)
       * Set the installed location in `BaseCMake.cmake`
     * Arch Linux (`pacman -S boost`)
@@ -31,15 +31,20 @@ The framework was tested on Windows 10, Arch Linux <5.9.9> as well as Manjaro <5
     * `argparse` (`python pip -m install argparse`)
 
 # Setup Instructions
-* `git clone --recursive -b AEsubmission https://github.com/GPUPeople/GPUMemManSurvey.git <chosen_directory>`
-* `cd <chosen_directory>`
+* Make sure all requirements are installed and configured correctly
+  * On `Windows` also set the correct boost path in `BaseCMake.cmake`
+* **Install from Archive**
+  * Extract archive
+  * In top-level directory, call
+    * `git submodule init`
+    * `git submodule update`
+* **Install from GitHub**
+  * `git clone --recursive -b AEsubmission https://github.com/GPUPeople/GPUMemManSurvey.git`
 * `python init.py`
-* On `Windows`
-  * Use the `Developer PowerShell for VS 20XX` (`msbuild` is needed) to call the scripts
-* Two options
-  * If you want to build everything, call `python setupAll.py --cc XX` set correct CC (tested with 61, 70 and 75)
+* **Two options** (On `Windows` use the `Developer PowerShell for VS 20XX` (`msbuild` is needed) to call the scripts)
+  * If you want to build everything, call `python setupAll.py --cc XX`, set correct CC (tested with 61, 70 and 75)
   * You can build each testcase, there is a `setup.py` in each tests folder, you can call each individually
-    * `python setup.py --cc XX` set correct CC tested with 61, 70, 75
+    * `python setup.py --cc XX`, set correct CC tested with 61, 70, 75
 
 * To clean/reset the build folders, simply call `python clean.py`
   * Once again, there is a separate `clean.py` in every test subfolder
@@ -50,7 +55,7 @@ To run a representative testsuite, simply call
   * The memory size is in GB
   * The device ID of the device to use (has to match with the CC passed in build stage)
   
-These runtime measures were measured for the limited testcase as setup in `testAll.py` on a TITAN V and an Intel Core i7-8700X.
+These runtime measures were measured for the limited testcase as setup in `testAll.py` on a TITAN V and an Intel Core i7-8700X on Windows 10 and Manjaro respectively.
 
 | Task | Time (min:sec) - Linux| Time (min:sec) - Windows|
 |:---:|:---:|:---:|
@@ -71,7 +76,7 @@ These runtime measures were measured for the limited testcase as setup in `testA
 | Synthetic Workload | 1 min 58 sec | 4 min 50 sec |
 | Synthetic Workload Write | 1 min 57 sec | 4 min 48 sec |
 
-The framework does **not** perform many sanity checks, please read the documentation first if something is not working as expected if some parameter was not configured correctly for example.
+The framework **does not perform many sanity checks**, please read the documentation first if something is not working as expected if some parameter was not configured correctly for example.
 
 # Folder Structure
 * `frameworks` -> includes code for all frameworks
