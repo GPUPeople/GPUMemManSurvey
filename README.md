@@ -33,20 +33,23 @@ The framework was tested on Windows 10, Arch Linux <5.9.9> as well as Manjaro <5
 # Setup Instructions
 * Make sure all requirements are installed and configured correctly
   * On `Windows` also set the correct boost path in `BaseCMake.cmake`
-* **Install from Archive**
-  * Extract archive
-  * In top-level directory, call
-    * `git submodule init`
-    * `git submodule update`
-* **Install from GitHub**
-  * `git clone --recursive -b AEsubmission https://github.com/GPUPeople/GPUMemManSurvey.git`
+* **Setup**
+  * **Option A:** Setup from Archive
+    * Extract archive
+    * In top-level directory, call
+      * `git submodule init`
+      * `git submodule update`
+  * **Option B:** Setup from GitHub
+    * `git clone --recursive -b AEsubmission https://github.com/GPUPeople/GPUMemManSurvey.git`
 * `python init.py`
-* **Two options** (On `Windows` use the `Developer PowerShell for VS 20XX` (`msbuild` is needed) to call the scripts)
-  * If you want to build everything, call `python setupAll.py --cc XX`, set correct CC (tested with 61, 70 and 75)
-  * You can build each testcase, there is a `setup.py` in each tests folder, you can call each individually
-    * `python setup.py --cc XX`, set correct CC tested with 61, 70, 75
-
-* To clean/reset the build folders, simply call `python clean.py`
+* **Install**
+  * On `Windows` use the `Developer PowerShell for VS 20XX` (`msbuild` is needed) to call the scripts
+  * **Option A:**
+    * If you want to build everything, call `python setupAll.py --cc XX`, set correct CC (tested with 61, 70 and 75)
+  * **OptionB:**
+    * You can build each testcase separately, there is a `setup.py` in each tests folder
+      * `python setup.py --cc XX`, set correct CC tested with 61, 70, 75
+* To **clean/reset** the build folders, simply call `python cleanAll.py`
   * Once again, there is a separate `clean.py` in every test subfolder
 
 # Testcase Instructions
