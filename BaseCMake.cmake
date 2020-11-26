@@ -16,6 +16,7 @@ option(CC80_SYNC "Build with compute capability 8.0 support - SYNC" FALSE)
 option(CC80_ASYNC "Build with compute capability 8.0 support - ASYNC" FALSE)
 option(CUDA_BUILD_INFO "Build with kernel statistics and line numbers" TRUE)
 option(CUDA_BUILD_DEBUG "Build with kernel debug" FALSE)
+option(SYNC_BUILD "Set to true to disable ITS" OFF)
 
 ##########################################################################
 # CUDA Flags

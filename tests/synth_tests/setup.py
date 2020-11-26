@@ -16,14 +16,14 @@ def main():
 		sync_flag += "_SYNC"
 
 	if os.name == 'nt': # If on Windows
-		Command("cmake -B build -D{}=ON".format(async_flag)).run()
+		Command("cmake -B build -D{}=ON -DSYNC_BUILD=OFF".format(async_flag)).run()
 		Command("msbuild build/GPUMemoryManagers.sln /p:Configuration=Release").run()
-		Command("cmake -B sync_build -D{}=ON".format(sync_flag)).run()
+		Command("cmake -B sync_build -D{}=ON -DSYNC_BUILD=ON".format(sync_flag)).run()
 		Command("msbuild sync_build/GPUMemoryManagers.sln /p:Configuration=Release").run()
 	else: # If on Linux
-		Command("mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release -D{}=ON".format(async_flag)).run()
+		Command("mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release -D{}=ON -DSYNC_BUILD=OFF".format(async_flag)).run()
 		Command("cd build && make").run()
-		Command("mkdir sync_build && cd sync_build && cmake .. -DCMAKE_BUILD_TYPE=Release -D{}=ON".format(sync_flag)).run()
+		Command("mkdir sync_build && cd sync_build && cmake .. -DCMAKE_BUILD_TYPE=Release -D{}=ON -DSYNC_BUILD=ON".format(sync_flag)).run()
 		Command("cd sync_build && make").run()
 
 if __name__ == "__main__":

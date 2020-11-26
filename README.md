@@ -16,6 +16,7 @@ The framework was tested on Windows 10, Arch Linux <5.9.9> as well as Manjaro <5
 * **boost** (required for ScatterAlloc)
   * Tested with boost `1.66` and `1.72`
     * Windows [Download](https://www.boost.org/users/download/)
+      * Set the installed location in `BaseCMake.cmake`
     * Arch Linux (`pacman -S boost`)
 * **CMake**
   * Version `>= 3.16`, tested with `3.18`
@@ -123,7 +124,7 @@ This table shows which test file can be used to generate which plot used in the 
 |Fig. `9.d`|`test_mixed_allocation.py`|`python test_mixed_allocation.py -t o+s+h+c+r+x -num 10000 -range 4-8192 -iter 100 -runtest -genres -timeout 120 -allocsize 8 -device 0`|
 |Fig. `10.x`|`test_scaling.py`|`python test_scaling.py -t o+s+h+c+r+x -byterange 4-8192 -threadrange 0-20 -iter 100 -runtest -genres -timeout 300 -allocsize 8 -device 0`|
 |Fig. `11.a`|`test_fragmentation.py`|`python test_fragmentation.py -t o+s+h+c+r+x -num 100000 -range 4-8192 -iter 100 -runtest -genres -timeout 60 -allocsize 8 -device 0`|
-|Fig. `11.b`|`test_oom.py`|`python test_oom.py -t o+s+h+c+r+x -num 100000 -range 4-8192 -runtest -genres -timeout 3600 -allocsize 8 -device 0`|
+|Fig. `11.b`|`test_oom.py`|`python test_oom.py -t o+s+h+c+r+x -num 100000 -range 4-8192 -runtest -genres -timeout 3600 -allocsize 2 -device 0`|
 |Fig. `11.c`|`test_synth_workload.py`|`python test_synth_workload.py -t o+s+h+c+r+x -threadrange 0-20 -range 4-64 -iter 100 -runtest -genres -timeout 300 -allocsize 8 -device 0`|
 |Fig. `11.d`|`test_synth_workload.py`|`python test_synth_workload.py -t o+s+h+c+r+x -threadrange 0-20 -range 4-4096 -iter 100 -runtest -genres -timeout 300 -allocsize 8 -device 0`|
 |Fig. `11.e`|`test_synth_workload.py`|`python test_synth_workload.py -t o+s+h+c+r+x -threadrange 0-20 -range 4-64 -iter 100 -runtest -genres -timeout 300 -allocsize 8 -device 0 -testwrite`|
