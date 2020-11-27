@@ -3,5 +3,5 @@
 	"files.associations": {
 		"__locale": "cpp"
 	},
-	"python.pythonPath": "/sbin/python3.10"
+	"python.pythonPath": "C:\\Program Files\\Python39\\python.exe"
 }
